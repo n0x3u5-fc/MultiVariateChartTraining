@@ -1,13 +1,16 @@
 [{
 	"caption": "Multivariate Chart",
 	"subCaption": "Correlation of Age with Nutrition",
-	"iVarName": "Age",
-	"dVarNames": ["Vitamin C", "Calcium", "Weight"],
-	"dvarUnits": ["cal", "cal", "kg"]
+	"varNames": ["Age", "Vitamin C", "Calcium", "Weight"],
+	"varUnits": ["Years", "mg", "mg", "kg"]
 }, {
-	"iVar": 18,
-	"dVars": [23.5, 56.12, 77]
+	"vars": [18, 23.5, 56.12, 77]
 }, {
-	"iVar": 19,
-	"dVars": [53.5, 46.12, 60]
+	"vars": [19, 53.5, 46.12, 60]
+}, {
+	"vars": [20, 50.67, 46.33, 68]
+}, {
+	"vars": [21, 70.12, 12.56, 62]
+}, {
+	"vars": [22, 63.17, 18.45, 63]
 }]
