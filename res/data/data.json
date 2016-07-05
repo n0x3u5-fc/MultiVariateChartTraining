@@ -2,7 +2,6 @@
 	"caption": "Test Multi Variate Chart",
 	"subCaption": "Correlating Footfall, Sales and Weight",
 	"xAxisLabel": "Time Axis",
-	"xDataSpan": "months",
 	"xdata": ["JAN", "MAR", "APR"],
 	"chartData": [{
 		"yAxisName": "Footfalls",

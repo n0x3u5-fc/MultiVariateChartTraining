@@ -1,0 +1,13 @@
+[{
+	"caption": "Multivariate Chart",
+	"subCaption": "Correlation of Age with Nutrition",
+	"iVarName": "Age",
+	"dVarNames": ["Vitamin C", "Calcium", "Weight"],
+	"dvarUnits": ["cal", "cal", "kg"]
+}, {
+	"iVar": 18,
+	"dVars": [23.5, 56.12, 77]
+}, {
+	"iVar": 19,
+	"dVars": [53.5, 46.12, 60]
+}]
