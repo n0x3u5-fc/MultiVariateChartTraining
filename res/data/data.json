@@ -1,17 +1,23 @@
 {
 	"caption": "Test Multi Variate Chart",
-	"subCaption": "Testing Stuff",
+	"subCaption": "Correlating Footfall, Sales and Weight",
 	"xAxisLabel": "Time Axis",
-    "yAxisLabels": ["Ford Sales", "Subaru Sales", "Porsche Sales"],
 	"xDataSpan": "months",
-	"dataSource": [{
-		"xdata": "JAN",
+	"xdata": ["JAN", "MAR", "APR"],
+	"chartData": [{
+		"yAxisName": "Footfalls",
+		"suffix": "people",
+		"prefix": "",
 		"ydata": [700, 1200, 3500]
 	}, {
-		"xdata": "MAR",
-		"ydata": [760, 860, 2780]
+		"yAxisName": "Sales Figures",
+		"suffix": "",
+		"prefix": "$",
+		"ydata": [1400, 2400, 7000]
 	}, {
-		"xdata": "APR",
-		"ydata": [572, 1000, 7650]
+		"yAxisName": "Weight of Goods",
+		"suffix": "kg",
+		"prefix": "",
+		"ydata": [2100, 3600, 10500]
 	}]
 }
