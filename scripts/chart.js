@@ -76,8 +76,57 @@
             var chart = new MultiVarChart(i, jsonDataKeys[0], jsonDataKeys[i], xData, yData);
             charts.push(chart);
         }
-        console.log(charts);
+        var chartCalculator = new ChartPropertyCalculator(charts);
+        chartCalculator.calculateYMax();
     };
+
+    var ChartPropertyCalculator = function (charts) {
+        this.charts = charts;
+        this.calculateYMax = function() {
+            for (var chart of charts){
+                console.log(chart.yData);
+                var maxY = Math.max.apply(Math, chart.yData);
+                var minY = Math.min.apply(Math, chart.yData);
+                var yAxis = this.calculateYAxis(minY, maxY);
+                console.log(yAxis);
+                console.log("------------------------------");
+            }
+        };
+        this.calculateYAxis = function(yMin, yMax, ticks) {
+            var ticks = typeof ticks != 'undefined' ? ticks : 8;
+            var tickValues = new Array();
+            if(yMin === yMax) {
+                yMin = yMin - 1;
+                yMax = yMax + 1;
+            }
+            var range = yMax - yMin;
+            if(ticks < 2) {
+                ticks = 2;
+            } else if(ticks > 2) {
+                ticks -= 2;
+            }
+            var roughStep = range / ticks;
+            var prettyMod = Math.floor(Math.log(roughStep)/Math.LN10);
+            var prettyPow = Math.pow(10, prettyMod);
+            var prettyDiv = Math.round(roughStep/prettyPow + 0.5);
+            var prettyStep = prettyDiv * prettyPow;
+
+            var lb = prettyStep * Math.floor(yMin/prettyStep);
+            var ub = prettyStep * Math.ceil(yMax/prettyStep);
+            var val = lb;
+            while(1) {
+                tickValues.push(Math.round((val + 0.00001)*1000)/1000);
+                val += prettyStep;
+                if(val > ub) {
+                    break;
+                }
+            }
+            return tickValues;
+        }
+
+    };
+
+    
 
     // Reading the AJAX from the file.
     var ajax = new AJAX('res/data/user_data.json', parseData);
