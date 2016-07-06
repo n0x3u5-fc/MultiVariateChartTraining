@@ -47,6 +47,8 @@
     };
 
     /**
+     * Callback to parse the data received via AJAX
+     * 
      * @callback parseData
      * @param {Object} json
      */
