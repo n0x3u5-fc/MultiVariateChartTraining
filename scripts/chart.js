@@ -76,8 +76,85 @@
             var chart = new MultiVarChart(i, jsonDataKeys[0], jsonDataKeys[i], xData, yData);
             charts.push(chart);
         }
-        console.log(charts);
+        var chartCalculator = new ChartPropertyCalculator(charts);
+        chartCalculator.calculateYMax();
     };
+
+    var ChartPropertyCalculator = function (charts) {
+        this.charts = charts;
+        this.calculateYMax = function() {
+            for (var chart of charts){
+                console.log(chart.yData);
+                var maxY = Math.max.apply(Math, chart.yData);
+                var minY = Math.min.apply(Math, chart.yData);
+                var prettyScale = new PrettyScale(2.04, 2.16);
+                console.log(prettyScale.tickSpacing);
+                console.log(prettyScale.niceMin);
+                console.log(prettyScale.niceMax);
+                console.log("------------------------------");
+            }
+        };
+    };
+
+    var PrettyScale = function (min, max) {
+        var self = this;
+
+        this.minPoint = min;
+        this.maxPoint = max;
+        this.maxTicks = 8;
+
+        this.calculate = function() {
+            self.range = self.niceNum(self.maxPoint - self.minPoint, false);
+            self.tickSpacing = self.niceNum((self.range/(self.maxTicks - 1)), true);
+            self.niceMin = Math.floor(self.minPoint / self.tickSpacing) * self.tickSpacing;
+            self.niceMax = Math.ceil(self.maxPoint / self.tickSpacing) * self.tickSpacing;
+        };
+
+        this.niceNum = function (range, round) {
+            var exponent;
+            var fraction;
+            var niceFraction;
+
+            exponent = Math.floor(Math.log10(range));
+            fraction = range/Math.pow(10, exponent);
+
+            if(round) {
+                if(fraction < 1.5) {
+                    niceFraction = 1;
+                } else if(fraction < 3) {
+                    niceFraction = 2;
+                } else if(fraction < 7) {
+                    niceFraction = 5;
+                } else {
+                    niceFraction = 10;
+                }
+            } else {
+                if(fraction <= 1) {
+                    niceFraction = 1;
+                } else if(fraction <= 2) {
+                    niceFraction = 2;
+                } else if(fraction <= 5) {
+                    niceFraction = 5;
+                } else {
+                    niceFraction = 10;
+                }
+            }
+            return niceFraction * Math.pow(10, exponent);
+        };
+
+        this.calculate();
+
+        this.setMinMaxPoints = function(minPoint, maxPoint) {
+            this.minPoint = minPoint;
+            this.maxPoint = maxPoint;
+            this.calculate();
+        };
+
+        this.setMaxTickMarks = function(maxTicks) {
+            this.maxTicks = maxTicks;
+            this.calculate();
+        };
+    }
 
     // Reading the AJAX from the file.
     var ajax = new AJAX('res/data/user_data.json', parseData);
