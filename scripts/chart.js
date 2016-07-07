@@ -62,36 +62,70 @@
          */
         var jsonDataKeys = Object.keys(json.data);
         var numCharts = jsonDataKeys.length - 1;
-        console.log("Number of charts to render: " + numCharts);
+        // console.log("Number of charts to render: " + numCharts);
         var charts = new Array();
         for (var i = 1; i <= numCharts; i++) {
             /** 
              * @type {number[]}
              */
-            var xData = json.data.Ages.split(",").map(Number);  // Mapping the each string we get after splitting to numbers
+            var xData = json.data[jsonDataKeys[0]].split(",");
             /** 
              * @type {number[]}
              */
-            var yData = json.data[jsonDataKeys[i]].split(",").map(Number);
+            var yData = json.data[jsonDataKeys[i]].split(",").map(function (numStr) {
+                if(numStr == "") {
+                    return "";
+                } else {
+                    return Number(numStr);
+                }
+            }); // Mapping each string after splitting to numbers
             var chart = new MultiVarChart(i, jsonDataKeys[0], jsonDataKeys[i], xData, yData);
             charts.push(chart);
         }
         var chartCalculator = new ChartPropertyCalculator(charts);
-        chartCalculator.calculateYMax();
+        chartCalculator.displayCharts();
     };
 
+    /**
+     * Calculates and display all properties of all charts one chart at a time
+     * 
+     * @constructor
+     * @param {Object[]} MultiVarChart - An array of charts whse properties need calculating
+     */
     var ChartPropertyCalculator = function (charts) {
         this.charts = charts;
-        this.calculateYMax = function() {
-            for (var chart of charts){
-                console.log(chart.yData);
-                var maxY = Math.max.apply(Math, chart.yData);
-                var minY = Math.min.apply(Math, chart.yData);
+        /**
+         * Displays the properties of every chart in the log
+         */
+        this.displayCharts = function() {
+            for (var i = 0; i < charts.length; i++){
+                if(i === charts.length - 1) {
+                    console.log("X-Axis Title: " + charts[i].xTitle);
+                }
+                console.log("X-Axis Plots and Ticks: ");
+                console.log(charts[i].xData);
+                console.log("Y-Axis Title: " + charts[i].yTitle);
+                console.log("Y-Axis Plots: ");
+                for(var yDatum of charts[i].yData) {
+                    if(yDatum == "") {
+                        charts[i].yData.splice(charts[i].yData.indexOf(yDatum), 1);
+                    }
+                }
+                console.log(charts[i].yData);
+                var maxY = Math.max.apply(Math, charts[i].yData);
+                var minY = Math.min.apply(Math, charts[i].yData);
                 var yAxis = this.calculateYAxis(minY, maxY);
+                console.log("Y-Axis Ticks: ");
                 console.log(yAxis);
-                console.log("------------------------------");
+                console.log("--------------------------------------------------");
             }
         };
+        /**
+         * Calculates the tick mark values so that the axes look pretty
+         * @param {number} yMin - The minimum value of the user given data
+         * @param {number} yMin - The maximum value of the user given data
+         * @param {number} [ticks=8] - An optional value suggesting the number of ticks to be used
+         */
         this.calculateYAxis = function(yMin, yMax, ticks) {
             var ticks = typeof ticks != 'undefined' ? ticks : 8;
             var tickValues = new Array();
@@ -123,7 +157,6 @@
             }
             return tickValues;
         }
-
     };
 
     
