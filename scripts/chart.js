@@ -263,6 +263,25 @@
                     yDivLine.setAttributeNS(null, "stroke-width", 1);
                     svg.appendChild(yDivLine);
                 }
+                for(var l = 0; l < mappedData.yData.length - 1; l++) {
+                    var graphLine = document.createElementNS(svgns, "line");
+                    graphLine.setAttributeNS(null, "x1", mappedData.xData[l]);
+                    graphLine.setAttributeNS(null, "y1", mappedData.yData[l]);
+                    graphLine.setAttributeNS(null, "x2", mappedData.xData[l+1]);
+                    graphLine.setAttributeNS(null, "y2", mappedData.yData[l+1]);
+                    graphLine.setAttributeNS(null, "class", "graphLine");
+                    graphLine.setAttributeNS(null, "stroke", "black");
+                    graphLine.setAttributeNS(null, "stroke-width", 1);
+                    svg.appendChild(graphLine);
+                }
+                for(var k = 0; k < mappedData.yData.length; k++) {
+                    var circle = document.createElementNS(svgns, "circle");
+                    circle.setAttributeNS(null, "cx", mappedData.xData[k]);
+                    circle.setAttributeNS(null, "cy", mappedData.yData[k]);
+                    circle.setAttributeNS(null, "r", "3px");
+                    circle.setAttributeNS(null, "fill", "green");
+                    svg.appendChild(circle);
+                }
                 // for(var y of mappedData.yData) {
                 //     console.log(mappedData.xData.indexOf(y), y);
                 // }
