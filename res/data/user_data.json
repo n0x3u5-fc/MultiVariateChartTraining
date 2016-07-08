@@ -2,10 +2,10 @@
 	"metadata": {
 		"caption": "Multi-Variate Chart",
 		"subCaption": "Correlation of Age with Nutrition",
-		"units": "years,mg,mg,mg,,kg"
+		"units": "months,mg,mg,kg,"
 	}, 
 	"data": {
-		"Months": "JAN,FEB,MAR,MAY,JUN,JUL",
+		"Time": "JAN,FEB,MAR,MAY,JUN,JUL",
 		"Vitamin A": "12.5,17.8,8.9,10.7,10.5,11.2",
 		"Calcium": "42.3,43.9,45.3,44.6,44.8,45.2",
 		"Weight": "50,56,60,61,60,62",
