@@ -38,12 +38,14 @@
      * @param {number[]} xData
      * @param {number[]} yData
      */
-    var MultiVarChart = function(index, xTitle, yTitle, xData, yData) {
+    var MultiVarChart = function(index, xTitle, yTitle, xData, yData, xUnit, yUnit) {
         this.index = index;
         this.xTitle = xTitle;
         this.yTitle = yTitle;
         this.xData = xData;
         this.yData = yData;
+        this.xUnit = xUnit;
+        this.yUnit = yUnit;
     };
 
     var MappedChart = function(index, xTitle, yTitle, xData, yData, yTicks, xTicks) {
@@ -66,6 +68,7 @@
         // console.log(json);
         console.log("Caption: " + json.metadata.caption);
         console.log("Sub-Caption: " + json.metadata.subCaption);
+
         /**
          * Contains the keys of the JSON's data attribute
          * @type {string[]}
@@ -89,12 +92,26 @@
                     return Number(numStr);
                 }
             }); // Mapping each string after splitting to numbers
-            var chart = new MultiVarChart(i, jsonDataKeys[0], jsonDataKeys[i], xData, yData);
+            var units = json.metadata.units.split(",");
+            var chart = new MultiVarChart(i, jsonDataKeys[0], jsonDataKeys[i], xData, yData, units[0], units[i]);
             charts.push(chart);
         }
+        createCaptions('chart-area', json.metadata.caption, json.metadata.subCaption);
         var chartCalculator = new ChartPropertyCalculator(charts);
         chartCalculator.displayCharts();
     };
+
+    var createCaptions = function(targetDiv, caption, subCaption) {
+        var captionHeader = document.createElement('h1');
+        captionHeader.setAttribute('class', 'caption');
+        var renderDiv = document.getElementById(targetDiv);
+        captionHeader.innerHTML = caption;
+        renderDiv.appendChild(captionHeader);
+        var subCaptionHeader = document.createElement('h2');
+        subCaptionHeader.setAttribute('class', 'sub-caption');
+        subCaptionHeader.innerHTML = subCaption;
+        renderDiv.appendChild(subCaptionHeader);
+    }
 
     /**
      * Calculates and display all properties of all charts one chart at a time
@@ -138,7 +155,7 @@
             div.setAttribute('class', "multi-chart");
             var renderDiv = document.getElementById(targetDiv);
             renderDiv.appendChild(div);
-        }
+        };
         this.dataMapper = function(height, width, lbHeight, lbWidth, chart) {
             // console.log(chart);
             var yTicks = new Array();
@@ -206,77 +223,107 @@
             return val;
         }
         this.createCharts = function(charts, height, width) {
+            console.log(charts);
             var svgns = "http://www.w3.org/2000/svg";
             var height = typeof height != 'undefined' ? height : 209;
-            var width = typeof width != 'undefined' ? width : 372;
-            var chartUbHeight = Math.ceil(height - (0.025*height));
-            // console.log(chartUbHeight);
-            var chartUbWidth = Math.ceil(width - (0.025*width));
-            // console.log(chartUbWidth);
-            var chartLbHeight = Math.floor(0 + (0.025*height));
-            // console.log(chartLbHeight);
-            var chartLbWidth = Math.floor(0 + (0.025*height));
-            // console.log(chartLbWidth);
+            var width = typeof width != 'undefined' ? width : 472;
+            var chartUbHeight = Math.ceil(height - (0.025*height)) + 35;
+            console.log(chartUbHeight);
+            var chartUbWidth = Math.ceil(width - (0.025*width)) + 35;
+            console.log(chartUbWidth);
+            var chartLbHeight = Math.floor(0 + (0.025*height)) + 35;
+            console.log(chartLbHeight);
+            var chartLbWidth = Math.floor(0 + (0.025*height)) + 35;
+            console.log(chartLbWidth);
             var chartHeight = chartUbHeight - chartLbHeight;
-            // console.log(chartHeight);
+            console.log(chartHeight);
             var chartWidth = chartUbWidth - chartLbWidth;
-            // console.log(chartWidth);
+            console.log(chartWidth);
 
             var multiCharts = document.getElementsByClassName("multi-chart");
             for(var i = 0; i < multiCharts.length; i++) {
                 var mappedData = this.dataMapper(chartHeight, chartWidth, chartLbHeight, chartLbWidth, charts[i]);
                 console.log(mappedData);
                 var svg = document.createElementNS(svgns, "svg");
-                svg.setAttributeNS(null, "height", height+"px");
-                svg.setAttributeNS(null, "width", width+"px");
+                svg.setAttributeNS(null, "height", height + 35 +"px");
+                svg.setAttributeNS(null, "width", width + 35 +"px");
                 svg.setAttributeNS(null, "version", "1.1");
                 var yline = document.createElementNS(svgns, "line");
                 yline.setAttributeNS(null, "x1", chartLbHeight);
-                yline.setAttributeNS(null, "y1", chartLbHeight);    
+                yline.setAttributeNS(null, "y1", chartLbHeight - 35);    
                 yline.setAttributeNS(null, "x2", chartLbHeight);
-                yline.setAttributeNS(null, "y2", chartUbHeight);
+                yline.setAttributeNS(null, "y2", chartUbHeight - 35);
                 yline.setAttributeNS(null, "class", "yAxis");
                 svg.appendChild(yline);
                 var xline = document.createElementNS(svgns, "line");
                 xline.setAttributeNS(null, "x1", chartUbWidth);
-                xline.setAttributeNS(null, "y1", chartUbHeight);
+                xline.setAttributeNS(null, "y1", chartUbHeight - 35);
                 xline.setAttributeNS(null, "x2", chartLbWidth);
-                xline.setAttributeNS(null, "y2", chartUbHeight);
+                xline.setAttributeNS(null, "y2", chartUbHeight - 35);
                 xline.setAttributeNS(null, "class", "xAxis");
                 svg.appendChild(xline);
+                var yTitle = document.createElementNS(svgns, "text");
+                yTitle.setAttributeNS(null, "x", (chartHeight/2) + 40);
+                yTitle.setAttributeNS(null, "y", -261);
+                yTitle.setAttributeNS(null, "class", "y-title");
+                yTitle.setAttributeNS(null, "transform", "rotate(270 270, 0)")
+                yTitle.setAttributeNS(null, "stroke", "black");
+                yTitle.textContent = charts[i].yUnit === "" ? charts[i].yTitle : charts[i].yTitle + " (" + charts[i].yUnit + ")";
+                svg.appendChild(yTitle);
+                if (i === multiCharts.length - 1) {
+                    var xTitle = document.createElementNS(svgns, "text");
+                    xTitle.setAttributeNS(null, "x", (chartWidth/2));
+                    xTitle.setAttributeNS(null, "y", chartHeight + 40);
+                    xTitle.setAttributeNS(null, "class", "x-title");
+                    xTitle.setAttributeNS(null, "stroke", "black");
+                    xTitle.textContent = charts[i].xUnit === "" ? charts[i].xTitle : charts[i].xTitle + " (" + charts[i].xUnit + ")";
+                    svg.appendChild(xTitle);
+                }
                 for(var xTick of mappedData.xTicks) {
                     var xTickLine = document.createElementNS(svgns, "line");
                     xTickLine.setAttributeNS(null, "x1", xTick);
-                    xTickLine.setAttributeNS(null, "y1", chartUbHeight);
+                    xTickLine.setAttributeNS(null, "y1", chartUbHeight - 35);
                     xTickLine.setAttributeNS(null, "x2", xTick);
-                    xTickLine.setAttributeNS(null, "y2", chartUbHeight + 5);
+                    xTickLine.setAttributeNS(null, "y2", chartUbHeight + 5 - 35);
                     xTickLine.setAttributeNS(null, "class", "xTick");
                     svg.appendChild(xTickLine);
+                    var xValues = document.createElementNS(svgns, "text");
+                    xValues.setAttributeNS(null, "x", xTick - 10);
+                    xValues.setAttributeNS(null, "y", height + 10);
+                    xValues.setAttributeNS(null, "stroke", "black");
+                    xValues.textContent = charts[i].xData[mappedData.xTicks.indexOf(xTick)];
+                    svg.appendChild(xValues);
                 }
                 for(var yTick of mappedData.yTicks) {
                     var yTickLine = document.createElementNS(svgns, "line");
                     yTickLine.setAttributeNS(null, "x1", chartLbWidth - 5);
-                    yTickLine.setAttributeNS(null, "y1", height - yTick);
+                    yTickLine.setAttributeNS(null, "y1", height - yTick + 35);
                     yTickLine.setAttributeNS(null, "x2", chartLbWidth);
-                    yTickLine.setAttributeNS(null, "y2", height - yTick);
+                    yTickLine.setAttributeNS(null, "y2", height - yTick + 35);
                     yTickLine.setAttributeNS(null, "class", "yTick");
                     svg.appendChild(yTickLine);
                     var yDivLine = document.createElementNS(svgns, "line");
                     yDivLine.setAttributeNS(null, "x1", chartLbWidth);
-                    yDivLine.setAttributeNS(null, "y1", height - yTick);
+                    yDivLine.setAttributeNS(null, "y1", height - yTick - 5);
                     yDivLine.setAttributeNS(null, "x2", chartUbWidth);
-                    yDivLine.setAttributeNS(null, "y2", height - yTick);
+                    yDivLine.setAttributeNS(null, "y2", height - yTick - 5);
                     yDivLine.setAttributeNS(null, "class", "yDiv");
                     yDivLine.setAttributeNS(null, "stroke", "black");
                     yDivLine.setAttributeNS(null, "stroke-width", 1);
                     svg.appendChild(yDivLine);
+                    var yValues = document.createElementNS(svgns, "text");
+                    yValues.setAttributeNS(null, "x", 0 + 11);
+                    yValues.setAttributeNS(null, "y", height - yTick + 5 + 35);
+                    yValues.setAttributeNS(null, "stroke", "black");
+                    yValues.textContent = charts[i].yTicks[mappedData.yTicks.indexOf(yTick)];
+                    svg.appendChild(yValues);
                 }
                 for(var l = 0; l < mappedData.yData.length - 1; l++) {
                     var graphLine = document.createElementNS(svgns, "line");
                     graphLine.setAttributeNS(null, "x1", mappedData.xData[l] + chartLbWidth);
-                    graphLine.setAttributeNS(null, "y1", chartHeight - mappedData.yData[l] + chartLbHeight);
+                    graphLine.setAttributeNS(null, "y1", chartHeight - mappedData.yData[l] + chartLbHeight - 35);
                     graphLine.setAttributeNS(null, "x2", mappedData.xData[l+1] + chartLbWidth);
-                    graphLine.setAttributeNS(null, "y2", chartHeight - mappedData.yData[l+1] + chartLbHeight);
+                    graphLine.setAttributeNS(null, "y2", chartHeight - mappedData.yData[l+1] + chartLbHeight - 35);
                     graphLine.setAttributeNS(null, "class", "graphLine");
                     graphLine.setAttributeNS(null, "stroke", "black");
                     graphLine.setAttributeNS(null, "stroke-width", 1);
@@ -285,8 +332,12 @@
                 for(var k = 0; k < mappedData.yData.length; k++) {
                     var circle = document.createElementNS(svgns, "circle");
                     circle.setAttributeNS(null, "cx", mappedData.xData[k] + chartLbWidth);
-                    circle.setAttributeNS(null, "cy", chartHeight - mappedData.yData[k] + chartLbHeight);
+                    circle.setAttributeNS(null, "cy", chartHeight - mappedData.yData[k] + chartLbHeight - 35);
                     circle.setAttributeNS(null, "r", "3px");
+                    circle.setAttributeNS(null, "class", "graphCircle");
+                    var toolTip = document.createElementNS(svgns, "title");
+                    toolTip.innerHTML = charts[i].yData[k];
+                    circle.appendChild(toolTip);
                     circle.setAttributeNS(null, "fill", "green");
                     svg.appendChild(circle);
                 }
