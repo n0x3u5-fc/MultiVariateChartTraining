@@ -1,5 +1,5 @@
 .xAxis, .yAxis {
-	stroke: black;
+	stroke: #212121;
 }
 
 .xAxis {
@@ -7,10 +7,24 @@
 }
 
 .xTick, .yTick {
-	stroke: black;
+	stroke: #212121;
 	stroke-width: 2px;
 }
 
 .yDiv {
 	stroke: #bfbfbf;
+}
+
+text {
+	font-size: 0.8em;
+}
+
+.graphLine {
+	stroke: #3f51b5;
+	stroke-width: 2px; 
+}
+
+.graphCircle {
+	stroke: #303f9f;
+	fill: #303f9f;
 }

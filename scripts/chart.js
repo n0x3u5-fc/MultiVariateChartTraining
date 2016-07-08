@@ -336,6 +336,7 @@
                     circle.setAttributeNS(null, "r", "3px");
                     circle.setAttributeNS(null, "class", "graphCircle");
                     var toolTip = document.createElementNS(svgns, "title");
+                    toolTip.setAttributeNS(null, "class", "plotToolTip");
                     toolTip.innerHTML = charts[i].yData[k];
                     circle.appendChild(toolTip);
                     circle.setAttributeNS(null, "fill", "green");
