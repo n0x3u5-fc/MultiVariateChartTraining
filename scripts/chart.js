@@ -117,7 +117,7 @@
                 // console.log("Y-Axis Title: " + charts[i].yTitle);
                 // console.log("Y-Axis Plots: ");
                 for(var yDatum of charts[i].yData) {
-                    if(yDatum == "") {
+                    if(yDatum === "") {
                         charts[i].yData.splice(charts[i].yData.indexOf(yDatum), 1);
                     }
                 }
@@ -140,7 +140,7 @@
             renderDiv.appendChild(div);
         }
         this.dataMapper = function(height, width, lbHeight, lbWidth, chart) {
-            console.log(chart);
+            // console.log(chart);
             var yTicks = new Array();
             var xTicks = new Array();
             var yData = new Array();
@@ -152,10 +152,10 @@
             var xTicksMax = chart.xTicks[chart.xTicks.length - 1];
             var yDataMin = Math.min.apply(Math, chart.yData);
             var yDataMax = Math.max.apply(Math, chart.yData);
-            var xDataMin = Math.min.apply(Math, chart.xData);
-            var xDataMax = Math.max.apply(Math, chart.xData);
+            var xDataMin = 0;
+            var xDataMax = chart.xData.length - 1;
 
-            var divDiff = height/chart.yTicks.length - 1;
+            var divDiff = height/(chart.yTicks.length - 1);
             var tickVal = lbHeight;
             for(var yTick of chart.yTicks) {
                 // var tickVal = this.pixelNormalizer(height, yTick, yTicksMax, yTicksMin);
@@ -163,26 +163,34 @@
                 tickVal += divDiff;
             }
             yTicks.push(tickVal);
-            divDiff = width/chart.xTicks.length - 1;
+            divDiff = width/(chart.xData.length - 1);
             tickVal = lbWidth;
-            for(var xTick of chart.xTicks) {
+            for(var xTick of chart.xData) {
                 // var xTickVal = this.pixelNormalizer(width, xTick, xTicksMax, xTicksMin);
                 xTicks.push(tickVal);
                 tickVal += divDiff;
             }
             xTicks.push(tickVal);
-            var yDataVal = yTicksMin;
             for(var yDatum of chart.yData) {
+                var yDataVal = 0;
                 // var yDataVal = this.pixelNormalizer(height, yDatum, yDataMax, yDataMin);
-                var yInterval = height/(yTicksMax - yTicksMin);
-                yDataVal += yInterval;
+                var yInterval = height/(yDataMax - yDataMin);
+                if (chart.yData.indexOf(yDatum) === 0) {
+                    yDataVal += yInterval*(yDatum - yDataMin);
+                } else {
+                    yDataVal += yInterval*(yDatum - yDataMin);
+                }
                 yData.push(yDataVal);
             }
-            var xDataVal = xTicksMin;
-            for(var xDatum of chart.xData) {
+            for(var i = 0; i <= xDataMax; i++) {
+                var xDataVal = 0;
                 // var xDataVal = this.pixelNormalizer(height, chart.xData.indexOf(xDatum), xDataMax, xDataMin);
-                var xInterval = width/(xTicksMax - xTicksMin);
-                xDataVal += xInterval;
+                var xInterval = width/(xDataMax - xDataMin);
+                if (i === 0) {
+                    xDataVal += xInterval*(i - xTicksMin);
+                } else {
+                    xDataVal += xInterval*(i - xDataMin);
+                }
                 xData.push(xDataVal);
             }
             var mappedChart = new MappedChart(chart.index, chart.xTitle, chart.yTitle, xData, yData, yTicks, xTicks);
@@ -265,10 +273,10 @@
                 }
                 for(var l = 0; l < mappedData.yData.length - 1; l++) {
                     var graphLine = document.createElementNS(svgns, "line");
-                    graphLine.setAttributeNS(null, "x1", mappedData.xData[l]);
-                    graphLine.setAttributeNS(null, "y1", mappedData.yData[l]);
-                    graphLine.setAttributeNS(null, "x2", mappedData.xData[l+1]);
-                    graphLine.setAttributeNS(null, "y2", mappedData.yData[l+1]);
+                    graphLine.setAttributeNS(null, "x1", mappedData.xData[l] + chartLbWidth);
+                    graphLine.setAttributeNS(null, "y1", chartHeight - mappedData.yData[l] + chartLbHeight);
+                    graphLine.setAttributeNS(null, "x2", mappedData.xData[l+1] + chartLbWidth);
+                    graphLine.setAttributeNS(null, "y2", chartHeight - mappedData.yData[l+1] + chartLbHeight);
                     graphLine.setAttributeNS(null, "class", "graphLine");
                     graphLine.setAttributeNS(null, "stroke", "black");
                     graphLine.setAttributeNS(null, "stroke-width", 1);
@@ -276,8 +284,8 @@
                 }
                 for(var k = 0; k < mappedData.yData.length; k++) {
                     var circle = document.createElementNS(svgns, "circle");
-                    circle.setAttributeNS(null, "cx", mappedData.xData[k]);
-                    circle.setAttributeNS(null, "cy", mappedData.yData[k]);
+                    circle.setAttributeNS(null, "cx", mappedData.xData[k] + chartLbWidth);
+                    circle.setAttributeNS(null, "cy", chartHeight - mappedData.yData[k] + chartLbHeight);
                     circle.setAttributeNS(null, "r", "3px");
                     circle.setAttributeNS(null, "fill", "green");
                     svg.appendChild(circle);
@@ -324,6 +332,10 @@
                 }
             }
             return tickValues;
+        }
+        this.calculateXAxis = function(xMin, xMax) {
+            var tickValues = new Array();
+
         }
     };
 
