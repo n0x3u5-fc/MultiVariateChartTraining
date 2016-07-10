@@ -21,10 +21,13 @@ text {
 
 .graphLine {
 	stroke: #3f51b5;
-	stroke-width: 2px; 
+	stroke-width: 2px;
 }
 
 .graphCircle {
 	stroke: #303f9f;
+	fill: #ffffff;
+}
+.graphCircle:hover {
 	fill: #303f9f;
 }

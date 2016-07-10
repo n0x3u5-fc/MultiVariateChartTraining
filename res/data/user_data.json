@@ -2,8 +2,10 @@
 	"metadata": {
 		"caption": "Multi-Variate Chart",
 		"subCaption": "Correlation of Age with Nutrition",
+		"height": 209,
+		"width": 472,
 		"units": "months,mg,mg,kg,"
-	}, 
+	},
 	"data": {
 		"Time": "JAN,FEB,MAR,MAY,JUN,JUL",
 		"Vitamin A": "12.5,17.8,8.9,10.7,10.5,11.2",
