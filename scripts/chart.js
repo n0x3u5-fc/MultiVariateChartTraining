@@ -179,16 +179,16 @@
             var xDataMin = 0;
             var xDataMax = chart.xData.length - 1;
 
-            var divDiff = height / (chart.yTicks.length - 1);
-            var tickVal = lbHeight;
             for (var yTick of chart.yTicks) {
+                var yTickVal = lbHeight;
                 // var tickVal = this.pixelNormalizer(height, yTick, yTicksMax, yTicksMin);
-                yTicks.push(tickVal);
-                tickVal += divDiff;
+                var yTickInterval = height / (yTicksMax - yTicksMin);
+                yTickVal += yTickInterval * (yTick - yTicksMin);
+                yTicks.push(Math.floor(yTickVal));
             }
-            yTicks.push(tickVal);
-            divDiff = width / (chart.xData.length - 1);
-            tickVal = lbWidth;
+            // yTicks.push(tickVal);
+            var divDiff = Math.floor(width / (chart.xData.length - 1));
+            var tickVal = lbWidth;
             for (var xTick of chart.xData) {
                 // var xTickVal = this.pixelNormalizer(width, xTick, xTicksMax, xTicksMin);
                 xTicks.push(tickVal);
@@ -204,7 +204,7 @@
                 } else {
                     yDataVal += yInterval * (yDatum - yDataMin);
                 }
-                yData.push(yDataVal);
+                yData.push(Math.floor(yDataVal));
             }
             for (var i = 0; i <= xDataMax; i++) {
                 var xDataVal = 0;
@@ -215,7 +215,7 @@
                 } else {
                     xDataVal += xInterval * (i - xDataMin);
                 }
-                xData.push(xDataVal);
+                xData.push(Math.floor(xDataVal));
             }
             var mappedChart = new MappedChart(chart.index, chart.xTitle, chart.yTitle, xData, yData, yTicks, xTicks);
             return mappedChart;
@@ -293,7 +293,7 @@
                     xTickLine.setAttributeNS(null, "class", "xTick");
                     svg.appendChild(xTickLine);
                     var xValues = document.createElementNS(svgns, "text");
-                    xValues.setAttributeNS(null, "x", xTick - 10);
+                    xValues.setAttributeNS(null, "x", xTick - 20);
                     xValues.setAttributeNS(null, "y", height + 10);
                     xValues.setAttributeNS(null, "stroke", "black");
                     xValues.textContent = charts[i].xData[mappedData.xTicks.indexOf(xTick)];
@@ -309,9 +309,9 @@
                     svg.appendChild(yTickLine);
                     var yDivLine = document.createElementNS(svgns, "line");
                     yDivLine.setAttributeNS(null, "x1", chartLbWidth);
-                    yDivLine.setAttributeNS(null, "y1", height - yTick - 5);
+                    yDivLine.setAttributeNS(null, "y1", height - yTick + 35);
                     yDivLine.setAttributeNS(null, "x2", chartUbWidth);
-                    yDivLine.setAttributeNS(null, "y2", height - yTick - 5);
+                    yDivLine.setAttributeNS(null, "y2", height - yTick + 35);
                     yDivLine.setAttributeNS(null, "class", "yDiv");
                     yDivLine.setAttributeNS(null, "stroke", "black");
                     yDivLine.setAttributeNS(null, "stroke-width", 1);
