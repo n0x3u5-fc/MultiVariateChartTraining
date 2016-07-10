@@ -75,13 +75,17 @@
      */
     var parseData = function(json) {
         // console.log(json);
-        console.log("Caption: " + json.metadata.caption);
-        console.log("Sub-Caption: " + json.metadata.subCaption);
+        // console.log("Caption: " + json.metadata.caption);
+        // console.log("Sub-Caption: " + json.metadata.subCaption);
 
         /**
          * Contains the keys of the JSON's data attribute
          * @type {string[]}
          */
+        // var height = typeof height != 'undefined' ? height : 209;
+        // var width = typeof width != 'undefined' ? width : 472;
+        var height = json.metadata.height;
+        var width = json.metadata.width;
         var jsonDataKeys = Object.keys(json.data);
         var numCharts = jsonDataKeys.length - 1;
         // console.log("Number of charts to render: " + numCharts);
@@ -101,7 +105,7 @@
         }
         createCaptions('chart-area', json.metadata.caption, json.metadata.subCaption);
         var chartCalculator = new ChartPropertyCalculator(charts);
-        chartCalculator.displayCharts();
+        chartCalculator.displayCharts(height, width);
     };
 
     var createCaptions = function(targetDiv, caption, subCaption) {
@@ -127,7 +131,7 @@
         /**
          * Displays the properties of every chart in the log
          */
-        this.displayCharts = function() {
+        this.displayCharts = function(height, width) {
             for (var i = 0; i < charts.length; i++) {
                 // if(i === charts.length - 1) {
                 //     console.log("X-Axis Title: " + charts[i].xTitle);
@@ -151,7 +155,7 @@
                 // console.log(yAxis);
                 // console.log("--------------------------------------------------");
             }
-            this.createCharts(charts);
+            this.createCharts(charts, height, width);
         };
         this.createDivs = function(targetDiv) {
             var div = document.createElement('div');
@@ -228,20 +232,18 @@
         this.createCharts = function(charts, height, width) {
             console.log(charts);
             var svgns = "http://www.w3.org/2000/svg";
-            height = typeof height != 'undefined' ? height : 209;
-            width = typeof width != 'undefined' ? width : 472;
             var chartUbHeight = Math.ceil(height - (0.025 * height)) + 35;
-            console.log(chartUbHeight);
+            // console.log(chartUbHeight);
             var chartUbWidth = Math.ceil(width - (0.025 * width)) + 35;
-            console.log(chartUbWidth);
+            // console.log(chartUbWidth);
             var chartLbHeight = Math.floor(0 + (0.025 * height)) + 35;
-            console.log(chartLbHeight);
+            // console.log(chartLbHeight);
             var chartLbWidth = Math.floor(0 + (0.025 * height)) + 35;
-            console.log(chartLbWidth);
+            // console.log(chartLbWidth);
             var chartHeight = chartUbHeight - chartLbHeight;
-            console.log(chartHeight);
+            // console.log(chartHeight);
             var chartWidth = chartUbWidth - chartLbWidth;
-            console.log(chartWidth);
+            // console.log(chartWidth);
 
             var multiCharts = document.getElementsByClassName("multi-chart");
             for (var i = 0; i < multiCharts.length; i++) {
@@ -333,17 +335,16 @@
                     svg.appendChild(graphLine);
                 }
                 for (var k = 0; k < mappedData.yData.length; k++) {
-                    var circle = document.createElementNS(svgns, "circle");
-                    circle.setAttributeNS(null, "cx", mappedData.xData[k] + chartLbWidth);
-                    circle.setAttributeNS(null, "cy", chartHeight - mappedData.yData[k] + chartLbHeight - 35);
-                    circle.setAttributeNS(null, "r", "3px");
-                    circle.setAttributeNS(null, "class", "graphCircle");
+                    var anchor = document.createElementNS(svgns, "circle");
+                    anchor.setAttributeNS(null, "cx", mappedData.xData[k] + chartLbWidth);
+                    anchor.setAttributeNS(null, "cy", chartHeight - mappedData.yData[k] + chartLbHeight - 35);
+                    anchor.setAttributeNS(null, "r", "4px");
+                    anchor.setAttributeNS(null, "class", "graphCircle");
                     var toolTip = document.createElementNS(svgns, "title");
                     toolTip.setAttributeNS(null, "class", "plotToolTip");
                     toolTip.innerHTML = charts[i].yData[k];
-                    circle.appendChild(toolTip);
-                    circle.setAttributeNS(null, "fill", "green");
-                    svg.appendChild(circle);
+                    anchor.appendChild(toolTip);
+                    svg.appendChild(anchor);
                 }
                 // for(var y of mappedData.yData) {
                 //     console.log(mappedData.xData.indexOf(y), y);
