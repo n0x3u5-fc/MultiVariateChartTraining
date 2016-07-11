@@ -198,12 +198,8 @@
             for (var yDatum of chart.yData) {
                 var yDataVal = 0;
                 // var yDataVal = this.pixelNormalizer(height, yDatum, yDataMax, yDataMin);
-                var yInterval = height / (yDataMax - yDataMin);
-                if (chart.yData.indexOf(yDatum) === 0) {
-                    yDataVal += yInterval * (yDatum - yDataMin);
-                } else {
-                    yDataVal += yInterval * (yDatum - yDataMin);
-                }
+                var yInterval = height / (yTicksMax - yTicksMin);
+                yDataVal += yInterval * (yDatum - yTicksMin);
                 yData.push(Math.floor(yDataVal));
             }
             for (var i = 0; i <= xDataMax; i++) {
@@ -374,7 +370,7 @@
             var roughStep = range / ticks;
             var prettyMod = Math.floor(Math.log(roughStep) / Math.LN10);
             var prettyPow = Math.pow(10, prettyMod);
-            var prettyDiv = Math.round(roughStep / prettyPow + 0.5);
+            var prettyDiv = Math.floor(roughStep / prettyPow + 0.5);
             var prettyStep = prettyDiv * prettyPow;
 
             var lb = prettyStep * Math.floor(yMin / prettyStep);
