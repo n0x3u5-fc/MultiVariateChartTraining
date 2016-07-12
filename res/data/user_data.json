@@ -3,14 +3,14 @@
 		"caption": "Multi-Variate Chart",
 		"subCaption": "Correlation of Age with Nutrition",
 		"height": 209,
-		"width": 472,
+		"width": 372,
 		"units": "months,mg,mg,kg,"
 	},
 	"data": {
 		"Time": "JAN,FEB,MAR,MAY,JUN,JUL",
-		"Vitamin A": "12.5,17.8,8.9,10.7,10.5,11.2",
-		"Calcium": "42.3,43.9,45.3,44.6,44.8,45.2",
-		"Weight": "50,56,67,61,60,62",
-		"Test": "0,45,15,32,78,100"
+		"Vitamin A": "12.5,17.8,8.9,10.7,,11.2",
+		"Calcium": "42.3,43.9,45.3,,,45.2",
+		"Weight": "50,,67,61,60,100",
+		"Test": ",45,15,32,78,100"
 	}
 }

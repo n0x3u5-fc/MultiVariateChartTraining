@@ -21,12 +21,19 @@ text {
 
 .graphLine {
 	stroke: #3f51b5;
+	stroke-width: 5px;
+}
+
+.inferredLine {
+	stroke: #000000;
 	stroke-width: 2px;
+	stroke-dasharray: 5, 5;
 }
 
 .graphCircle {
 	stroke: #303f9f;
 	fill: #ffffff;
+	stroke-width: 2px;
 }
 .graphCircle:hover {
 	fill: #303f9f;
