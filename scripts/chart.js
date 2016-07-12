@@ -9,7 +9,16 @@
      * @param {string} url - A URL specifying the location of the JSON file
      * @param {parseData} callback - Callback to receive and process fetched data
      */
-    var ajaxLoader = function(url, callback) {
+
+    var Data = function() {
+        this.caption = "";
+        this.subCaption = "";
+        this.height = "";
+        this.width = "";
+        this.charts = [];
+    };
+
+    Data.prototype.ajaxLoader = function(url, callback) {
         var httpRequest = new XMLHttpRequest();
         if (!httpRequest) {
             console.log("Unable to create XMLHTTP instance.");
@@ -26,6 +35,55 @@
             }
         };
         httpRequest.send();
+    };
+
+    /**
+     * Callback to parse the data received via AJAX
+     *
+     * @callback dataParser
+     * @param {Object} json
+     */
+    Data.prototype.dataParser = function(json) {
+        this.caption = json.metadata.caption;
+        this.subCaption = json.metadata.subCaption;
+        this.height = json.metadata.height;
+        this.width = json.metadata.width;
+        /**
+         * Contains the keys of the JSON's data attribute
+         * @type {string[]}
+         */
+        var jsonDataKeys = Object.keys(json.data);
+        var numCharts = jsonDataKeys.length - 1;
+        for (var i = 1; i <= numCharts; i++) {
+            /**
+             * @type {number[]}
+             */
+            var xData = json.data[jsonDataKeys[0]].split(",");
+            /**
+             * @type {number[]}
+             */
+            var yData = json.data[jsonDataKeys[i]].split(",").map(numberMapper); // Mapping each string after splitting to numbers
+            var units = json.metadata.units.split(",");
+            var chart = new MultiVarChart(i, jsonDataKeys[0], jsonDataKeys[i], xData, yData, units[0], units[i]);
+            this.charts.push(chart);
+        }
+        createCaptions('chart-area', this.caption, this.subCaption);
+        var chartCalculator = new ChartPropertyCalculator(this.charts);
+        chartCalculator.displayCharts(this.height, this.width);
+    };
+
+    var SvgHelper = function() {
+        this.svgns = "http://www.w3.org/2000/svg";
+    };
+
+    SvgHelper.prototype.drawLine = function(svg, x1, y1, x2, y2, className) {
+        var line = document.createElementNS(this.svgns, "line");
+        line.setAttributeNS(null, "x1", x1);
+        line.setAttributeNS(null, "y1", y1);
+        line.setAttributeNS(null, "x2", x2);
+        line.setAttributeNS(null, "y2", y2);
+        line.setAttributeNS(null, "class", className);
+        svg.appendChild(line);
     };
 
     /**
@@ -162,7 +220,7 @@
             }
             xTicks.push(tickVal);
             for (var yDatum of chart.yData) {
-                if(yDatum === "") {
+                if (yDatum === "") {
                     yData.push("");
                 } else {
                     var yDataVal = 0;
@@ -259,7 +317,7 @@
                     xTickLine.setAttributeNS(null, "y2", chartUbHeight + 5 - 55);
                     xTickLine.setAttributeNS(null, "class", "xTick");
                     svg.appendChild(xTickLine);
-                    if(i === multiCharts.length - 1) {
+                    if (i === multiCharts.length - 1) {
                         var xValues = document.createElementNS(svgns, "text");
                         xValues.textContent = charts[i].xData[mappedData.xTicks.indexOf(xTick)];
                         xValues.setAttributeNS(null, "x", height - 180);
@@ -300,7 +358,7 @@
                     // if(i === 0) {
                     //     debugger;
                     // }
-                    if(mappedData.yData[l + 1] !== "") {
+                    if (mappedData.yData[l + 1] !== "") {
                         graphLine = document.createElementNS(svgns, "line");
                         graphLine.setAttributeNS(null, "x1", mappedData.xData[l] + chartLbWidth);
                         graphLine.setAttributeNS(null, "y1", chartHeight - mappedData.yData[l] + chartLbHeight - 55);
@@ -309,10 +367,11 @@
                         graphLine.setAttributeNS(null, "class", "graphLine");
                         svg.appendChild(graphLine);
                     } else {
-                        if(mappedData.yData[l] !== "") {
-                            for(var j = l + 2; j < mappedData.yData.length; j++) {
-                                l++; c++;
-                                if(mappedData.yData[j] !== "") {
+                        if (mappedData.yData[l] !== "") {
+                            for (var j = l + 2; j < mappedData.yData.length; j++) {
+                                l++;
+                                c++;
+                                if (mappedData.yData[j] !== "") {
                                     graphLine = document.createElementNS(svgns, "line");
                                     graphLine.setAttributeNS(null, "x1", mappedData.xData[l - c] + chartLbWidth);
                                     graphLine.setAttributeNS(null, "y1", chartHeight - mappedData.yData[l - c] + chartLbHeight - 55);
@@ -328,7 +387,7 @@
                 }
 
                 for (var k = 0; k < mappedData.yData.length; k++) {
-                    if(mappedData.yData[k] !== "") {
+                    if (mappedData.yData[k] !== "") {
                         var anchor = document.createElementNS(svgns, "circle");
                         anchor.setAttributeNS(null, "cx", mappedData.xData[k] + chartLbWidth);
                         anchor.setAttributeNS(null, "cy", chartHeight - mappedData.yData[k] + chartLbHeight - 55);
@@ -343,22 +402,24 @@
                 }
 
                 multiCharts[i].appendChild(svg);
-                if(i === multiCharts.length - 1) {
+                if (i === multiCharts.length - 1) {
                     var textCollisions = [];
                     var xTextValues = document.getElementsByClassName("x-value");
-                    for(var i = 0; i < xTextValues.length - 1; i++) {
-                        var rectNow = xTextValues[i].getBoundingClientRect();
-                        var rectNext = xTextValues[i + 1].getBoundingClientRect();
+                    for (var textValue = 0; i < xTextValues.length - 1; i++) {
+                        var rectNow = xTextValues[textValue].getBoundingClientRect();
+                        var rectNext = xTextValues[textValue + 1].getBoundingClientRect();
                         textCollisions.push(this.isSvgColliding(rectNow, rectNext));
                     }
                 }
             }
+
+            crosshairHandler(document.getElementsByClassName("chart-svg"));
         };
 
         this.isSvgColliding = function(rectNow, rectNext) {
-            return !(rectNext.left > rectNow.right || 
-                rectNext.right < rectNow.left || 
-                rectNext.top > rectNow.bottom || 
+            return !(rectNext.left > rectNow.right ||
+                rectNext.right < rectNow.left ||
+                rectNext.top > rectNow.bottom ||
                 rectNext.bottom < rectNow.top);
         };
         /**
@@ -400,65 +461,105 @@
         };
     };
 
-    /**
-     * Callback to parse the data received via AJAX
-     *
-     * @callback parseData
-     * @param {Object} json
-     */
-    var parseData = function(json) {
-        // console.log(json);
-        // console.log("Caption: " + json.metadata.caption);
-        // console.log("Sub-Caption: " + json.metadata.subCaption);
-
-        /**
-         * Contains the keys of the JSON's data attribute
-         * @type {string[]}
-         */
-        // var height = typeof height != 'undefined' ? height : 209;
-        // var width = typeof width != 'undefined' ? width : 472;
-        var height = json.metadata.height;
-        var width = json.metadata.width;
-        var jsonDataKeys = Object.keys(json.data);
-        var numCharts = jsonDataKeys.length - 1;
-        // console.log("Number of charts to render: " + numCharts);
-        var charts = [];
-        for (var i = 1; i <= numCharts; i++) {
-            /**
-             * @type {number[]}
-             */
-            var xData = json.data[jsonDataKeys[0]].split(",");
-            /**
-             * @type {number[]}
-             */
-            var yData = json.data[jsonDataKeys[i]].split(",").map(numberMapper); // Mapping each string after splitting to numbers
-            var units = json.metadata.units.split(",");
-            var chart = new MultiVarChart(i, jsonDataKeys[0], jsonDataKeys[i], xData, yData, units[0], units[i]);
-            charts.push(chart);
-        }
-        createCaptions('chart-area', json.metadata.caption, json.metadata.subCaption);
-        var chartCalculator = new ChartPropertyCalculator(charts);
-        chartCalculator.displayCharts(height, width);
-    };
-
     // Reading the AJAX from the file.
-    ajaxLoader('res/data/user_data.json', parseData);
+    var data = new Data();
+    data.ajaxLoader('res/data/user_data.json', data.dataParser.bind(data));
+    console.log(data);
 
     var createCrosshair = function(event) {
-        console.log(event.clientX, event.clientY);
+        var targetSvgHeight = event.target.getAttributeNS(null, "height");
+        var crosshair;
+        var crosshairCreation = new CustomEvent("crosshairCreateEvent", {"detail": event.clientX});
+        for(var svgChart of document.getElementsByClassName("chart-svg")) {
+            if(svgChart !== event.target) {
+                svgChart.dispatchEvent(crosshairCreation);
+            }
+        }
+        if(targetSvgHeight) {
+            targetSvgHeight = targetSvgHeight.slice(0, -2);
+            // var svgHelper = new SvgHelper();
+            // svgHelper.drawLine(event.target, event.clientX, 0, event.clientX, targetSvgHeight, "crosshair");
+            crosshair = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            crosshair.setAttributeNS(null, "x1", event.clientX - 10);
+            crosshair.setAttributeNS(null, "y1", 0);
+            crosshair.setAttributeNS(null, "x2", event.clientX - 10);
+            crosshair.setAttributeNS(null, "y2", targetSvgHeight - 60);
+            crosshair.setAttributeNS(null, "stroke", "red");
+            crosshair.setAttributeNS(null, "id", "crosshair");
+            event.target.appendChild(crosshair);
+        }
+    };
 
+    var createOtherCrosshairs = function(event) {
+        // if(event.target !== event.source) {
+            var targetSvgHeight = event.target.getAttributeNS(null, "height");
+            var crosshair;
+            if(targetSvgHeight) {
+                targetSvgHeight = targetSvgHeight.slice(0, -2);
+                crosshair = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                crosshair.setAttributeNS(null, "x1", event.detail - 10);
+                crosshair.setAttributeNS(null, "y1", 0);
+                crosshair.setAttributeNS(null, "x2", event.detail - 10);
+                crosshair.setAttributeNS(null, "y2", targetSvgHeight - 60);
+                crosshair.setAttributeNS(null, "stroke", "red");
+                crosshair.setAttributeNS(null, "class", "otherCrosshair");
+                event.target.appendChild(crosshair);
+            }
+        // }
+    };
+
+    var moveCrosshair = function(event) {
+        var crosshair = document.getElementById("crosshair");
+        var crosshairMovement = new CustomEvent("crosshairMoveEvent", {"detail": event.clientX});
+        for(var svgChart of document.getElementsByClassName("chart-svg")) {
+            if(svgChart !== event.target) {
+                svgChart.dispatchEvent(crosshairMovement);
+            }
+        }
+        crosshair.setAttributeNS(null, "x1", event.clientX - 10);
+        crosshair.setAttributeNS(null, "x2", event.clientX - 10);
+    };
+
+    var moveOtherCrosshairs = function(event) {
+        if(event.target !== event.source) {
+            var crosshairs = document.getElementsByClassName("otherCrosshair");
+            for(var crosshair of crosshairs) {
+                crosshair.setAttributeNS(null, "x1", event.detail - 10);
+                crosshair.setAttributeNS(null, "x2", event.detail - 10);
+            }
+        }
     };
 
     var removeCrosshair = function(event) {
-        console.log("crosshair removed");
-    }
+        var crosshair = document.getElementById("crosshair");
+        event.target.removeChild(crosshair);
+        var crosshairRemoval = new Event("crosshairRemoveEvent");
+        for(var svgChart of document.getElementsByClassName("chart-svg")) {
+            if(svgChart !== event.target) {
+                svgChart.dispatchEvent(crosshairRemoval);
+            }
+        }
+    };
 
-    var crosshairHandler = function() {
-        var svgCharts = document.getElementsByClassName("chart-svg");
-        console.log(svgCharts);
-        for(var svgChart of svgCharts) {
-            svgChart.addEventListener("mousemove", createCrosshair);
-            svgChart.addEventListener("mouseout", removeCrosshair);
+    var removeOtherCrosshairs = function(event) {
+        if(event.target !== event.source) {
+            var crosshairs = document.getElementsByClassName("otherCrosshair");
+            for(var crosshair of crosshairs) {
+                if(crosshair.parentNode === event.target) {
+                    event.target.removeChild(crosshair);
+                }
+            }
+        }
+    };
+
+    var crosshairHandler = function(svgCharts) {
+        for (var svgChart of svgCharts) {
+            svgChart.addEventListener("mouseenter", createCrosshair);
+            svgChart.addEventListener("crosshairCreateEvent", createOtherCrosshairs);
+            svgChart.addEventListener("mousemove", moveCrosshair);
+            svgChart.addEventListener("crosshairMoveEvent", moveOtherCrosshairs);
+            svgChart.addEventListener("mouseleave", removeCrosshair);
+            svgChart.addEventListener("crosshairRemoveEvent", removeOtherCrosshairs);
         }
     };
 

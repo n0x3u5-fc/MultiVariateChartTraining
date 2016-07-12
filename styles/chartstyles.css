@@ -38,3 +38,10 @@ text {
 .graphCircle:hover {
 	fill: #303f9f;
 }
+
+#crosshair {
+	stroke-dasharray: 5, 2;
+}
+.otherCrosshair {
+	stroke-dasharray: 5, 2;
+}
