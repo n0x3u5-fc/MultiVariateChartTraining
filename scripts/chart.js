@@ -63,14 +63,23 @@
              * @type {number[]}
              */
             var yData = json.data[jsonDataKeys[i]].split(",").map(numberMapper); // Mapping each string after splitting to numbers
-            var units = json.metadata.units.split(",");
-            var chart = new MultiVarChart(i, jsonDataKeys[0], jsonDataKeys[i], xData, yData, units[0], units[i]);
-            this.charts.push(chart);
+            if(!this.allSame(yData, "")) {
+                var units = json.metadata.units.split(",");
+                var chart = new MultiVarChart(i, jsonDataKeys[0], jsonDataKeys[i], xData, yData, units[0], units[i]);
+                this.charts.push(chart);
+            }
         }
         createCaptions('chart-area', this.caption, this.subCaption);
         var chartCalculator = new ChartPropertyCalculator(this.charts);
         chartCalculator.displayCharts(this.height, this.width);
     };
+
+    Data.prototype.allSame = function(arr, val) {
+        for(var elem of arr) {
+            if(elem !== val) { return false; }
+        }
+        return true;
+    }
 
     var SvgHelper = function() {
         this.svgns = "http://www.w3.org/2000/svg";
@@ -170,14 +179,17 @@
                 //     }
                 // }
                 // console.log(charts[i].yData);
+                // if(i > 2) { debugger; }
                 var maxY = Math.max.apply(Math, charts[i].yData.map(nullMaxMapper));
                 var minY = Math.min.apply(Math, charts[i].yData.map(nullMinMapper));
-                charts[i].yTicks = this.calculateYAxis(minY, maxY);
-                charts[i].xTicks = this.calculateYAxis(0, charts[i].xData.length);
-                this.createDivs("chart-area");
-                // console.log("Y-Axis Ticks: ");
-                // console.log(yAxis);
-                // console.log("--------------------------------------------------");
+                if(minY !== Infinity || maxY !== -Infinity) {
+                    charts[i].yTicks = this.calculateYAxis(minY, maxY);
+                    charts[i].xTicks = this.calculateYAxis(0, charts[i].xData.length);
+                    this.createDivs("chart-area");
+                    // console.log("Y-Axis Ticks: ");
+                    // console.log(yAxis);
+                    // console.log("--------------------------------------------------");
+                }
             }
             this.createCharts(charts, height, width);
         };
@@ -257,21 +269,23 @@
             console.log(charts);
             var svgns = "http://www.w3.org/2000/svg";
             var chartUbHeight = Math.ceil(height - (0.025 * height)) + 55;
-            // console.log(chartUbHeight);
+            console.log("chartUbHeight: " + chartUbHeight);
             var chartUbWidth = Math.ceil(width - (0.025 * width)) + 55;
-            // console.log(chartUbWidth);
+            console.log("chartUbWidth: " + chartUbWidth);
             var chartLbHeight = Math.floor(0 + (0.025 * height)) + 55;
-            // console.log(chartLbHeight);
+            console.log("chartLbHeight: " + chartLbHeight);
             var chartLbWidth = Math.floor(0 + (0.025 * height)) + 55;
-            // console.log(chartLbWidth);
+            console.log("chartLbWidth: " + chartLbWidth);
             var chartHeight = chartUbHeight - chartLbHeight;
-            // console.log(chartHeight);
+            console.log("chartHeight: " + chartHeight);
             var chartWidth = chartUbWidth - chartLbWidth;
-            // console.log(chartWidth);
+            console.log("chartWidth: " + chartWidth);
+            var mappedCharts = [];
 
             var multiCharts = document.getElementsByClassName("multi-chart");
             for (var i = 0; i < multiCharts.length; i++) {
                 var mappedData = this.dataMapper(chartHeight, chartWidth, chartLbHeight, chartLbWidth, charts[i]);
+                mappedCharts.push(mappedData);
                 console.log(mappedData);
                 var svg = document.createElementNS(svgns, "svg");
                 svg.setAttributeNS(null, "height", height + 55 + "px");
@@ -300,6 +314,8 @@
                 yTitle.setAttributeNS(null, "stroke", "black");
                 yTitle.textContent = charts[i].yUnit === "" ? charts[i].yTitle : charts[i].yTitle + " (" + charts[i].yUnit + ")";
                 svg.appendChild(yTitle);
+                var yDivGroup = document.createElementNS(svgns, "g");
+                yDivGroup.setAttributeNS(null, "class", "y-div-group");
                 if (i === multiCharts.length - 1) {
                     var xTitle = document.createElementNS(svgns, "text");
                     xTitle.setAttributeNS(null, "x", (chartWidth / 2));
@@ -344,6 +360,7 @@
                     yDivLine.setAttributeNS(null, "class", "yDiv");
                     yDivLine.setAttributeNS(null, "stroke", "black");
                     yDivLine.setAttributeNS(null, "stroke-width", 1);
+                    // yDivGroup.appendChild(yDivLine);
                     svg.appendChild(yDivLine);
                     var yValues = document.createElementNS(svgns, "text");
                     yValues.setAttributeNS(null, "x", 0 + 25);
@@ -355,9 +372,6 @@
                 for (var l = 0; l < mappedData.yData.length - 1; l++) {
                     var graphLine;
                     var c = 0;
-                    // if(i === 0) {
-                    //     debugger;
-                    // }
                     if (mappedData.yData[l + 1] !== "") {
                         graphLine = document.createElementNS(svgns, "line");
                         graphLine.setAttributeNS(null, "x1", mappedData.xData[l] + chartLbWidth);
@@ -366,24 +380,21 @@
                         graphLine.setAttributeNS(null, "y2", chartHeight - mappedData.yData[l + 1] + chartLbHeight - 55);
                         graphLine.setAttributeNS(null, "class", "graphLine");
                         svg.appendChild(graphLine);
-                    } else {
-                        if (mappedData.yData[l] !== "") {
-                            for (var j = l + 2; j < mappedData.yData.length; j++) {
-                                l++;
-                                c++;
-                                if (mappedData.yData[j] !== "") {
-                                    graphLine = document.createElementNS(svgns, "line");
-                                    graphLine.setAttributeNS(null, "x1", mappedData.xData[l - c] + chartLbWidth);
-                                    graphLine.setAttributeNS(null, "y1", chartHeight - mappedData.yData[l - c] + chartLbHeight - 55);
-                                    graphLine.setAttributeNS(null, "x2", mappedData.xData[j] + chartLbWidth);
-                                    graphLine.setAttributeNS(null, "y2", chartHeight - mappedData.yData[j] + chartLbHeight - 55);
-                                    graphLine.setAttributeNS(null, "class", "inferredLine");
-                                    svg.appendChild(graphLine);
-                                    break;
-                                }
+                    } else if (mappedData.yData[l] !== "") {
+                        for (var j = l + 2; j < mappedData.yData.length; j++) {
+                            l++; c++;
+                            if (mappedData.yData[j] !== "") {
+                                graphLine = document.createElementNS(svgns, "line");
+                                graphLine.setAttributeNS(null, "x1", mappedData.xData[l - c] + chartLbWidth);
+                                graphLine.setAttributeNS(null, "y1", chartHeight - mappedData.yData[l - c] + chartLbHeight - 55);
+                                graphLine.setAttributeNS(null, "x2", mappedData.xData[j] + chartLbWidth);
+                                graphLine.setAttributeNS(null, "y2", chartHeight - mappedData.yData[j] + chartLbHeight - 55);
+                                graphLine.setAttributeNS(null, "class", "inferredLine");
+                                svg.appendChild(graphLine);
+                                break;
                             }
                         }
-                    }
+                    }                
                 }
 
                 for (var k = 0; k < mappedData.yData.length; k++) {
@@ -401,6 +412,15 @@
                     }
                 }
 
+                var rect = document.createElementNS(svgns, "rect");
+                rect.setAttributeNS(null, "width", chartWidth);
+                rect.setAttributeNS(null, "height", chartHeight);
+                rect.setAttributeNS(null, "x", chartLbWidth);
+                rect.setAttributeNS(null, "y", chartLbHeight - 55);
+                rect.setAttributeNS(null, "class", "chart-rect");
+                rect.setAttributeNS(null, "fill-opacity", 0);
+                svg.appendChild(rect);
+
                 multiCharts[i].appendChild(svg);
                 if (i === multiCharts.length - 1) {
                     var textCollisions = [];
@@ -413,7 +433,8 @@
                 }
             }
 
-            crosshairHandler(document.getElementsByClassName("chart-svg"));
+            crosshairHandler(document.getElementsByClassName("chart-rect"));
+            // tooltipHandler(document.getElementsByClassName("chart-svg"), mappedCharts);
         };
 
         this.isSvgColliding = function(rectNow, rectNext) {
@@ -461,49 +482,67 @@
         };
     };
 
-    // Reading the AJAX from the file.
-    var data = new Data();
-    data.ajaxLoader('res/data/user_data.json', data.dataParser.bind(data));
-    console.log(data);
+    var createTooltip = function(event, mappedCharts) {
+        console.log(this);
+        var tooltip;
+        for(var svgChart of document.getElementsByClassName("chart-svg")) {
+            tooltip = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            tooltip.setAttributeNS(null, "x", event.clientX - 10);
+            tooltip.setAttributeNS(null, "y", event.clientY - 120);
+            tooltip.setAttributeNS(null, "class", "tooltip");
+            tooltip.setAttributeNS(null, "stroke", "black");
+            tooltip.textContent = "Hi";
+            event.target.appendChild(tooltip);
+        }
+    };
+
+    var tooltipHandler = function(svgCharts, mappedCharts) {
+        for(var svgChart of svgCharts) {
+            svgChart.addEventListener("mouseenter", function(event) { createTooltip(event, mappedCharts); });
+        }
+    };
 
     var createCrosshair = function(event) {
         var targetSvgHeight = event.target.getAttributeNS(null, "height");
+        var targetSvgX = event.target.getAttributeNS(null, "x");
+        var targetSvgY = event.target.getAttributeNS(null, "y");
         var crosshair;
         var crosshairCreation = new CustomEvent("crosshairCreateEvent", {"detail": event.clientX});
-        for(var svgChart of document.getElementsByClassName("chart-svg")) {
-            if(svgChart !== event.target) {
-                svgChart.dispatchEvent(crosshairCreation);
+        for(var rect of document.getElementsByClassName("chart-rect")) {
+            if(rect !== event.target) {
+                rect.dispatchEvent(crosshairCreation);
             }
         }
         if(targetSvgHeight) {
-            targetSvgHeight = targetSvgHeight.slice(0, -2);
             // var svgHelper = new SvgHelper();
             // svgHelper.drawLine(event.target, event.clientX, 0, event.clientX, targetSvgHeight, "crosshair");
             crosshair = document.createElementNS("http://www.w3.org/2000/svg", "line");
-            crosshair.setAttributeNS(null, "x1", event.clientX - 10);
-            crosshair.setAttributeNS(null, "y1", 0);
-            crosshair.setAttributeNS(null, "x2", event.clientX - 10);
-            crosshair.setAttributeNS(null, "y2", targetSvgHeight - 60);
+            crosshair.setAttributeNS(null, "x1", event.clientX);
+            crosshair.setAttributeNS(null, "y1", targetSvgY);
+            crosshair.setAttributeNS(null, "x2", event.clientX);
+            crosshair.setAttributeNS(null, "y2", targetSvgHeight);
             crosshair.setAttributeNS(null, "stroke", "red");
             crosshair.setAttributeNS(null, "id", "crosshair");
-            event.target.appendChild(crosshair);
+            event.target.parentNode.appendChild(crosshair);
         }
     };
 
     var createOtherCrosshairs = function(event) {
         // if(event.target !== event.source) {
+            console.log(event);
             var targetSvgHeight = event.target.getAttributeNS(null, "height");
+            var targetSvgX = event.target.getAttributeNS(null, "x");
+            var targetSvgY = event.target.getAttributeNS(null, "y");
             var crosshair;
             if(targetSvgHeight) {
-                targetSvgHeight = targetSvgHeight.slice(0, -2);
                 crosshair = document.createElementNS("http://www.w3.org/2000/svg", "line");
-                crosshair.setAttributeNS(null, "x1", event.detail - 10);
-                crosshair.setAttributeNS(null, "y1", 0);
-                crosshair.setAttributeNS(null, "x2", event.detail - 10);
-                crosshair.setAttributeNS(null, "y2", targetSvgHeight - 60);
+                crosshair.setAttributeNS(null, "x1", event.detail);
+                crosshair.setAttributeNS(null, "y1", targetSvgY);
+                crosshair.setAttributeNS(null, "x2", event.detail);
+                crosshair.setAttributeNS(null, "y2", targetSvgHeight);
                 crosshair.setAttributeNS(null, "stroke", "red");
                 crosshair.setAttributeNS(null, "class", "otherCrosshair");
-                event.target.appendChild(crosshair);
+                event.target.parentNode.appendChild(crosshair);
             }
         // }
     };
@@ -511,56 +550,62 @@
     var moveCrosshair = function(event) {
         var crosshair = document.getElementById("crosshair");
         var crosshairMovement = new CustomEvent("crosshairMoveEvent", {"detail": event.clientX});
-        for(var svgChart of document.getElementsByClassName("chart-svg")) {
-            if(svgChart !== event.target) {
-                svgChart.dispatchEvent(crosshairMovement);
+        for(var rect of document.getElementsByClassName("chart-rect")) {
+            if(rect !== event.target) {
+                rect.dispatchEvent(crosshairMovement);
             }
         }
-        crosshair.setAttributeNS(null, "x1", event.clientX - 10);
-        crosshair.setAttributeNS(null, "x2", event.clientX - 10);
+        if(crosshair) {
+            crosshair.setAttributeNS(null, "x1", event.clientX - 10);
+            crosshair.setAttributeNS(null, "x2", event.clientX - 10);
+        }
     };
 
     var moveOtherCrosshairs = function(event) {
-        if(event.target !== event.source) {
+        // if(event.target !== event.source) {
             var crosshairs = document.getElementsByClassName("otherCrosshair");
             for(var crosshair of crosshairs) {
                 crosshair.setAttributeNS(null, "x1", event.detail - 10);
                 crosshair.setAttributeNS(null, "x2", event.detail - 10);
             }
-        }
+        // }
     };
 
     var removeCrosshair = function(event) {
         var crosshair = document.getElementById("crosshair");
-        event.target.removeChild(crosshair);
+        event.target.parentNode.removeChild(crosshair);
         var crosshairRemoval = new Event("crosshairRemoveEvent");
-        for(var svgChart of document.getElementsByClassName("chart-svg")) {
-            if(svgChart !== event.target) {
-                svgChart.dispatchEvent(crosshairRemoval);
+        for(var rect of document.getElementsByClassName("chart-rect")) {
+            if(rect !== event.target) {
+                rect.dispatchEvent(crosshairRemoval);
             }
         }
     };
 
     var removeOtherCrosshairs = function(event) {
-        if(event.target !== event.source) {
+        // if(event.target !== event.source) {
             var crosshairs = document.getElementsByClassName("otherCrosshair");
             for(var crosshair of crosshairs) {
-                if(crosshair.parentNode === event.target) {
-                    event.target.removeChild(crosshair);
+                if(crosshair.parentNode === event.target.parentNode) {
+                    event.target.parentNode.removeChild(crosshair);
                 }
             }
+        // }
+    };
+
+    var crosshairHandler = function(rects) {
+        for (var rect of rects) {
+            rect.addEventListener("mouseenter", createCrosshair);
+            rect.addEventListener("crosshairCreateEvent", createOtherCrosshairs);
+            rect.addEventListener("mousemove", moveCrosshair);
+            rect.addEventListener("crosshairMoveEvent", moveOtherCrosshairs);
+            rect.addEventListener("mouseleave", removeCrosshair);
+            rect.addEventListener("crosshairRemoveEvent", removeOtherCrosshairs);
         }
     };
 
-    var crosshairHandler = function(svgCharts) {
-        for (var svgChart of svgCharts) {
-            svgChart.addEventListener("mouseenter", createCrosshair);
-            svgChart.addEventListener("crosshairCreateEvent", createOtherCrosshairs);
-            svgChart.addEventListener("mousemove", moveCrosshair);
-            svgChart.addEventListener("crosshairMoveEvent", moveOtherCrosshairs);
-            svgChart.addEventListener("mouseleave", removeCrosshair);
-            svgChart.addEventListener("crosshairRemoveEvent", removeOtherCrosshairs);
-        }
-    };
+    // Reading the AJAX from the file.
+    var data = new Data();
+    data.ajaxLoader('res/data/user_data.json', data.dataParser.bind(data));
 
 })(document, console);
