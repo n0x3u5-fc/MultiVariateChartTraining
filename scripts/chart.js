@@ -79,7 +79,7 @@
             if(elem !== val) { return false; }
         }
         return true;
-    }
+    };
 
     var SvgHelper = function() {
         this.svgns = "http://www.w3.org/2000/svg";
@@ -179,7 +179,6 @@
                 //     }
                 // }
                 // console.log(charts[i].yData);
-                // if(i > 2) { debugger; }
                 var maxY = Math.max.apply(Math, charts[i].yData.map(nullMaxMapper));
                 var minY = Math.min.apply(Math, charts[i].yData.map(nullMinMapper));
                 if(minY !== Infinity || maxY !== -Infinity) {
@@ -269,17 +268,17 @@
             console.log(charts);
             var svgns = "http://www.w3.org/2000/svg";
             var chartUbHeight = Math.ceil(height - (0.025 * height)) + 55;
-            console.log("chartUbHeight: " + chartUbHeight);
+            // console.log("chartUbHeight: " + chartUbHeight);
             var chartUbWidth = Math.ceil(width - (0.025 * width)) + 55;
-            console.log("chartUbWidth: " + chartUbWidth);
+            // console.log("chartUbWidth: " + chartUbWidth);
             var chartLbHeight = Math.floor(0 + (0.025 * height)) + 55;
-            console.log("chartLbHeight: " + chartLbHeight);
+            // console.log("chartLbHeight: " + chartLbHeight);
             var chartLbWidth = Math.floor(0 + (0.025 * height)) + 55;
-            console.log("chartLbWidth: " + chartLbWidth);
+            // console.log("chartLbWidth: " + chartLbWidth);
             var chartHeight = chartUbHeight - chartLbHeight;
-            console.log("chartHeight: " + chartHeight);
+            // console.log("chartHeight: " + chartHeight);
             var chartWidth = chartUbWidth - chartLbWidth;
-            console.log("chartWidth: " + chartWidth);
+            // console.log("chartWidth: " + chartWidth);
             var mappedCharts = [];
 
             var multiCharts = document.getElementsByClassName("multi-chart");
@@ -307,8 +306,8 @@
                 xline.setAttributeNS(null, "class", "xAxis");
                 svg.appendChild(xline);
                 var yTitle = document.createElementNS(svgns, "text");
-                yTitle.setAttributeNS(null, "x", (chartHeight / 2) + 50);
-                yTitle.setAttributeNS(null, "y", -261);
+                yTitle.setAttributeNS(null, "x", (chartHeight / 2) - 50);
+                yTitle.setAttributeNS(null, "y", -255);
                 yTitle.setAttributeNS(null, "class", "y-title");
                 yTitle.setAttributeNS(null, "transform", "rotate(270 270, 0)");
                 yTitle.setAttributeNS(null, "stroke", "black");
@@ -336,7 +335,7 @@
                     if (i === multiCharts.length - 1) {
                         var xValues = document.createElementNS(svgns, "text");
                         xValues.textContent = charts[i].xData[mappedData.xTicks.indexOf(xTick)];
-                        xValues.setAttributeNS(null, "x", height - 180);
+                        xValues.setAttributeNS(null, "x", height - 380);
                         xValues.setAttributeNS(null, "y", xTick - 265);
                         xValues.setAttributeNS(null, "transform", "rotate(270 270, 0)");
                         xValues.setAttributeNS(null, "stroke", "black");
@@ -352,16 +351,24 @@
                     yTickLine.setAttributeNS(null, "y2", height - yTick + 55);
                     yTickLine.setAttributeNS(null, "class", "yTick");
                     svg.appendChild(yTickLine);
-                    var yDivLine = document.createElementNS(svgns, "line");
-                    yDivLine.setAttributeNS(null, "x1", chartLbWidth);
-                    yDivLine.setAttributeNS(null, "y1", height - yTick + 55);
-                    yDivLine.setAttributeNS(null, "x2", chartUbWidth);
-                    yDivLine.setAttributeNS(null, "y2", height - yTick + 55);
-                    yDivLine.setAttributeNS(null, "class", "yDiv");
-                    yDivLine.setAttributeNS(null, "stroke", "black");
-                    yDivLine.setAttributeNS(null, "stroke-width", 1);
-                    // yDivGroup.appendChild(yDivLine);
-                    svg.appendChild(yDivLine);
+                    // var yDivLine = document.createElementNS(svgns, "line");
+                    // yDivLine.setAttributeNS(null, "x1", chartLbWidth);
+                    // yDivLine.setAttributeNS(null, "y1", height - yTick + 55);
+                    // yDivLine.setAttributeNS(null, "x2", chartUbWidth);
+                    // yDivLine.setAttributeNS(null, "y2", height - yTick + 55);
+                    // yDivLine.setAttributeNS(null, "class", "yDiv");
+                    // yDivLine.setAttributeNS(null, "stroke", "black");
+                    // yDivLine.setAttributeNS(null, "stroke-width", 1);
+                    // svg.appendChild(yDivLine);
+                    var yDivRect = document.createElementNS(svgns, "rect");
+                    yDivRect.setAttributeNS(null, "x", chartLbWidth);
+                    yDivRect.setAttributeNS(null, "y", yTick - 54);
+                    yDivRect.setAttributeNS(null, "height", chartHeight - yTick + 60);
+                    yDivRect.setAttributeNS(null, "width", chartWidth);
+                    yDivRect.setAttributeNS(null, "class", "yDiv");
+                    yDivRect.setAttributeNS(null, "stroke", "green");
+                    yDivRect.setAttributeNS(null, "fill", "white");
+                    svg.appendChild(yDivRect);
                     var yValues = document.createElementNS(svgns, "text");
                     yValues.setAttributeNS(null, "x", 0 + 25);
                     yValues.setAttributeNS(null, "y", height - yTick + 5 + 55);
@@ -372,7 +379,7 @@
                 for (var l = 0; l < mappedData.yData.length - 1; l++) {
                     var graphLine;
                     var c = 0;
-                    if (mappedData.yData[l + 1] !== "") {
+                    if (mappedData.yData[l + 1] !== "" && mappedData.yData[l] !== "") {
                         graphLine = document.createElementNS(svgns, "line");
                         graphLine.setAttributeNS(null, "x1", mappedData.xData[l] + chartLbWidth);
                         graphLine.setAttributeNS(null, "y1", chartHeight - mappedData.yData[l] + chartLbHeight - 55);
@@ -394,7 +401,7 @@
                                 break;
                             }
                         }
-                    }                
+                    }
                 }
 
                 for (var k = 0; k < mappedData.yData.length; k++) {
@@ -404,6 +411,7 @@
                         anchor.setAttributeNS(null, "cy", chartHeight - mappedData.yData[k] + chartLbHeight - 55);
                         anchor.setAttributeNS(null, "r", "4px");
                         anchor.setAttributeNS(null, "class", "graphCircle");
+                        anchor.setAttributeNS(null, "data-value", charts[i].yData[k]);
                         var toolTip = document.createElementNS(svgns, "title");
                         toolTip.setAttributeNS(null, "class", "plotToolTip");
                         toolTip.innerHTML = charts[i].yData[k];
@@ -422,27 +430,12 @@
                 svg.appendChild(rect);
 
                 multiCharts[i].appendChild(svg);
-                if (i === multiCharts.length - 1) {
-                    var textCollisions = [];
-                    var xTextValues = document.getElementsByClassName("x-value");
-                    for (var textValue = 0; i < xTextValues.length - 1; i++) {
-                        var rectNow = xTextValues[textValue].getBoundingClientRect();
-                        var rectNext = xTextValues[textValue + 1].getBoundingClientRect();
-                        textCollisions.push(this.isSvgColliding(rectNow, rectNext));
-                    }
-                }
             }
 
             crosshairHandler(document.getElementsByClassName("chart-rect"));
             // tooltipHandler(document.getElementsByClassName("chart-svg"), mappedCharts);
         };
 
-        this.isSvgColliding = function(rectNow, rectNext) {
-            return !(rectNext.left > rectNow.right ||
-                rectNext.right < rectNow.left ||
-                rectNext.top > rectNow.bottom ||
-                rectNext.bottom < rectNow.top);
-        };
         /**
          * Calculates the tick mark values so that the axes look pretty
          * @param {number} yMin - The minimum value of the user given data
@@ -482,31 +475,18 @@
         };
     };
 
-    var createTooltip = function(event, mappedCharts) {
-        console.log(this);
-        var tooltip;
-        for(var svgChart of document.getElementsByClassName("chart-svg")) {
-            tooltip = document.createElementNS("http://www.w3.org/2000/svg", "text");
-            tooltip.setAttributeNS(null, "x", event.clientX - 10);
-            tooltip.setAttributeNS(null, "y", event.clientY - 120);
-            tooltip.setAttributeNS(null, "class", "tooltip");
-            tooltip.setAttributeNS(null, "stroke", "black");
-            tooltip.textContent = "Hi";
-            event.target.appendChild(tooltip);
-        }
-    };
-
-    var tooltipHandler = function(svgCharts, mappedCharts) {
-        for(var svgChart of svgCharts) {
-            svgChart.addEventListener("mouseenter", function(event) { createTooltip(event, mappedCharts); });
-        }
+    var isSvgColliding = function(rectNow, rectNext) {
+        return !(rectNext.left > rectNow.right ||
+            rectNext.right < rectNow.left ||
+            rectNext.top > rectNow.bottom ||
+            rectNext.bottom < rectNow.top);
     };
 
     var createCrosshair = function(event) {
-        var targetSvgHeight = event.target.getAttributeNS(null, "height");
-        var targetSvgX = event.target.getAttributeNS(null, "x");
-        var targetSvgY = event.target.getAttributeNS(null, "y");
-        var crosshair;
+        var targetSvgHeight = parseInt(event.target.getAttributeNS(null, "height"), 10);
+        var targetSvgX = parseInt(event.target.getAttributeNS(null, "x"), 10);
+        var targetSvgY = parseInt(event.target.getAttributeNS(null, "y"), 10);
+        var crosshair, tooltip, tooltipBg;
         var crosshairCreation = new CustomEvent("crosshairCreateEvent", {"detail": event.clientX});
         for(var rect of document.getElementsByClassName("chart-rect")) {
             if(rect !== event.target) {
@@ -520,10 +500,30 @@
             crosshair.setAttributeNS(null, "x1", event.clientX);
             crosshair.setAttributeNS(null, "y1", targetSvgY);
             crosshair.setAttributeNS(null, "x2", event.clientX);
-            crosshair.setAttributeNS(null, "y2", targetSvgHeight);
+            crosshair.setAttributeNS(null, "y2", targetSvgHeight + 4);
             crosshair.setAttributeNS(null, "stroke", "red");
             crosshair.setAttributeNS(null, "id", "crosshair");
             event.target.parentNode.insertBefore(crosshair, event.target);
+
+            tooltipBg = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+            tooltipBg.setAttributeNS(null, "x", event.clientX);
+            tooltipBg.setAttributeNS(null, "y", targetSvgHeight);
+            tooltipBg.setAttributeNS(null, "rx", 2);
+            tooltipBg.setAttributeNS(null, "ry", 2);
+            tooltipBg.setAttributeNS(null, "height", 20);
+            tooltipBg.setAttributeNS(null, "width", 60);
+            tooltipBg.setAttributeNS(null, "fill", "red");
+            tooltipBg.style.visibility = "hidden";
+            tooltipBg.setAttributeNS(null, "id", "tooltipBg");
+            event.target.parentNode.appendChild(tooltipBg);
+
+            tooltip = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            tooltip.setAttributeNS(null, "x", event.clientX);
+            tooltip.setAttributeNS(null, "y", targetSvgHeight);
+            tooltip.setAttributeNS(null, "id", "tooltip");
+            tooltip.setAttributeNS(null, "stroke", "black");
+            tooltip.style.visibility = "hidden";
+            event.target.parentNode.appendChild(tooltip);
         }
     };
 
@@ -532,7 +532,7 @@
             var targetSvgHeight = event.target.getAttributeNS(null, "height");
             var targetSvgX = event.target.getAttributeNS(null, "x");
             var targetSvgY = event.target.getAttributeNS(null, "y");
-            var crosshair;
+            var crosshair, tooltip, tooltipBg;
             if(targetSvgHeight) {
                 crosshair = document.createElementNS("http://www.w3.org/2000/svg", "line");
                 crosshair.setAttributeNS(null, "x1", event.detail);
@@ -542,12 +542,34 @@
                 crosshair.setAttributeNS(null, "stroke", "red");
                 crosshair.setAttributeNS(null, "class", "otherCrosshair");
                 event.target.parentNode.appendChild(crosshair);
+
+                tooltipBg = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+                tooltipBg.setAttributeNS(null, "x", event.detail);
+                tooltipBg.setAttributeNS(null, "y", targetSvgHeight);
+                tooltipBg.setAttributeNS(null, "rx", 2);
+                tooltipBg.setAttributeNS(null, "ry", 2);
+                tooltipBg.setAttributeNS(null, "height", 20);
+                tooltipBg.setAttributeNS(null, "width", 60);
+                tooltipBg.setAttributeNS(null, "fill", "red");
+                tooltipBg.style.visibility = "hidden";
+                tooltipBg.setAttributeNS(null, "class", "otherTooltipBg");
+                event.target.parentNode.appendChild(tooltipBg);
+
+                tooltip = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                tooltip.setAttributeNS(null, "x", event.detail);
+                tooltip.setAttributeNS(null, "y", targetSvgHeight);
+                tooltip.setAttributeNS(null, "class", "otherTooltip");
+                tooltip.setAttributeNS(null, "stroke", "black");
+                tooltip.style.visibility = "hidden";
+                event.target.parentNode.appendChild(tooltip);
             }
         // }
     };
 
     var moveCrosshair = function(event) {
         var crosshair = document.getElementById("crosshair");
+        var tooltip = document.getElementById("tooltip");
+        var tooltipBg = document.getElementById("tooltipBg");
         var anchors = document.getElementsByClassName("graphCircle");
         var crosshairMovement = new CustomEvent("crosshairMoveEvent", {"detail": event.clientX});
         for(var rect of document.getElementsByClassName("chart-rect")) {
@@ -555,34 +577,96 @@
                 rect.dispatchEvent(crosshairMovement);
             }
         }
-        for(var anchor of anchors) {
-            if(anchor.parentNode === event.target.parentNode) {
-                var cBox = anchor.getBBox();
-                var crosshairX = crosshair.getAttributeNS(null, "x1");
-                if(crosshairX >= cBox.x && crosshairX <= cBox.x + cBox.width + 2) {
-                    var crosshairover = new CustomEvent("crosshairover");
-                }
-            }
-        }
+
         if(crosshair) {
             crosshair.setAttributeNS(null, "x1", event.clientX - 9);
             crosshair.setAttributeNS(null, "x2", event.clientX - 9);
+        }
+
+        for(var anchor of anchors) {
+            if(anchor.parentNode === event.target.parentNode) {
+                var cRect = anchor.getBoundingClientRect();
+                var cBox = anchor.getBBox();
+                var chartRect = event.target.getBoundingClientRect();
+                var crossRect = crosshair.getBoundingClientRect();
+                if(isSvgColliding(cRect, crossRect)) {
+                    tooltip.style.visibility = "initial";
+                    tooltipBg.style.visibility = "initial";
+                    var tooltipX = cBox.x + (cBox.width) + 5;
+                    var tooltipBgX = cBox.x + (cBox.width) + 3;
+                    var tooltipY = cBox.y + (cBox.height * 2);
+                    var tooltipBgY = cBox.y + cBox.height - 3;
+                    if(tooltipX + cBox.width > chartRect.right) {
+                        tooltipX -= (cBox.width * 5) - 5;
+                        tooltipBgX -= (cBox.width * 5) - 5;
+                    }
+                    tooltip.setAttributeNS(null, "x", tooltipX);
+                    tooltip.setAttributeNS(null, "y", tooltipY + 3);
+                    tooltipBg.setAttributeNS(null, "x", tooltipBgX);
+                    tooltipBg.setAttributeNS(null, "y", tooltipBgY);
+                    tooltip.textContent = anchor.getAttributeNS(null, "data-value");
+                    tooltipBg.setAttributeNS(null, "width", tooltip.getComputedTextLength() + 6);
+                }
+            }
         }
     };
 
     var moveOtherCrosshairs = function(event) {
         // if(event.target !== event.source) {
             var crosshairs = document.getElementsByClassName("otherCrosshair");
+            var tooltips = event.target.parentNode.getElementsByClassName("otherTooltip");
+            var tooltipBgs = event.target.parentNode.getElementsByClassName("otherTooltipBg");
+            var anchors = event.target.parentNode.getElementsByClassName("graphCircle");
+
             for(var crosshair of crosshairs) {
                 crosshair.setAttributeNS(null, "x1", event.detail - 9);
                 crosshair.setAttributeNS(null, "x2", event.detail - 9);
+                for(var tooltip of tooltips) {
+                    for(var anchor of anchors) {
+                        var cRect = anchor.getBoundingClientRect();
+                        var cBox = anchor.getBBox();
+                        var chartRect = event.target.getBoundingClientRect();
+                        var crossRect = crosshair.getBoundingClientRect();
+                        if(isSvgColliding(cRect, crossRect)) {
+                            tooltip.style.visibility = "initial";
+                            tooltipBgs[0].style.visibility = "initial";
+                            var tooltipX = cBox.x + (cBox.width) + 5;
+                            var tooltipBgX = cBox.x + (cBox.width) + 3;
+                            var tooltipY = cBox.y + (cBox.height * 2);
+                            var tooltipBgY = cBox.y + cBox.height - 3;
+                            if(tooltipX + cBox.width > chartRect.right) {
+                                tooltipX -= (cBox.width * 5) - 5;
+                                tooltipBgX -= (cBox.width * 5) - 5;
+                            }
+                            tooltip.setAttributeNS(null, "x", tooltipX);
+                            tooltip.setAttributeNS(null, "y", tooltipY + 3);
+                            tooltipBgs[0].setAttributeNS(null, "x", tooltipBgX);
+                            tooltipBgs[0].setAttributeNS(null, "y", tooltipBgY);
+                            tooltip.textContent = anchor.getAttributeNS(null, "data-value");
+                            tooltipBgs[0].setAttributeNS(null, "width", tooltip.getComputedTextLength() + 6);
+                        }
+                    }
+                }
             }
+
         // }
     };
 
     var removeCrosshair = function(event) {
         var crosshair = document.getElementById("crosshair");
-        event.target.parentNode.removeChild(crosshair);
+        var tooltip = document.getElementById("tooltip");
+        var tooltipBg = event.target.parentNode.getElementById("tooltipBg");
+
+        if(crosshair) {
+            event.target.parentNode.removeChild(crosshair);
+        }
+        if(tooltip) {
+            event.target.parentNode.removeChild(tooltip);
+        }
+        if(tooltipBg) {
+            event.target.parentNode.removeChild(tooltipBg);
+        }
+
         var crosshairRemoval = new Event("crosshairRemoveEvent");
         for(var rect of document.getElementsByClassName("chart-rect")) {
             if(rect !== event.target) {
@@ -594,12 +678,30 @@
     var removeOtherCrosshairs = function(event) {
         // if(event.target !== event.source) {
             var crosshairs = document.getElementsByClassName("otherCrosshair");
+            var tooltips = document.getElementsByClassName("otherTooltip");
+            var tooltipBgs = document.getElementsByClassName("otherTooltipBg");
+
             for(var crosshair of crosshairs) {
                 if(crosshair.parentNode === event.target.parentNode) {
                     event.target.parentNode.removeChild(crosshair);
                 }
             }
+            for(var tooltip of tooltips) {
+                if(tooltip.parentNode === event.target.parentNode) {
+                    event.target.parentNode.removeChild(tooltip);
+                }
+            }
+            for(var tooltipBg of tooltipBgs) {
+                if(tooltipBg.parentNode === event.target.parentNode) {
+                    event.target.parentNode.removeChild(tooltipBg);
+                }
+            }
+
         // }
+    };
+
+    var showTooltip = function(event) {
+        console.log("toolTip shown");
     };
 
     var crosshairHandler = function(rects) {
