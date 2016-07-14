@@ -523,13 +523,12 @@
             crosshair.setAttributeNS(null, "y2", targetSvgHeight);
             crosshair.setAttributeNS(null, "stroke", "red");
             crosshair.setAttributeNS(null, "id", "crosshair");
-            event.target.parentNode.appendChild(crosshair);
+            event.target.parentNode.insertBefore(crosshair, event.target);
         }
     };
 
     var createOtherCrosshairs = function(event) {
         // if(event.target !== event.source) {
-            console.log(event);
             var targetSvgHeight = event.target.getAttributeNS(null, "height");
             var targetSvgX = event.target.getAttributeNS(null, "x");
             var targetSvgY = event.target.getAttributeNS(null, "y");
@@ -549,15 +548,25 @@
 
     var moveCrosshair = function(event) {
         var crosshair = document.getElementById("crosshair");
+        var anchors = document.getElementsByClassName("graphCircle");
         var crosshairMovement = new CustomEvent("crosshairMoveEvent", {"detail": event.clientX});
         for(var rect of document.getElementsByClassName("chart-rect")) {
             if(rect !== event.target) {
                 rect.dispatchEvent(crosshairMovement);
             }
         }
+        for(var anchor of anchors) {
+            if(anchor.parentNode === event.target.parentNode) {
+                var cBox = anchor.getBBox();
+                var crosshairX = crosshair.getAttributeNS(null, "x1");
+                if(crosshairX >= cBox.x && crosshairX <= cBox.x + cBox.width + 2) {
+                    var crosshairover = new CustomEvent("crosshairover");
+                }
+            }
+        }
         if(crosshair) {
-            crosshair.setAttributeNS(null, "x1", event.clientX - 10);
-            crosshair.setAttributeNS(null, "x2", event.clientX - 10);
+            crosshair.setAttributeNS(null, "x1", event.clientX - 9);
+            crosshair.setAttributeNS(null, "x2", event.clientX - 9);
         }
     };
 
@@ -565,8 +574,8 @@
         // if(event.target !== event.source) {
             var crosshairs = document.getElementsByClassName("otherCrosshair");
             for(var crosshair of crosshairs) {
-                crosshair.setAttributeNS(null, "x1", event.detail - 10);
-                crosshair.setAttributeNS(null, "x2", event.detail - 10);
+                crosshair.setAttributeNS(null, "x1", event.detail - 9);
+                crosshair.setAttributeNS(null, "x2", event.detail - 9);
             }
         // }
     };
