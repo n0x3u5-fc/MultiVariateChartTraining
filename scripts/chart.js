@@ -363,16 +363,17 @@
                     var yDivRect = document.createElementNS(svgns, "rect");
                     yDivRect.setAttributeNS(null, "x", chartLbWidth);
                     yDivRect.setAttributeNS(null, "y", yTick - 54);
-                    yDivRect.setAttributeNS(null, "height", chartHeight - yTick + 60);
+                    yDivRect.setAttributeNS(null, "height", chartHeight - yTick + 62);
                     yDivRect.setAttributeNS(null, "width", chartWidth);
                     yDivRect.setAttributeNS(null, "class", "yDiv");
                     yDivRect.setAttributeNS(null, "stroke", "green");
                     yDivRect.setAttributeNS(null, "fill", "white");
                     svg.appendChild(yDivRect);
                     var yValues = document.createElementNS(svgns, "text");
-                    yValues.setAttributeNS(null, "x", 0 + 25);
+                    yValues.setAttributeNS(null, "x", 0 + 50);
                     yValues.setAttributeNS(null, "y", height - yTick + 5 + 55);
                     yValues.setAttributeNS(null, "stroke", "black");
+                    yValues.setAttributeNS(null, "text-anchor", "end");
                     yValues.textContent = charts[i].yTicks[mappedData.yTicks.indexOf(yTick)];
                     svg.appendChild(yValues);
                 }
@@ -589,7 +590,11 @@
                 var cBox = anchor.getBBox();
                 var chartRect = event.target.getBoundingClientRect();
                 var crossRect = crosshair.getBoundingClientRect();
+                if(!isSvgColliding(cRect, crossRect)) {
+                    console.log("is not colliding");
+                }
                 if(isSvgColliding(cRect, crossRect)) {
+                    console.log("is colliding");
                     tooltip.style.visibility = "initial";
                     tooltipBg.style.visibility = "initial";
                     var tooltipX = cBox.x + (cBox.width) + 5;
