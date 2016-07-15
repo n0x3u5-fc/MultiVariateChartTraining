@@ -1,5 +1,28 @@
+/*#chart-area {
+	width: 50%;
+	margin-left: auto;
+	margin-right: auto;
+}*/
+.caption {
+	font-family: sans-serif;
+	text-transform: uppercase;
+	margin-bottom: 2px;
+	font-weight: 500;
+}
+.sub-caption {
+	margin-top: 2px;
+	font-family: sans-serif;
+	color: #afafaf;
+	font-weight: normal;
+	font-size: 1em;
+}
+
+.chart-rect {
+	stroke: #d1d1d1;
+}
+
 .xAxis, .yAxis {
-	stroke: #212121;
+	stroke: #d1d1d1;
 }
 
 .xAxis {
@@ -7,20 +30,26 @@
 }
 
 .xTick, .yTick {
-	stroke: #212121;
+	stroke: #aeaeae;
 	stroke-width: 2px;
 }
 
 .yDiv {
-	stroke: #bfbfbf;
+	stroke: #dedede;
+}
+.yDiv:nth-child(odd) {
+	fill: #f7f7f7;
 }
 
 text {
 	font-size: 0.8em;
+	font-family: sans-serif;
+	font-weight: lighter;
+	stroke-width: 0px;
 }
 
 .graphLine {
-	stroke: #3f51b5;
+	stroke: #3272ca;
 	stroke-width: 5px;
 }
 
@@ -31,7 +60,7 @@ text {
 }
 
 .graphCircle {
-	stroke: #303f9f;
+	stroke: #3272ca;
 	fill: #ffffff;
 	stroke-width: 2px;
 }
@@ -40,8 +69,15 @@ text {
 }
 
 #crosshair {
+	stroke: #f15c5c;
 	stroke-dasharray: 5, 2;
 }
 .otherCrosshair {
+	stroke: #f15c5c;
 	stroke-dasharray: 5, 2;
+}
+
+#tooltipBg, .otherTooltipBg {
+	fill: #fedacc;
+	stroke: #ab887b;
 }
