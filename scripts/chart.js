@@ -10,12 +10,13 @@
      * @param {parseData} callback - Callback to receive and process fetched data
      */
 
+    var allYData;
     var Data = function() {
         this.caption = "";
         this.subCaption = "";
         this.height = "";
         this.width = "";
-        this.charts = [];
+        this.chartData = [];
     };
 
     Data.prototype.ajaxLoader = function(url, callback) {
@@ -66,12 +67,27 @@
             if(!this.allSame(yData, "")) {
                 var units = json.metadata.units.split(",");
                 var chart = new MultiVarChart(i, jsonDataKeys[0], jsonDataKeys[i], xData, yData, units[0], units[i]);
-                this.charts.push(chart);
+                this.chartData.push(chart);
             }
         }
         createCaptions('chart-area', this.caption, this.subCaption);
-        var chartCalculator = new ChartPropertyCalculator(this.charts);
+        var chartCalculator = new ChartPropertyCalculator(this.chartData);
+        allYData = this.extractYData(chartCalculator.charts);
         chartCalculator.displayCharts(this.height, this.width);
+    };
+
+    Data.prototype.extractYData = function(charts) {
+        var yDataSet = [];
+        for(var chart of charts) {
+            var preppedYData = [];
+            for(var yDatum of chart.yData) {
+                if(yDatum !== "") {
+                    preppedYData.push(yDatum);
+                }
+            }
+            yDataSet.push(preppedYData);
+        }
+        return yDataSet;
     };
 
     Data.prototype.allSame = function(arr, val) {
@@ -265,7 +281,7 @@
             return val;
         };
         this.createCharts = function(charts, height, width) {
-            console.log(charts);
+            // console.log(charts);
             var svgns = "http://www.w3.org/2000/svg";
             var chartUbHeight = Math.ceil(height - (0.025 * height)) + 55;
             // console.log("chartUbHeight: " + chartUbHeight);
@@ -285,7 +301,7 @@
             for (var i = 0; i < multiCharts.length; i++) {
                 var mappedData = this.dataMapper(chartHeight, chartWidth, chartLbHeight, chartLbWidth, charts[i]);
                 mappedCharts.push(mappedData);
-                console.log(mappedData);
+                // console.log(mappedData);
                 var svg = document.createElementNS(svgns, "svg");
                 svg.setAttributeNS(null, "height", height + 55 + "px");
                 svg.setAttributeNS(null, "width", width + 55 + "px");
@@ -397,7 +413,7 @@
                                 graphLine.setAttributeNS(null, "y1", chartHeight - mappedData.yData[l - c] + chartLbHeight - 55);
                                 graphLine.setAttributeNS(null, "x2", mappedData.xData[j] + chartLbWidth);
                                 graphLine.setAttributeNS(null, "y2", chartHeight - mappedData.yData[j] + chartLbHeight - 55);
-                                graphLine.setAttributeNS(null, "class", "inferredLine");
+                                graphLine.setAttributeNS(null, "class", "graphLine inferredLine");
                                 svg.appendChild(graphLine);
                                 break;
                             }
@@ -481,6 +497,36 @@
             rectNext.right < rectNow.left ||
             rectNext.top > rectNow.bottom ||
             rectNext.bottom < rectNow.top);
+    };
+
+    var getLineIntersectionPoint = function(x1, y1, x2, y2, x3, y3, x4, y4) {
+        var den, num1, num2, a, b, result = {
+            x: null,
+            y: null
+        };
+
+        den = ((x1 - x2) * (y3 - y4)) - ((y1 - y2) * (x3 - x4));
+        if(den === 0) {
+            return result;
+        }
+        // a = l1StartY - l2StartY;
+        // b = l1StartX - l2StartX;
+        num1 = (((x1 * y2) - (y1 * x2)) * (x3 - x4)) - ((x1 - x2) * ((x3 * y4) - (y3 * x4)));
+        num2 = (((x1 * y2) - (y1 * x2)) * (y3 - y4)) - ((y1 - y2) * ((x3 * y4) - (y3 * x4)));
+
+        result.x = num1/den;
+        result.y = num2/den;
+
+        return result;
+    };
+
+    var getInterpolatedVal = function(x1, y1, x2, y2, x) {
+        x1 = Number(x1);
+        x2 = Number(x2);
+        y1 = Number(y1);
+        y2 = Number(y2);
+        var interpolatedVal = Math.round((y1 + ((y2 - y1) * ((x - x1) / (x2 - x1)))) * 100) / 100;
+        return interpolatedVal;
     };
 
     var createCrosshair = function(event) {
@@ -571,8 +617,14 @@
         var crosshair = document.getElementById("crosshair");
         var tooltip = document.getElementById("tooltip");
         var tooltipBg = document.getElementById("tooltipBg");
-        var anchors = document.getElementsByClassName("graphCircle");
+        var anchors = event.target.parentNode.getElementsByClassName("graphCircle");
         var crosshairMovement = new CustomEvent("crosshairMoveEvent", {"detail": event.clientX});
+        var graphLines = event.target.parentNode.getElementsByClassName("graphLine");
+        var graphLineBox, graphLineStartX, graphLineStartY, graphLineEndX,
+            graphLineEndY,
+            crosshairStartX, crosshairStartY, crosshairEndX, crosshairEndY,
+            crosshairBox,
+            prevAnchorData, anchorData;
         for(var rect of document.getElementsByClassName("chart-rect")) {
             if(rect !== event.target) {
                 rect.dispatchEvent(crosshairMovement);
@@ -582,50 +634,115 @@
         if(crosshair) {
             crosshair.setAttributeNS(null, "x1", event.clientX - 9);
             crosshair.setAttributeNS(null, "x2", event.clientX - 9);
+            crosshairBox = crosshair.getBoundingClientRect();
+            crosshairStartX = crosshair.getAttributeNS(null, "x1");
+            crosshairStartY = crosshair.getAttributeNS(null, "y1");
+            crosshairEndX = crosshair.getAttributeNS(null, "x2");
+            crosshairEndY = crosshair.getAttributeNS(null, "y2");
+            for(var i = 1; i < anchors.length; i++) {
+                graphLineBox = graphLines[i - 1].getBoundingClientRect();
+                graphLineStartX = graphLines[i - 1].getAttributeNS(null, "x1");
+                graphLineStartY = graphLines[i - 1].getAttributeNS(null, "y1");
+                graphLineEndX = graphLines[i - 1].getAttributeNS(null, "x2");
+                graphLineEndY = graphLines[i - 1].getAttributeNS(null, "y2");
+                prevAnchorData = anchors[i - 1].getAttributeNS(null, "data-value");
+                anchorData = anchors[i].getAttributeNS(null, "data-value");
+                if(isSvgColliding(graphLineBox, crosshairBox)) {
+                    var intersect = getLineIntersectionPoint(crosshairStartX,
+                        crosshairStartY, crosshairEndX, crosshairEndY,
+                        graphLineStartX, graphLineStartY, graphLineEndX,
+                        graphLineEndY);
+                    var interpolatedVal = getInterpolatedVal(graphLineStartX,
+                        prevAnchorData, graphLineEndX, anchorData,
+                        intersect.x);
+                    tooltip.style.visibility = "initial";
+                    tooltipBg.style.visibility = "initial";
+                    tooltip.setAttributeNS(null, "x", intersect.x + 6);
+                    tooltip.setAttributeNS(null, "y", intersect.y + 20);
+                    tooltipBg.setAttributeNS(null, "x", intersect.x + 4);
+                    tooltipBg.setAttributeNS(null, "y", intersect.y + 5);
+                    tooltip.textContent = interpolatedVal;
+                    tooltipBg.setAttributeNS(null, "width", tooltip.getComputedTextLength() + 6);
+                }
+            }
         }
 
         for(var anchor of anchors) {
-            if(anchor.parentNode === event.target.parentNode) {
-                var cRect = anchor.getBoundingClientRect();
-                var cBox = anchor.getBBox();
-                var chartRect = event.target.getBoundingClientRect();
-                var crossRect = crosshair.getBoundingClientRect();
-                if(!isSvgColliding(cRect, crossRect)) {
-                    console.log("is not colliding");
+            var cRect = anchor.getBoundingClientRect();
+            var cBox = anchor.getBBox();
+            var chartRect = event.target.getBoundingClientRect();
+            var crossRect = crosshair.getBoundingClientRect();
+            if(isSvgColliding(cRect, crossRect)) {
+                tooltip.style.visibility = "initial";
+                tooltipBg.style.visibility = "initial";
+                var tooltipX = cBox.x + (cBox.width) + 5;
+                var tooltipBgX = cBox.x + (cBox.width) + 3;
+                var tooltipY = cBox.y + (cBox.height * 2);
+                var tooltipBgY = cBox.y + cBox.height - 3;
+                if(tooltipX + cBox.width > chartRect.right) {
+                    tooltipX -= (cBox.width * 5) - 5;
+                    tooltipBgX -= (cBox.width * 5) - 5;
                 }
-                if(isSvgColliding(cRect, crossRect)) {
-                    console.log("is colliding");
-                    tooltip.style.visibility = "initial";
-                    tooltipBg.style.visibility = "initial";
-                    var tooltipX = cBox.x + (cBox.width) + 5;
-                    var tooltipBgX = cBox.x + (cBox.width) + 3;
-                    var tooltipY = cBox.y + (cBox.height * 2);
-                    var tooltipBgY = cBox.y + cBox.height - 3;
-                    if(tooltipX + cBox.width > chartRect.right) {
-                        tooltipX -= (cBox.width * 5) - 5;
-                        tooltipBgX -= (cBox.width * 5) - 5;
-                    }
-                    tooltip.setAttributeNS(null, "x", tooltipX);
-                    tooltip.setAttributeNS(null, "y", tooltipY + 3);
-                    tooltipBg.setAttributeNS(null, "x", tooltipBgX);
-                    tooltipBg.setAttributeNS(null, "y", tooltipBgY);
-                    tooltip.textContent = anchor.getAttributeNS(null, "data-value");
-                    tooltipBg.setAttributeNS(null, "width", tooltip.getComputedTextLength() + 6);
-                }
+                tooltip.setAttributeNS(null, "x", tooltipX);
+                tooltip.setAttributeNS(null, "y", tooltipY + 3);
+                tooltipBg.setAttributeNS(null, "x", tooltipBgX);
+                tooltipBg.setAttributeNS(null, "y", tooltipBgY);
+                tooltip.textContent = anchor.getAttributeNS(null, "data-value");
+                tooltipBg.setAttributeNS(null, "width", tooltip.getComputedTextLength() + 6);
             }
         }
     };
 
     var moveOtherCrosshairs = function(event) {
         // if(event.target !== event.source) {
-            var crosshairs = document.getElementsByClassName("otherCrosshair");
+            var crosshairs = event.target.parentNode.getElementsByClassName("otherCrosshair");
             var tooltips = event.target.parentNode.getElementsByClassName("otherTooltip");
             var tooltipBgs = event.target.parentNode.getElementsByClassName("otherTooltipBg");
             var anchors = event.target.parentNode.getElementsByClassName("graphCircle");
+            var graphLines = event.target.parentNode.getElementsByClassName("graphLine");
+            var graphLineBox, graphLineStartX, graphLineStartY, graphLineEndX,
+                graphLineEndY,
+                crosshairStartX, crosshairStartY, crosshairEndX, crosshairEndY,
+                crosshairBox,
+                prevAnchorData, anchorData;
 
             for(var crosshair of crosshairs) {
                 crosshair.setAttributeNS(null, "x1", event.detail - 9);
                 crosshair.setAttributeNS(null, "x2", event.detail - 9);
+                crosshairBox = crosshair.getBoundingClientRect();
+                crosshairStartX = crosshair.getAttributeNS(null, "x1");
+                crosshairStartY = crosshair.getAttributeNS(null, "y1");
+                crosshairEndX = crosshair.getAttributeNS(null, "x2");
+                crosshairEndY = crosshair.getAttributeNS(null, "y2");
+                for(var tooltip of tooltips) {
+                    for(var i = 1; i < anchors.length; i++) {
+                        graphLineBox = graphLines[i - 1].getBoundingClientRect();
+                        graphLineStartX = graphLines[i - 1].getAttributeNS(null, "x1");
+                        graphLineStartY = graphLines[i - 1].getAttributeNS(null, "y1");
+                        graphLineEndX = graphLines[i - 1].getAttributeNS(null, "x2");
+                        graphLineEndY = graphLines[i - 1].getAttributeNS(null, "y2");
+                        prevAnchorData = anchors[i - 1].getAttributeNS(null, "data-value");
+                        anchorData = anchors[i].getAttributeNS(null, "data-value");
+                        if(isSvgColliding(graphLineBox, crosshairBox)) {
+                            var intersect = getLineIntersectionPoint(crosshairStartX,
+                                crosshairStartY, crosshairEndX, crosshairEndY,
+                                graphLineStartX, graphLineStartY, graphLineEndX,
+                                graphLineEndY);
+                            var interpolatedVal = getInterpolatedVal(graphLineStartX,
+                                prevAnchorData, graphLineEndX, anchorData,
+                                intersect.x);
+                            tooltip.style.visibility = "initial";
+                            tooltipBgs[0].style.visibility = "initial";
+                            tooltip.setAttributeNS(null, "x", intersect.x + 6);
+                            tooltip.setAttributeNS(null, "y", intersect.y + 20);
+                            tooltipBgs[0].setAttributeNS(null, "x", intersect.x + 4);
+                            tooltipBgs[0].setAttributeNS(null, "y", intersect.y + 5);
+                            tooltip.textContent = interpolatedVal;
+                            tooltipBgs[0].setAttributeNS(null, "width", tooltip.getComputedTextLength() + 6);
+                        }
+                    }
+                }
+
                 for(var tooltip of tooltips) {
                     for(var anchor of anchors) {
                         var cRect = anchor.getBoundingClientRect();
