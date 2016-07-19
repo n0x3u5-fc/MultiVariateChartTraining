@@ -3,7 +3,7 @@
 		"caption"   : "Multi-Variate Chart",
 		"subCaption": "Correlation of Age with Nutrition",
 		"height"    : 309,
-		"width"     : 472,
+		"width"     : 460,
 		"units"     : "months,mg,mg,kg,"
 	},
 	"data": {

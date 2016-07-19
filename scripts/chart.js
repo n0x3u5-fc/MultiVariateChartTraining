@@ -127,6 +127,12 @@
         return circle;
     };
 
+    SvgHelper.prototype.getRotationPoint = function(elem) {
+        var elemBox = elem.getBBox();
+        var rotationPt = (elemBox.x + 14) + ", " + (elemBox.y + (elemBox.height / 2));
+        return rotationPt;
+    };
+
     var MultiVarChart = function(index, xTitle, yTitle, xData, yData, xUnit, yUnit) {
         this.index  = index;
         this.xTitle = xTitle;
@@ -216,6 +222,7 @@
     ChartRenderer.prototype.createDivs = function(targetDiv) {
         var div = document.createElement('div');
         div.setAttribute('class', "multi-chart");
+        div.style.display = "inline";
         var renderDiv = document.getElementById(targetDiv);
         renderDiv.appendChild(div);
     };
@@ -261,15 +268,14 @@
 
             var yTitleContent = charts[i].yUnit === "" ?
                 charts[i].yTitle : charts[i].yTitle + " (" + charts[i].yUnit + ")";
-            var yTitle = svgHelper.drawTextByClass((chartHeight / 2) - 50, -255, yTitleContent,
+            var yTitle = svgHelper.drawTextByClass(0, (chartUbHeight / 2), yTitleContent,
                                                    "y-title");
-            yTitle.setAttributeNS(null, "transform", "rotate(270 270, 0)");
             svg.appendChild(yTitle);
 
             if (i === multiCharts.length - 1) {
                 var xTitleContent = charts[i].xUnit === "" ?
                     charts[i].xTitle : charts[i].xTitle + " (" + charts[i].xUnit + ")";
-                var xTitle = svgHelper.drawTextByClass((chartWidth / 2), chartHeight + 67,
+                var xTitle = svgHelper.drawTextByClass((chartWidth / 2), chartUbHeight + 4,
                                                        xTitleContent, "x-title");
                 svg.appendChild(xTitle);
             }
@@ -281,9 +287,8 @@
 
                 if (i === multiCharts.length - 1) {
                     var xValuesContent = charts[i].xData[mappedData.xTicks.indexOf(xTick)];
-                    var xValues = svgHelper.drawTextByClass(height - 385, xTick - 265,
+                    var xValues = svgHelper.drawTextByClass(xTick - 13, chartUbHeight - 23,
                                                             xValuesContent, "x-value");
-                    xValues.setAttributeNS(null, "transform", "rotate(270 270, 0)");
                     svg.appendChild(xValues);
                 }
             }
@@ -298,9 +303,8 @@
                 //     height - yTick + 55, chartUbWidth, height - yTick + 55,
                 //     "yDiv");
                 // svg.appendChild(yDivLine);
-
                 var yDivRect = svgHelper.drawRectByClass(chartLbWidth, yTick - 55,
-                                                         chartHeight - yTick + 62, chartWidth,
+                                                         chartHeight - yTick + mappedData.yTicks[0], chartWidth,
                                                          "yDiv");
                 svg.appendChild(yDivRect);
 
@@ -353,6 +357,19 @@
             rect.setAttributeNS(null, "fill-opacity", 0);
             svg.appendChild(rect);
             multiCharts[i].appendChild(svg);
+            if(i === multiCharts.length - 1) {
+                var xValueElements = svg.getElementsByClassName("x-value");
+                for(var e = 0; e < xValueElements.length; e++) {
+                    var rotationPt = svgHelper.getRotationPoint(xValueElements[e]);
+                    xValueElements[e].setAttributeNS(null, "transform",
+                        "rotate(270 " + rotationPt + ")");
+                }
+            }
+            var yTitleElems  = svg.getElementsByClassName("y-title");
+            for(var elem of yTitleElems) {
+                var titleRotationPt = svgHelper.getRotationPoint(elem);
+                elem.setAttributeNS(null, "transform", "rotate(270 " + titleRotationPt + ")");
+            }
         }
     };
 
@@ -395,7 +412,6 @@
             xTicks.push(tickVal);
             tickVal += divDiff;
         }
-        xTicks.push(tickVal);
         for (var yDatum of chart.yData) {
             if (yDatum === "") {
                 yData.push("");
@@ -465,8 +481,9 @@
     };
 
     EventAgents.prototype.createCrosshair = function(event) {
+        var mouseOffset = event.target.getBoundingClientRect().left;
         var crosshairCreation = new CustomEvent("crosshairCreateEvent", {
-            "detail": event.clientX
+            "detail": event.clientX - mouseOffset + 71
         });
         for (var rect of document.getElementsByClassName("chart-rect")) {
             rect.dispatchEvent(crosshairCreation);
@@ -474,14 +491,15 @@
     };
 
     EventAgents.prototype.createOtherCrosshairs = function(event) {
-        var targetSvgHeight = event.target.getAttributeNS(null, "height");
-        var targetSvgX      = event.target.getAttributeNS(null, "x");
-        var targetSvgY      = event.target.getAttributeNS(null, "y");
+        var targetSvgHeight = Number(event.target.getAttributeNS(null, "height"));
+        var targetSvgX      = Number(event.target.getAttributeNS(null, "x"));
+        var targetSvgY      = Number(event.target.getAttributeNS(null, "y"));
         var crosshair, tooltip, tooltipBg;
         if (targetSvgHeight) {
             crosshair = this.svgHelper.drawLineByClass(event.detail, targetSvgY, event.detail,
-                                                       targetSvgHeight, "otherCrosshair");
+                                                       targetSvgHeight + targetSvgY, "otherCrosshair");
             event.target.parentNode.insertBefore(crosshair, event.target);
+            console.log(crosshair);
 
             tooltipBg = this.svgHelper.drawRectByClass(event.detail, targetSvgHeight, 20, 60,
                                                        "otherTooltipBg");
@@ -498,8 +516,9 @@
     };
 
     EventAgents.prototype.moveCrosshair = function(event) {
+        var mouseOffset = event.target.getBoundingClientRect().left;
         var crosshairMovement = new CustomEvent("crosshairMoveEvent", {
-            "detail": event.clientX
+            "detail": event.clientX - mouseOffset + 71
         });
         for (var rect of document.getElementsByClassName("chart-rect")) {
             rect.dispatchEvent(crosshairMovement);
