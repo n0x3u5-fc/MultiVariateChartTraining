@@ -114,7 +114,6 @@
         rect.setAttributeNS(null, "height", height);
         rect.setAttributeNS(null, "width", width);
         rect.setAttributeNS(null, "class", className);
-        rect.setAttributeNS(null, "stroke", "black");
         rect.setAttributeNS(null, "fill", "white");
         return rect;
     };
@@ -206,7 +205,8 @@
             var minY = Math.min.apply(Math, this.charts[i].yData.map(chartUtilities.nullMinMapper));
             if (minY !== Infinity || maxY !== -Infinity) {
                 this.charts[i].yTicks = this.chartProperties.calculateYAxis(minY, maxY);
-                this.charts[i].xTicks = this.chartProperties.calculateYAxis(0, this.charts[i].xData.length);
+                this.charts[i].xTicks = this.chartProperties.calculateYAxis(0,
+                                                                       this.charts[i].xData.length);
                 this.createDivs("chart-area");
             }
         }
@@ -245,51 +245,53 @@
 
         var multiCharts = document.getElementsByClassName("multi-chart");
         for (var i = 0; i < multiCharts.length; i++) {
-            var mappedData = this.chartProperties.dataMapper(chartHeight,
-                chartWidth, chartLbHeight, chartLbWidth, charts[i]);
+            var mappedData = this.chartProperties.dataMapper(chartHeight, chartWidth, chartLbHeight,
+                                                             chartLbWidth, charts[i]);
             mappedCharts.push(mappedData);
 
-            var svg = svgHelper.createSvgByClass(height + 55, width + 55,
-                "chart-svg");
+            var svg = svgHelper.createSvgByClass(height + 55, width + 55, "chart-svg");
 
-            var yline = svgHelper.drawLineByClass(chartLbHeight,
-                chartLbHeight - 55, chartLbHeight, chartUbHeight - 55, "yAxis");
+            var yline = svgHelper.drawLineByClass(chartLbHeight, chartLbHeight - 55,
+                                                  chartLbHeight, chartUbHeight - 55, "yAxis");
             svg.appendChild(yline);
 
-            var xline = svgHelper.drawLineByClass(chartUbWidth,
-                chartUbHeight - 55, chartLbWidth, chartUbHeight - 55, "xAxis");
+            var xline = svgHelper.drawLineByClass(chartUbWidth, chartUbHeight - 55, chartLbWidth,
+                                                  chartUbHeight - 55, "xAxis");
             svg.appendChild(xline);
 
-            var yTitleContent = charts[i].yUnit === "" ? charts[i].yTitle : charts[i].yTitle + " (" + charts[i].yUnit + ")";
-            var yTitle = svgHelper.drawTextByClass((chartHeight / 2) - 50, -255, yTitleContent, "y-title");
+            var yTitleContent = charts[i].yUnit === "" ?
+                charts[i].yTitle : charts[i].yTitle + " (" + charts[i].yUnit + ")";
+            var yTitle = svgHelper.drawTextByClass((chartHeight / 2) - 50, -255, yTitleContent,
+                                                   "y-title");
             yTitle.setAttributeNS(null, "transform", "rotate(270 270, 0)");
             svg.appendChild(yTitle);
 
             if (i === multiCharts.length - 1) {
-                var xTitleContent = charts[i].xUnit === "" ? charts[i].xTitle : charts[i].xTitle + " (" + charts[i].xUnit + ")";
-                var xTitle = svgHelper.drawTextByClass((chartWidth / 2),
-                    chartHeight + 67, xTitleContent, "x-title");
+                var xTitleContent = charts[i].xUnit === "" ?
+                    charts[i].xTitle : charts[i].xTitle + " (" + charts[i].xUnit + ")";
+                var xTitle = svgHelper.drawTextByClass((chartWidth / 2), chartHeight + 67,
+                                                       xTitleContent, "x-title");
                 svg.appendChild(xTitle);
             }
 
             for (var xTick of mappedData.xTicks) {
-                var xTickLine = svgHelper.drawLineByClass(xTick,
-                    chartUbHeight - 55, xTick, chartUbHeight + 5 - 55, "xTick");
+                var xTickLine = svgHelper.drawLineByClass(xTick, chartUbHeight - 55, xTick,
+                                                          chartUbHeight + 5 - 55, "xTick");
                 svg.appendChild(xTickLine);
 
                 if (i === multiCharts.length - 1) {
                     var xValuesContent = charts[i].xData[mappedData.xTicks.indexOf(xTick)];
-                    var xValues = svgHelper.drawTextByClass(height - 385,
-                        xTick - 265, xValuesContent, "x-value");
+                    var xValues = svgHelper.drawTextByClass(height - 385, xTick - 265,
+                                                            xValuesContent, "x-value");
                     xValues.setAttributeNS(null, "transform", "rotate(270 270, 0)");
                     svg.appendChild(xValues);
                 }
             }
 
             for (var yTick of mappedData.yTicks) {
-                var yTickLine = svgHelper.drawLineByClass(chartLbWidth - 5,
-                    height - yTick + 55, chartLbWidth, height - yTick + 55,
-                    "yTick");
+                var yTickLine = svgHelper.drawLineByClass(chartLbWidth - 5, height - yTick + 55,
+                                                          chartLbWidth, height - yTick + 55,
+                                                          "yTick");
                 svg.appendChild(yTickLine);
 
                 // var yDivLine = svgHelper.drawLineByClass(chartLbWidth,
@@ -297,13 +299,14 @@
                 //     "yDiv");
                 // svg.appendChild(yDivLine);
 
-                var yDivRect = svgHelper.drawRectByClass(chartLbWidth,
-                    yTick - 55, chartHeight - yTick + 62, chartWidth, "yDiv");
+                var yDivRect = svgHelper.drawRectByClass(chartLbWidth, yTick - 55,
+                                                         chartHeight - yTick + 62, chartWidth,
+                                                         "yDiv");
                 svg.appendChild(yDivRect);
 
                 var yValuesContent = charts[i].yTicks[mappedData.yTicks.indexOf(yTick)];
-                var yValues = svgHelper.drawTextByClass(0 + 50,
-                    height - yTick + 5 + 55, yValuesContent, "y-value");
+                var yValues = svgHelper.drawTextByClass(0 + 50, height - yTick + 5 + 55,
+                                                        yValuesContent, "y-value");
                 yValues.setAttributeNS(null, "text-anchor", "end");
                 svg.appendChild(yValues);
             }
@@ -311,12 +314,11 @@
                 var graphLine;
                 var c = 0;
                 if (mappedData.yData[l + 1] !== "" && mappedData.yData[l] !== "") {
-                    graphLine = svgHelper
-                        .drawLineByClass(mappedData.xData[l] + chartLbWidth,
-                            chartHeight - mappedData.yData[l] + chartLbHeight - 55,
-                            mappedData.xData[l + 1] + chartLbWidth,
-                            chartHeight - mappedData.yData[l + 1] + chartLbHeight - 55,
-                            "graphLine");
+                    graphLine = svgHelper.drawLineByClass(mappedData.xData[l] + chartLbWidth,
+                                        chartHeight - mappedData.yData[l] + chartLbHeight - 55,
+                                        mappedData.xData[l + 1] + chartLbWidth,
+                                        chartHeight - mappedData.yData[l + 1] + chartLbHeight - 55,
+                                        "graphLine");
                     svg.appendChild(graphLine);
                 } else if (mappedData.yData[l] !== "") {
                     for (var j = l + 2; j < mappedData.yData.length; j++) {
@@ -325,10 +327,10 @@
                         if (mappedData.yData[j] !== "") {
                             graphLine = svgHelper
                                 .drawLineByClass(mappedData.xData[l - c] + chartLbWidth,
-                                    chartHeight - mappedData.yData[l - c] + chartLbHeight - 55,
-                                    mappedData.xData[j] + chartLbWidth,
-                                    chartHeight - mappedData.yData[j] + chartLbHeight - 55,
-                                    "graphLine inferredLine");
+                                        chartHeight - mappedData.yData[l - c] + chartLbHeight - 55,
+                                        mappedData.xData[j] + chartLbWidth,
+                                        chartHeight - mappedData.yData[j] + chartLbHeight - 55,
+                                        "graphLine inferredLine");
                             svg.appendChild(graphLine);
                             break;
                         }
@@ -338,24 +340,18 @@
 
             for (var k = 0; k < mappedData.yData.length; k++) {
                 if (mappedData.yData[k] !== "") {
-                    var anchor = svgHelper
-                        .drawCircleByClass(mappedData.xData[k] + chartLbWidth,
-                            chartHeight - mappedData.yData[k] + chartLbHeight - 55,
-                            4, "graphCircle");
+                    var anchor = svgHelper.drawCircleByClass(mappedData.xData[k] + chartLbWidth,
+                                            chartHeight - mappedData.yData[k] + chartLbHeight - 55,
+                                            4, "graphCircle");
                     anchor.setAttributeNS(null, "data-value", charts[i].yData[k]);
                     svg.appendChild(anchor);
                 }
             }
 
-            var rect = document.createElementNS(svgns, "rect");
-            rect.setAttributeNS(null, "width", chartWidth);
-            rect.setAttributeNS(null, "height", chartHeight);
-            rect.setAttributeNS(null, "x", chartLbWidth);
-            rect.setAttributeNS(null, "y", chartLbHeight - 55);
-            rect.setAttributeNS(null, "class", "chart-rect");
+            var rect = svgHelper.drawRectByClass(chartLbWidth,chartLbHeight - 55, chartHeight,
+                                                 chartWidth, "chart-rect");
             rect.setAttributeNS(null, "fill-opacity", 0);
             svg.appendChild(rect);
-
             multiCharts[i].appendChild(svg);
         }
     };
@@ -370,7 +366,8 @@
         this.charts = charts;
     };
 
-    ChartPropertyCalculator.prototype.dataMapper = function(height, width, lbHeight, lbWidth, chart) {
+    ChartPropertyCalculator.prototype.dataMapper = function(height, width, lbHeight, lbWidth,
+                                                            chart) {
         var yTicks = [];
         var xTicks = [];
         var yData  = [];
@@ -464,6 +461,7 @@
 
     var EventAgents = function() {
         this.svgHelper = new SvgHelper();
+        this.defaultAnchorStroke = getComputedStyle(document.getElementsByClassName("graphCircle")[0]).stroke;
     };
 
     EventAgents.prototype.createCrosshair = function(event) {
@@ -481,18 +479,21 @@
         var targetSvgY      = event.target.getAttributeNS(null, "y");
         var crosshair, tooltip, tooltipBg;
         if (targetSvgHeight) {
-            crosshair = this.svgHelper.drawLineByClass(event.detail, targetSvgY, event.detail, targetSvgHeight, "otherCrosshair");
+            crosshair = this.svgHelper.drawLineByClass(event.detail, targetSvgY, event.detail,
+                                                       targetSvgHeight, "otherCrosshair");
             event.target.parentNode.insertBefore(crosshair, event.target);
 
-            tooltipBg = this.svgHelper.drawRectByClass(event.detail, targetSvgHeight, 20, 60, "otherTooltipBg");
+            tooltipBg = this.svgHelper.drawRectByClass(event.detail, targetSvgHeight, 20, 60,
+                                                       "otherTooltipBg");
             tooltipBg.setAttributeNS(null, "rx", 2);
             tooltipBg.setAttributeNS(null, "ry", 2);
             tooltipBg.style.visibility = "hidden";
-            event.target.parentNode.appendChild(tooltipBg);
+            event.target.parentNode.insertBefore(tooltipBg, event.target);
 
-            tooltip = this.svgHelper.drawTextByClass(event.detail, targetSvgHeight, "","otherTooltip");
+            tooltip = this.svgHelper.drawTextByClass(event.detail, targetSvgHeight, "",
+                                                     "otherTooltip");
             tooltip.style.visibility = "hidden";
-            event.target.parentNode.appendChild(tooltip);
+            event.target.parentNode.insertBefore(tooltip, event.target);
         }
     };
 
@@ -510,11 +511,11 @@
         var tooltips   = event.target.parentNode.getElementsByClassName("otherTooltip");
         var tooltipBgs = event.target.parentNode.getElementsByClassName("otherTooltipBg");
         var anchors    = event.target.parentNode.getElementsByClassName("graphCircle");
+        var defaultAnchorStroke = getComputedStyle(anchors[0]).stroke;
         var graphLines = event.target.parentNode.getElementsByClassName("graphLine");
-        var graphLineBox, graphLineStartX, graphLineStartY, graphLineEndX,
-            graphLineEndY,
-            crosshairStartX, crosshairStartY, crosshairEndX, crosshairEndY,
-            crosshairBox, crossHairRect,
+        var graphLineBox, graphLineStartX, graphLineStartY, graphLineEndX, graphLineEndY,
+            crosshairStartX, crosshairStartY, crosshairEndX, crosshairEndY, crosshairBox,
+            crossHairRect,
             tooltipX, tooltipY,
             tooltipBgX, tooltipBgY,
             prevAnchorData, anchorData, anchorRect, anchorBox,
@@ -527,52 +528,78 @@
         crosshairStartY = crosshairs[0].getAttributeNS(null, "y1");
         crosshairEndX   = crosshairs[0].getAttributeNS(null, "x2");
         crosshairEndY   = crosshairs[0].getAttributeNS(null, "y2");
-        for (var i = 1; i < anchors.length; i++) {
-            graphLineBox    = graphLines[i - 1].getBoundingClientRect();
-            graphLineStartX = graphLines[i - 1].getAttributeNS(null, "x1");
-            graphLineStartY = graphLines[i - 1].getAttributeNS(null, "y1");
-            graphLineEndX   = graphLines[i - 1].getAttributeNS(null, "x2");
-            graphLineEndY   = graphLines[i - 1].getAttributeNS(null, "y2");
-            prevAnchorData  = anchors[i - 1].getAttributeNS(null, "data-value");
-            anchorData      = anchors[i].getAttributeNS(null, "data-value");
-            anchorRect      = anchors[i].getBoundingClientRect();
-            anchorBox       = anchors[i].getBBox();
-            chartRect       = event.target.getBoundingClientRect();
-            crossHairRect   = crosshairs[0].getBoundingClientRect();
-            if (chartUtilities.isSvgColliding(graphLineBox, crosshairBox)) {
-                var intersect = chartUtilities.getLineIntersectionPoint(crosshairStartX,
-                    crosshairStartY, crosshairEndX, crosshairEndY,
-                    graphLineStartX, graphLineStartY, graphLineEndX,
-                    graphLineEndY);
-                var interpolatedVal = chartUtilities.getInterpolatedVal(graphLineStartX,
-                    prevAnchorData, graphLineEndX, anchorData,
-                    intersect.x);
-                tooltips[0].style.visibility = "initial";
-                tooltips[0].setAttributeNS(null, "x", intersect.x + 6);
-                tooltips[0].setAttributeNS(null, "y", intersect.y + 20);
-                tooltips[0].textContent = interpolatedVal;
-                tooltipBgs[0].style.visibility = "initial";
-                tooltipBgs[0].setAttributeNS(null, "x", intersect.x + 4);
-                tooltipBgs[0].setAttributeNS(null, "y", intersect.y + 5);
-                tooltipBgs[0].setAttributeNS(null, "width", tooltips[0].getComputedTextLength() + 6);
-            }
-            if (chartUtilities.isSvgColliding(anchorRect, crossHairRect)) {
-                tooltips[0].style.visibility   = "initial";
-                tooltipBgs[0].style.visibility = "initial";
-                tooltipX   = anchorBox.x + (anchorBox.width) + 5;
-                tooltipBgX = anchorBox.x + (anchorBox.width) + 3;
-                tooltipY   = anchorBox.y + (anchorBox.height * 2);
-                tooltipBgY = anchorBox.y + anchorBox.height - 3;
-                if (tooltipX + anchorBox.width > chartRect.right) {
-                    tooltipX   -= (anchorBox.width * 5) - 5;
-                    tooltipBgX -= (anchorBox.width * 5) - 5;
+        if(crosshairs[0].getBoundingClientRect().left < anchors[0].getBoundingClientRect().left ||
+            crosshairs[0].getBoundingClientRect().right > anchors[anchors.length - 1].getBoundingClientRect().right) {
+            tooltips[0].style.visibility = "hidden";
+            tooltipBgs[0].style.visibility = "hidden";
+            anchors[0].style.stroke = this.defaultAnchorStroke;
+            anchors[anchors.length - 1].style.stroke = this.defaultAnchorStroke;
+            anchors[0].setAttributeNS(null, "r", 4);
+            anchors[anchors.length - 1].setAttributeNS(null, "r", 4);
+        } else {
+            for (var i = 1; i < anchors.length; i++) {
+                graphLineBox    = graphLines[i - 1].getBoundingClientRect();
+                graphLineStartX = graphLines[i - 1].getAttributeNS(null, "x1");
+                graphLineStartY = graphLines[i - 1].getAttributeNS(null, "y1");
+                graphLineEndX   = graphLines[i - 1].getAttributeNS(null, "x2");
+                graphLineEndY   = graphLines[i - 1].getAttributeNS(null, "y2");
+                anchorData      = anchors[i].getAttributeNS(null, "data-value");
+                prevAnchorData  = anchors[i - 1].getAttributeNS(null, "data-value");
+                if (chartUtilities.isSvgColliding(graphLineBox, crosshairBox)) {
+                    var intersect = chartUtilities.getLineIntersectionPoint(crosshairStartX,
+                                                                            crosshairStartY,
+                                                                            crosshairEndX,
+                                                                            crosshairEndY,
+                                                                            graphLineStartX,
+                                                                            graphLineStartY,
+                                                                            graphLineEndX,
+                                                                            graphLineEndY);
+
+                    var interpolatedVal = chartUtilities.getInterpolatedVal(graphLineStartX,
+                                                                            prevAnchorData,
+                                                                            graphLineEndX,
+                                                                            anchorData,
+                                                                            intersect.x);
+                    tooltips[0].style.visibility = "initial";
+                    tooltips[0].setAttributeNS(null, "x", intersect.x + 6);
+                    tooltips[0].setAttributeNS(null, "y", intersect.y + 20);
+                    tooltips[0].textContent = interpolatedVal;
+                    tooltipBgs[0].style.visibility = "initial";
+                    tooltipBgs[0].setAttributeNS(null, "x", intersect.x + 4);
+                    tooltipBgs[0].setAttributeNS(null, "y", intersect.y + 5);
+                    tooltipBgs[0].setAttributeNS(null, "width",
+                                                 tooltips[0].getComputedTextLength() + 6);
                 }
-                tooltips[0].setAttributeNS(null, "x", tooltipX);
-                tooltips[0].setAttributeNS(null, "y", tooltipY + 3);
-                tooltips[0].textContent = anchors[i].getAttributeNS(null, "data-value");
-                tooltipBgs[0].setAttributeNS(null, "x", tooltipBgX);
-                tooltipBgs[0].setAttributeNS(null, "y", tooltipBgY);
-                tooltipBgs[0].setAttributeNS(null, "width", tooltips[0].getComputedTextLength() + 6);
+            }
+            for (i = 0; i < anchors.length; i++) {
+                anchorBox       = anchors[i].getBBox();
+                anchorRect      = anchors[i].getBoundingClientRect();
+                chartRect       = event.target.getBoundingClientRect();
+                crossHairRect   = crosshairs[0].getBoundingClientRect();
+                if (chartUtilities.isSvgColliding(anchorRect, crossHairRect)) {
+                    tooltips[0].style.visibility   = "initial";
+                    tooltipBgs[0].style.visibility = "initial";
+                    tooltipX   = anchorBox.x + (anchorBox.width) + 5;
+                    tooltipBgX = anchorBox.x + (anchorBox.width) + 3;
+                    tooltipY   = anchorBox.y + (anchorBox.height * 2);
+                    tooltipBgY = anchorBox.y + anchorBox.height - 3;
+                    if (tooltipX + anchorBox.width > chartRect.right) {
+                        tooltipX   -= (anchorBox.width * 5) - 5;
+                        tooltipBgX -= (anchorBox.width * 5) - 5;
+                    }
+                    tooltips[0].setAttributeNS(null, "x", tooltipX);
+                    tooltips[0].setAttributeNS(null, "y", tooltipY + 3);
+                    tooltips[0].textContent = anchors[i].getAttributeNS(null, "data-value");
+                    anchors[i].setAttributeNS(null, "r", 5);
+                    anchors[i].style.stroke = "#f15c5c";
+                    tooltipBgs[0].setAttributeNS(null, "x", tooltipBgX);
+                    tooltipBgs[0].setAttributeNS(null, "y", tooltipBgY);
+                    tooltipBgs[0].setAttributeNS(null, "width",
+                        tooltips[0].getComputedTextLength() + 6);
+                } else {
+                    anchors[i].setAttributeNS(null, "r", 4);
+                    anchors[i].style.stroke = this.defaultAnchorStroke;
+                }
             }
         }
     };
@@ -587,10 +614,15 @@
     EventAgents.prototype.removeOtherCrosshairs = function(event) {
         var crosshairs = event.target.parentNode.getElementsByClassName("otherCrosshair");
         var tooltips = event.target.parentNode.getElementsByClassName("otherTooltip");
+        var anchors = event.target.parentNode.getElementsByClassName("graphCircle");
         var tooltipBgs = event.target.parentNode.getElementsByClassName("otherTooltipBg");
 
         for (var crosshair of crosshairs) {
             event.target.parentNode.removeChild(crosshair);
+        }
+        for(var anchor of anchors) {
+            anchor.style.stroke = this.defaultAnchorStroke;
+            anchor.setAttributeNS(null, "r", 4);
         }
         for (var tooltip of tooltips) {
             event.target.parentNode.removeChild(tooltip);
@@ -602,12 +634,12 @@
 
     EventAgents.prototype.crosshairHandler = function(rects) {
         for (var rect of rects) {
-            rect.addEventListener("mouseenter", this.createCrosshair.bind(this));
+            rect.addEventListener("mouseenter", this.createCrosshair);
             rect.addEventListener("crosshairCreateEvent", this.createOtherCrosshairs.bind(this));
             rect.addEventListener("mousemove", this.moveCrosshair);
-            rect.addEventListener("crosshairMoveEvent", this.moveOtherCrosshairs);
+            rect.addEventListener("crosshairMoveEvent", this.moveOtherCrosshairs.bind(this));
             rect.addEventListener("mouseleave", this.removeCrosshair);
-            rect.addEventListener("crosshairRemoveEvent", this.removeOtherCrosshairs);
+            rect.addEventListener("crosshairRemoveEvent", this.removeOtherCrosshairs.bind(this));
         }
     };
 
