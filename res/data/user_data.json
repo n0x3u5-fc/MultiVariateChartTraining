@@ -2,15 +2,16 @@
 	"metadata": {
 		"caption"   : "Multi-Variate Chart",
 		"subCaption": "Correlation of Age with Nutrition",
-		"height"    : 309,
-		"width"     : 460,
+		"type"		: "column",
+		"height"    : 280,
+		"width"     : 380,
 		"units"     : "months,mg,mg,kg,"
 	},
 	"data": {
-		"Time"     : "JAN,FEB,MAR,APR,MAY,JUN,JUL,AUG,SEPT,OCT,NOV,DEC",
-		"Vitamin A": "12.5,17.8,8.9,10.7,,11.2,-22.3,21.4,78.9,78.9,31.2,-12",
+		"Time"     : "JAN,FEB,MAR,APR,MAY,JUN,JUL",
+		"Vitamin A": "12.5,17.8,8.9,10.7,,11.2,-22.3",
 		"Calcium"  : "42.3,43.9,45.3,,,45.2",
 		"Weight"   : "34,56,-23",
-		"Test"     : ",45,15,32,78,100"
+		"Test"     : "5,45,15,32,45,78,100"
 	}
 }
