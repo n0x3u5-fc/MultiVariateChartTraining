@@ -66,8 +66,8 @@
         } else {
             console.log("Sorry Dave. I can't let you do that.");
         }
-        var eventAgent = new EventAgents();
-        eventAgent.crosshairHandler(document.getElementsByClassName("chart-rect"));
+        var eventAgent = new EventAgents(this.type);
+        eventAgent.crosshairHandler(document.getElementsByClassName("chart-svg"));
     };
 
     Data.prototype.allSame = function(arr, val) {
@@ -252,15 +252,18 @@
     };
 
     ColumnChartRenderer.prototype.createCharts = function(charts, height, width) {
-        var svgHelper = new SvgHelper();
-        var svgns = "http://www.w3.org/2000/svg";
+        var svgHelper     = new SvgHelper();
+        var svgns         = "http://www.w3.org/2000/svg";
         var chartUbHeight = Math.ceil(height - (0.025 * height)) + 55;
-        var chartUbWidth = Math.ceil(width - (0.025 * width)) + 55;
+        var chartUbWidth  = Math.ceil(width - (0.025 * width)) + 55;
         var chartLbHeight = Math.floor(0 + (0.025 * height)) + 55;
-        var chartLbWidth = Math.floor(0 + (0.025 * height)) + 55;
-        var chartHeight = chartUbHeight - chartLbHeight;
-        var chartWidth = chartUbWidth - chartLbWidth;
-        var mappedCharts = [];
+        var chartLbWidth  = Math.floor(0 + (0.025 * height)) + 55;
+        var chartHeight   = chartUbHeight - chartLbHeight;
+        var chartWidth    = chartUbWidth - chartLbWidth;
+        var mappedCharts  = [];
+        var xZeroLine,
+            columnPlot,
+            zeroPlaneY;
 
         var multiCharts = document.getElementsByClassName("multi-chart");
         for (var i = 0; i < multiCharts.length; i++) {
@@ -287,10 +290,11 @@
                 svg.appendChild(yDivRect);
 
                 if(yValuesContent == 0) {
-                    var xZeroLine = svgHelper.drawLineByClass(chartLbWidth, height - yTick + 55, chartUbWidth,
+                    xZeroLine = svgHelper.drawLineByClass(chartLbWidth, height - yTick + 55, chartUbWidth,
                                                   height - yTick + 55, "zeroPlane");
                     xZeroLine.setAttributeNS(null, "stroke-opacity", 0);
                     svg.appendChild(xZeroLine);
+                    yValuesContent = 0;
                 }
 
                 var yValues = svgHelper.drawTextByClass(0 + 50, height - yTick + 5 + 55,
@@ -330,56 +334,39 @@
                 }
             }
 
-            // for (var l = 0; l < mappedData.yData.length - 1; l++) {
-            //     var graphLine;
-            //     var c = 0;
-            //     if (mappedData.yData[l + 1] !== "" && mappedData.yData[l] !== "") {
-            //         graphLine = svgHelper.drawLineByClass(mappedData.xData[l] + chartLbWidth,
-            //                             chartHeight - mappedData.yData[l] + chartLbHeight - 55,
-            //                             mappedData.xData[l + 1] + chartLbWidth,
-            //                             chartHeight - mappedData.yData[l + 1] + chartLbHeight - 55,
-            //                             "graphLine");
-            //         svg.appendChild(graphLine);
-            //     } else if (mappedData.yData[l] !== "") {
-            //         for (var j = l + 2; j < mappedData.yData.length; j++) {
-            //             l++;
-            //             c++;
-            //             if (mappedData.yData[j] !== "") {
-            //                 graphLine = svgHelper
-            //                     .drawLineByClass(mappedData.xData[l - c] + chartLbWidth,
-            //                             chartHeight - mappedData.yData[l - c] + chartLbHeight - 55,
-            //                             mappedData.xData[j] + chartLbWidth,
-            //                             chartHeight - mappedData.yData[j] + chartLbHeight - 55,
-            //                             "graphLine inferredLine");
-            //                 svg.appendChild(graphLine);
-            //                 break;
-            //             }
-            //         }
-            //     }
-            // }
-
             for (var k = 0; k < mappedData.yData.length; k++) {
                 if (mappedData.yData[k] !== "") {
                     var anchor = svgHelper.drawCircleByClass(mappedData.xData[k] + chartLbWidth,
                                             chartHeight - mappedData.yData[k] + chartLbHeight - 55,
                                             4, "graphCircle");
                     anchor.setAttributeNS(null, "data-value", charts[i].yData[k]);
-                    if(charts[i].yData[k] < 0) {
-
+                    // svg.appendChild(anchor);
+                    if(svg.getElementsByClassName("zeroPlane").length > 0) {
+                        zeroPlaneY = xZeroLine.getAttributeNS(null, "y1");
+                        if(charts[i].yData[k] < 0) {
+                            var columnHeight = chartHeight - mappedData.yData[k] + chartLbHeight - 55 - zeroPlaneY;
+                            columnPlot = svgHelper.drawRectByClass(mappedData.xData[k] + chartLbWidth - 20,
+                            zeroPlaneY, columnHeight, 40, "column-plot");
+                        } else {
+                            columnPlot = svgHelper.drawRectByClass(mappedData.xData[k] + chartLbWidth - 20,
+                            chartUbHeight - mappedData.yData[k] - 55,
+                            mappedData.yData[k] - (chartHeight - zeroPlaneY + (0.02 * chartUbHeight)), 40,
+                            "column-plot");
+                        }
                     } else {
-                        var columnPlot = svgHelper.drawRectByClass(mappedData.xData[k] + chartLbWidth - 20,
-                        chartHeight - mappedData.yData[k] + chartLbHeight - 55,
-                        chartHeight - (chartHeight - mappedData.yData[k] + chartLbHeight - 61), 40,
+                        columnPlot = svgHelper.drawRectByClass(mappedData.xData[k] + chartLbWidth - 20,
+                        chartUbHeight - mappedData.yData[k] - 55,
+                        chartHeight - (chartUbHeight - mappedData.yData[k] - 55 - (0.02 * chartUbHeight)), 40,
                         "column-plot");
                     }
                     svg.appendChild(columnPlot);
                 }
             }
 
-            var rect = svgHelper.drawRectByClass(chartLbWidth,chartLbHeight - 55, chartHeight,
-                                                 chartWidth, "chart-rect");
-            rect.setAttributeNS(null, "fill-opacity", 0);
-            svg.appendChild(rect);
+            // var rect = svgHelper.drawRectByClass(chartLbWidth,chartLbHeight - 55, chartHeight,
+            //                                      chartWidth, "chart-rect");
+            // rect.setAttributeNS(null, "fill-opacity", 0);
+            // svg.appendChild(rect);
             multiCharts[i].appendChild(svg);
             if(i === multiCharts.length - 1) {
                 var xValueElements = svg.getElementsByClassName("x-value");
@@ -698,7 +685,8 @@
         return tickValues;
     };
 
-    var EventAgents = function() {
+    var EventAgents = function(chartType) {
+        this.chartType = chartType;
         this.svgHelper = new SvgHelper();
         if(document.getElementsByClassName("graphCircle")[0]) {
             this.defaultAnchorStroke = getComputedStyle(document.getElementsByClassName("graphCircle")[0]).stroke;
@@ -875,14 +863,51 @@
         }
     };
 
-    EventAgents.prototype.crosshairHandler = function(rects) {
-        for (var rect of rects) {
-            rect.addEventListener("mouseenter", this.createCrosshair);
-            rect.addEventListener("crosshairCreateEvent", this.createOtherCrosshairs.bind(this));
-            rect.addEventListener("mousemove", this.moveCrosshair);
-            rect.addEventListener("crosshairMoveEvent", this.moveOtherCrosshairs.bind(this));
-            rect.addEventListener("mouseleave", this.removeCrosshair);
-            rect.addEventListener("crosshairRemoveEvent", this.removeOtherCrosshairs.bind(this));
+    EventAgents.prototype.prepPlot = function() {
+        var mouseOffset = event.target.getBoundingClientRect().left;
+        var plotHighlight = new CustomEvent("plotLightEvent", {
+            "detail": event.clientX - mouseOffset + 71
+        });
+        event.target.dispatchEvent(plotHighlight);
+    };
+    EventAgents.prototype.prepAllPlots = function() {
+        // tooltipBg = this.svgHelper.drawRectByClass(event.detail, targetSvgHeight, 20, 60,
+        //                                                "otherTooltipBg");
+        // tooltipBg.setAttributeNS(null, "rx", 2);
+        // tooltipBg.setAttributeNS(null, "ry", 2);
+        // tooltipBg.style.visibility = "hidden";
+        // event.target.parentNode.insertBefore(tooltipBg, event.target);
+
+        // tooltip = this.svgHelper.drawTextByClass(event.detail, targetSvgHeight, "",
+        //                                          "otherTooltip");
+        // event.target.parentNode.insertBefore(tooltip, event.target);
+    };
+    EventAgents.prototype.highlightPlot = function() {
+        console.log("plot will highlight");
+    };
+    EventAgents.prototype.lowlightPlot = function() {
+        console.log("plot will lowlight");
+    };
+
+    EventAgents.prototype.crosshairHandler = function(svgs) {
+        for(var svg of svgs) {
+            if(this.chartType === "column") {
+                for(var plot of svg.getElementsByClassName("column-plot")) {
+                    plot.addEventListener("mouseenter", this.prepPlot);
+                    plot.addEventListener("plotLightEvent", this.prepAllPlots.bind(this));
+                    plot.addEventListener("mousemove", this.highlightPlot);
+                    plot.addEventListener("mouseleave", this.lowlightPlot);
+                }
+            } else if(this.chartType === "line") {
+                for (var rect of svg.getElementsByClassName("chart-rect")) {
+                    rect.addEventListener("mouseenter", this.createCrosshair);
+                    rect.addEventListener("crosshairCreateEvent", this.createOtherCrosshairs.bind(this));
+                    rect.addEventListener("mousemove", this.moveCrosshair);
+                    rect.addEventListener("crosshairMoveEvent", this.moveOtherCrosshairs.bind(this));
+                    rect.addEventListener("mouseleave", this.removeCrosshair);
+                    rect.addEventListener("crosshairRemoveEvent", this.removeOtherCrosshairs.bind(this));
+                }
+            }
         }
     };
 

@@ -58,11 +58,11 @@ text {
 }
 
 .column-plot {
-	fill: #3272ca;
+	fill: #3273cb;
 }
-.column-plot:hover {
-	fill: #f15c5c;
-}
+/*.column-plot:hover {
+	fill: #b94748;
+}*/
 
 .graphCircle {
 	stroke: #3272ca;
