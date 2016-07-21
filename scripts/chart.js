@@ -359,6 +359,7 @@
                         chartHeight - (chartUbHeight - mappedData.yData[k] - 55 - (0.02 * chartUbHeight)), 40,
                         "column-plot");
                     }
+                    columnPlot.setAttributeNS(null, "data-value", charts[i].yData[k]);
                     svg.appendChild(columnPlot);
                 }
             }
@@ -604,9 +605,6 @@
         if(chartType === "column") {
             var divDiff = Math.floor((width - 80) / (chart.xData.length - 1));
             var tickVal = lbWidth + 40;
-            console.log("lbWidth", lbWidth);
-            console.log("width", width);
-            console.log("ubWidth", lbWidth + width);
             for (var xTick of chart.xData) {
                 xTicks.push(tickVal);
                 tickVal += divDiff;
@@ -690,6 +688,9 @@
         this.svgHelper = new SvgHelper();
         if(document.getElementsByClassName("graphCircle")[0]) {
             this.defaultAnchorStroke = getComputedStyle(document.getElementsByClassName("graphCircle")[0]).stroke;
+        }
+        if(document.getElementsByClassName("column-plot")[0]) {
+            this.defaultPlotFill = getComputedStyle(document.getElementsByClassName("column-plot")[0]).fill;
         }
     };
 
@@ -844,8 +845,8 @@
 
     EventAgents.prototype.removeOtherCrosshairs = function(event) {
         var crosshairs = event.target.parentNode.getElementsByClassName("otherCrosshair");
-        var tooltips = event.target.parentNode.getElementsByClassName("otherTooltip");
-        var anchors = event.target.parentNode.getElementsByClassName("graphCircle");
+        var tooltips   = event.target.parentNode.getElementsByClassName("otherTooltip");
+        var anchors    = event.target.parentNode.getElementsByClassName("graphCircle");
         var tooltipBgs = event.target.parentNode.getElementsByClassName("otherTooltipBg");
 
         for (var crosshair of crosshairs) {
@@ -864,29 +865,87 @@
     };
 
     EventAgents.prototype.prepPlot = function() {
-        var mouseOffset = event.target.getBoundingClientRect().left;
-        var plotHighlight = new CustomEvent("plotLightEvent", {
-            "detail": event.clientX - mouseOffset + 71
+        var mouseLeftOffset = event.target.getBoundingClientRect().left;
+        var mouseTopOffset  = event.target.getBoundingClientRect().top;
+        var plotx = event.target.getAttributeNS(null, "x");
+        var plotHighlight   = new CustomEvent("plotLightEvent", {
+            "detail": {
+                "mousex"      : event.clientX - mouseLeftOffset + 62,
+                "mousey"      : event.clientY - mouseTopOffset + 3,
+                "hoveredPlotX": plotx
+            }
         });
-        event.target.dispatchEvent(plotHighlight);
+        for(var plot of document.getElementsByClassName("column-plot")) {
+            plot.dispatchEvent(plotHighlight);
+        }
     };
     EventAgents.prototype.prepAllPlots = function() {
-        // tooltipBg = this.svgHelper.drawRectByClass(event.detail, targetSvgHeight, 20, 60,
-        //                                                "otherTooltipBg");
-        // tooltipBg.setAttributeNS(null, "rx", 2);
-        // tooltipBg.setAttributeNS(null, "ry", 2);
-        // tooltipBg.style.visibility = "hidden";
-        // event.target.parentNode.insertBefore(tooltipBg, event.target);
-
-        // tooltip = this.svgHelper.drawTextByClass(event.detail, targetSvgHeight, "",
-        //                                          "otherTooltip");
-        // event.target.parentNode.insertBefore(tooltip, event.target);
+        var tooltip, tooltipBg;
+        var targetSvgHeight = Number(event.target.getAttributeNS(null, "height"));
+        var targetSvgX      = Number(event.target.getAttributeNS(null, "x"));
+        var targetSvgY      = Number(event.target.getAttributeNS(null, "y"));
+        if(event.target.getBBox().x == event.detail.hoveredPlotX) {
+            event.target.style.fill = "#b94748";
+        }
+        tooltipBg = this.svgHelper.drawRectByClass(event.detail.mousex, event.detail.mousey, 20, 60,
+                                                   "otherTooltipBg");
+        tooltipBg.setAttributeNS(null, "rx", 2);
+        tooltipBg.setAttributeNS(null, "ry", 2);
+        tooltipBg.style.visibility = "hidden";
+        event.target.parentNode.appendChild(tooltipBg);
+        tooltip = this.svgHelper.drawTextByClass(event.detail.mousex, event.detail.mousey, "",
+                                                 "otherTooltip");
+        event.target.parentNode.appendChild(tooltip);
     };
-    EventAgents.prototype.highlightPlot = function() {
-        console.log("plot will highlight");
+    EventAgents.prototype.prepTooltips = function() {
+        var mouseLeftOffset = event.target.parentNode.getBoundingClientRect().left;
+        var mouseTopOffset  = event.target.parentNode.getBoundingClientRect().top;
+        var plotx = event.target.getAttributeNS(null, "x");
+        var tooltipMovement = new CustomEvent("tooltipMoveEvent", {
+            "detail": {
+                "mousex": event.clientX - mouseLeftOffset - 15,
+                "mousey": event.clientY - mouseTopOffset + 15,
+                "hoveredPlotX": plotx
+            }
+        });
+        for (var plot of document.getElementsByClassName("column-plot")) {
+            plot.dispatchEvent(tooltipMovement);
+        }
     };
-    EventAgents.prototype.lowlightPlot = function() {
-        console.log("plot will lowlight");
+    EventAgents.prototype.moveTooltips = function() {
+        var rectRect   = event.target.getBoundingClientRect();
+        var tooltips   = event.target.parentNode.getElementsByClassName("otherTooltip");
+        var tooltipBgs = event.target.parentNode.getElementsByClassName("otherTooltipBg");
+        var hoverColumnLeft;
+        if(event.target.getBBox().x == event.detail.hoveredPlotX) {
+            if(event.detail.mousey > event.target.getBBox().y) {
+                console.log(event.target.getBBox().y);
+            }
+            tooltipBgs[0].style.visibility = "initial";
+            tooltipBgs[0].setAttributeNS(null, "x", event.detail.mousex);
+            tooltipBgs[0].setAttributeNS(null, "y", event.detail.mousey);
+            tooltips[0].textContent = event.target.getAttributeNS(null, "data-value");
+            tooltips[0].setAttributeNS(null, "x", event.detail.mousex + 5);
+            tooltips[0].setAttributeNS(null, "y", event.detail.mousey + 15);
+            tooltipBgs[0].setAttributeNS(null, "width", tooltips[0].getComputedTextLength() + 10);
+        }
+    };
+    EventAgents.prototype.unprepPlot = function() {
+        var unprepAllPlots = new Event("unprepPlotEvent");
+        for (var plot of document.getElementsByClassName("column-plot")) {
+            plot.dispatchEvent(unprepAllPlots);
+        }
+    };
+    EventAgents.prototype.unprepAllPlots = function() {
+        event.target.style.fill = this.defaultPlotFill;
+        var tooltips   = event.target.parentNode.getElementsByClassName("otherTooltip");
+        var tooltipBgs = event.target.parentNode.getElementsByClassName("otherTooltipBg");
+        for (var tooltip of tooltips) {
+            event.target.parentNode.removeChild(tooltip);
+        }
+        for (var tooltipBg of tooltipBgs) {
+            event.target.parentNode.removeChild(tooltipBg);
+        }
     };
 
     EventAgents.prototype.crosshairHandler = function(svgs) {
@@ -895,8 +954,10 @@
                 for(var plot of svg.getElementsByClassName("column-plot")) {
                     plot.addEventListener("mouseenter", this.prepPlot);
                     plot.addEventListener("plotLightEvent", this.prepAllPlots.bind(this));
-                    plot.addEventListener("mousemove", this.highlightPlot);
-                    plot.addEventListener("mouseleave", this.lowlightPlot);
+                    plot.addEventListener("mousemove", this.prepTooltips);
+                    plot.addEventListener("tooltipMoveEvent", this.moveTooltips.bind(this));
+                    plot.addEventListener("mouseleave", this.unprepPlot);
+                    plot.addEventListener("unprepPlotEvent", this.unprepAllPlots.bind(this));
                 }
             } else if(this.chartType === "line") {
                 for (var rect of svg.getElementsByClassName("chart-rect")) {
