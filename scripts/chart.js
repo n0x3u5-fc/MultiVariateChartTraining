@@ -864,7 +864,7 @@
         }
     };
 
-    EventAgents.prototype.prepPlot = function() {
+    EventAgents.prototype.prepPlot = function(event) {
         var mouseLeftOffset = event.target.getBoundingClientRect().left;
         var mouseTopOffset  = event.target.getBoundingClientRect().top;
         var plotx = event.target.getAttributeNS(null, "x");
@@ -879,7 +879,7 @@
             plot.dispatchEvent(plotHighlight);
         }
     };
-    EventAgents.prototype.prepAllPlots = function() {
+    EventAgents.prototype.prepAllPlots = function(event) {
         var tooltip, tooltipBg;
         var targetSvgHeight = Number(event.target.getAttributeNS(null, "height"));
         var targetSvgX      = Number(event.target.getAttributeNS(null, "x"));
@@ -897,7 +897,7 @@
                                                  "otherTooltip");
         event.target.parentNode.appendChild(tooltip);
     };
-    EventAgents.prototype.prepTooltips = function() {
+    EventAgents.prototype.prepTooltips = function(event) {
         var mouseLeftOffset = event.target.parentNode.getBoundingClientRect().left;
         var mouseTopOffset  = event.target.parentNode.getBoundingClientRect().top;
         var plotx = event.target.getAttributeNS(null, "x");
@@ -912,15 +912,12 @@
             plot.dispatchEvent(tooltipMovement);
         }
     };
-    EventAgents.prototype.moveTooltips = function() {
+    EventAgents.prototype.moveTooltips = function(event) {
         var rectRect   = event.target.getBoundingClientRect();
         var tooltips   = event.target.parentNode.getElementsByClassName("otherTooltip");
         var tooltipBgs = event.target.parentNode.getElementsByClassName("otherTooltipBg");
         var hoverColumnLeft;
         if(event.target.getBBox().x == event.detail.hoveredPlotX) {
-            if(event.detail.mousey > event.target.getBBox().y) {
-                console.log(event.target.getBBox().y);
-            }
             tooltipBgs[0].style.visibility = "initial";
             tooltipBgs[0].setAttributeNS(null, "x", event.detail.mousex);
             tooltipBgs[0].setAttributeNS(null, "y", event.detail.mousey);
@@ -930,14 +927,16 @@
             tooltipBgs[0].setAttributeNS(null, "width", tooltips[0].getComputedTextLength() + 10);
         }
     };
-    EventAgents.prototype.unprepPlot = function() {
+    EventAgents.prototype.unprepPlot = function(event) {
         var unprepAllPlots = new Event("unprepPlotEvent");
         for (var plot of document.getElementsByClassName("column-plot")) {
             plot.dispatchEvent(unprepAllPlots);
         }
     };
-    EventAgents.prototype.unprepAllPlots = function() {
-        event.target.style.fill = this.defaultPlotFill;
+    EventAgents.prototype.unprepAllPlots = function(event) {
+        if(event.target.style.fill === "rgb(185, 71, 72)") {
+            event.target.style.fill = this.defaultPlotFill;
+        }
         var tooltips   = event.target.parentNode.getElementsByClassName("otherTooltip");
         var tooltipBgs = event.target.parentNode.getElementsByClassName("otherTooltipBg");
         for (var tooltip of tooltips) {
@@ -946,6 +945,42 @@
         for (var tooltipBg of tooltipBgs) {
             event.target.parentNode.removeChild(tooltipBg);
         }
+    };
+
+    EventAgents.prototype.dragSelect = function(event) {
+        var svg = event.target.parentNode;
+        var mouseLeftOffset = svg.getBoundingClientRect().left;
+        var mouseTopOffset  = svg.getBoundingClientRect().top;
+        for (var plot of document.getElementsByClassName("column-plot")) {
+            plot.style.fill = this.defaultPlotFill;
+        }
+        svg.onmouseup = this.selectPlots;
+        svg.onmousemove = this.expandSelect;
+        var selectBox = this.svgHelper.drawRectByClass(event.clientX - mouseLeftOffset, event.clientY - mouseTopOffset, 5, 5, "select-box");
+        selectBox.setAttributeNS(null, "fill", "red");
+        selectBox.setAttributeNS(null, "fill-opacity", 0.4);
+        svg.appendChild(selectBox);
+    };
+    EventAgents.prototype.expandSelect = function(event) {
+        var svg = event.target.parentNode;
+        var svgRect = svg.getBoundingClientRect();
+        var selectBoxes = svg.getElementsByClassName("select-box");
+        var columnPlots = event.target.parentNode.getElementsByClassName("column-plot");
+        for(var selectBox of selectBoxes) {
+            selectBox.setAttributeNS(null, "width", event.clientX - svgRect.left);
+            selectBox.setAttributeNS(null, "height", event.clientY - svgRect.top);
+            for(var columnPlot of columnPlots) {
+                if(chartUtilities.isSvgColliding(selectBoxes[0].getBoundingClientRect(), columnPlot.getBoundingClientRect())) {
+                    columnPlot.style.fill = "#b94749";
+                }
+            }
+        }
+    };
+    EventAgents.prototype.selectPlots = function(event) {
+        event.target.parentNode.onmouseup = null;
+        event.target.parentNode.onmousemove = null;
+        var selectBoxes = event.target.parentNode.getElementsByClassName("select-box");
+        event.target.parentNode.removeChild(selectBoxes[0]);
     };
 
     EventAgents.prototype.crosshairHandler = function(svgs) {
@@ -969,6 +1004,7 @@
                     rect.addEventListener("crosshairRemoveEvent", this.removeOtherCrosshairs.bind(this));
                 }
             }
+            svg.addEventListener("mousedown", this.dragSelect.bind(this));
         }
     };
 
