@@ -36,6 +36,8 @@
         this.height     = json.metadata.height;
         this.width      = json.metadata.width;
         this.type       = json.metadata.type;
+        this.sortBy     = json.metadata.sortBy;
+        this.sortOrder  = json.metadata.sortOrder;
 
         var jsonDataKeys = Object.keys(json.data);
         var numCharts    = jsonDataKeys.length - 1;
@@ -54,6 +56,7 @@
                 this.chartData.push(chart);
             }
         }
+        this.sortData(this.sortBy);
         var chartProperties = new ChartPropertyCalculator(this.chartData);
         if(this.type === "line") {
             chartRenderer = new LineChartRenderer(this.chartData, chartProperties);
@@ -70,13 +73,68 @@
         eventAgent.crosshairHandler(document.getElementsByClassName("chart-svg"));
     };
 
+    Data.prototype.sortData = function(sortBy) {
+        switch(sortBy) {
+            case "average":
+                this.sortByAverage();
+                break;
+            case "value":
+                this.sortByValue();
+                break;
+            default:
+                console.log("default");
+        }
+    };
+
+    Data.prototype.sortByAverage = function() {
+        var averages = [];
+        for(var chartDatum of this.chartData) {
+            var sum = 0, length = 0;
+            for (var yDatum of chartDatum.yData) {
+                if(yDatum !== "") {
+                    sum += yDatum;
+                    length++;
+                }
+            }
+            averages.push(sum / length);
+        }
+        this.chartData = this.multiSort(averages, this.chartData, this.sortOrder);
+    };
+
+    Data.prototype.sortByValue = function() {
+        var maxes = [];
+        for(var chartDatum of this.chartData) {
+            maxes.push(Math.max.apply(Math, chartDatum.yData));
+        }
+        this.chartData = this.multiSort(maxes, this.chartData, this.sortOrder);
+    };
+
+    Data.prototype.multiSort = function(supportingArray, sortingArray, order) {
+        var arr = [];
+        for(var i in sortingArray) {
+            arr.push({'sort': sortingArray[i], 'support': supportingArray[i]});
+        }
+        if(order == "descending") {
+            arr.sort(function(a, b) {
+                return ((a.support > b.support) ? -1 : ((a.support == b.support) ? 0 : 1));
+            });
+        } else if(order == "ascending") {
+            arr.sort(function(a, b) {
+                return ((a.support < b.support) ? -1 : ((a.support == b.support) ? 0 : 1));
+            });
+        }
+        for(var j = 0; j < arr.length; j++) {
+            sortingArray[j] = arr[j].sort;
+        }
+        return sortingArray;
+    };
+
     Data.prototype.allSame = function(arr, val) {
         for (var elem of arr) {
             if (elem !== val) {
                 return false;
             }
         }
-
         return true;
     };
 
@@ -341,22 +399,23 @@
                                             4, "graphCircle");
                     anchor.setAttributeNS(null, "data-value", charts[i].yData[k]);
                     // svg.appendChild(anchor);
+                    var plotWidth = (chartWidth / mappedData.xData.length) - 10;
                     if(svg.getElementsByClassName("zeroPlane").length > 0) {
                         zeroPlaneY = xZeroLine.getAttributeNS(null, "y1");
                         if(charts[i].yData[k] < 0) {
                             var columnHeight = chartHeight - mappedData.yData[k] + chartLbHeight - 55 - zeroPlaneY;
-                            columnPlot = svgHelper.drawRectByClass(mappedData.xData[k] + chartLbWidth - 20,
-                            zeroPlaneY, columnHeight, 40, "column-plot");
+                            columnPlot = svgHelper.drawRectByClass(mappedData.xData[k] + chartLbWidth - (plotWidth / 2),
+                            zeroPlaneY, columnHeight, plotWidth, "column-plot");
                         } else {
-                            columnPlot = svgHelper.drawRectByClass(mappedData.xData[k] + chartLbWidth - 20,
+                            columnPlot = svgHelper.drawRectByClass(mappedData.xData[k] + chartLbWidth - (plotWidth / 2),
                             chartUbHeight - mappedData.yData[k] - 55,
-                            mappedData.yData[k] - (chartHeight - zeroPlaneY + (0.02 * chartUbHeight)), 40,
+                            mappedData.yData[k] - (chartHeight - zeroPlaneY + (0.02 * chartUbHeight)), plotWidth,
                             "column-plot");
                         }
                     } else {
-                        columnPlot = svgHelper.drawRectByClass(mappedData.xData[k] + chartLbWidth - 20,
+                        columnPlot = svgHelper.drawRectByClass(mappedData.xData[k] + chartLbWidth - (plotWidth / 2),
                         chartUbHeight - mappedData.yData[k] - 55,
-                        chartHeight - (chartUbHeight - mappedData.yData[k] - 55 - (0.02 * chartUbHeight)), 40,
+                        chartHeight - (chartUbHeight - mappedData.yData[k] - 55 - (0.02 * chartUbHeight)), plotWidth,
                         "column-plot");
                     }
                     columnPlot.setAttributeNS(null, "data-value", charts[i].yData[k]);
@@ -622,9 +681,6 @@
         } else {
             var divDiff = Math.floor(width / (chart.xData.length - 1));
             var tickVal = lbWidth;
-            console.log("lbWidth", lbWidth);
-            console.log("ubWidth", width);
-            console.log("ubWidth", lbWidth + width);
             for (var xTick of chart.xData) {
                 xTicks.push(tickVal);
                 tickVal += divDiff;
@@ -975,12 +1031,14 @@
             selectBox.setAttributeNS(null, "width", event.clientX - svgRect.left);
             selectBox.setAttributeNS(null, "height", event.clientY - svgRect.top);
             for(var columnPlot of columnPlots) {
-                if(chartUtilities.isSvgColliding(selectBoxes[0].getBoundingClientRect(), columnPlot.getBoundingClientRect())) {
+                if(chartUtilities.isSvgColliding(selectBoxes[0].getBoundingClientRect(),
+                    columnPlot.getBoundingClientRect())) {
                     columnPlot.style.fill = "#b94749";
                 }
             }
             for(var anchorPlot of anchorPlots) {
-                if(chartUtilities.isSvgColliding(selectBoxes[0].getBoundingClientRect(), anchorPlot.getBoundingClientRect())) {
+                if(chartUtilities.isSvgColliding(selectBoxes[0].getBoundingClientRect(),
+                    anchorPlot.getBoundingClientRect())) {
                     anchorPlot.style.fill = "#b94749";
                 }
             }
@@ -1020,5 +1078,4 @@
 
     var data = new Data();
     data.ajaxLoader('res/data/user_data.json', data.dataParser.bind(data));
-
 })(window);
