@@ -688,6 +688,7 @@
         this.svgHelper = new SvgHelper();
         if(document.getElementsByClassName("graphCircle")[0]) {
             this.defaultAnchorStroke = getComputedStyle(document.getElementsByClassName("graphCircle")[0]).stroke;
+            this.defaultAnchorFill = getComputedStyle(document.getElementsByClassName("graphCircle")[0]).fill;
         }
         if(document.getElementsByClassName("column-plot")[0]) {
             this.defaultPlotFill = getComputedStyle(document.getElementsByClassName("column-plot")[0]).fill;
@@ -954,6 +955,9 @@
         for (var plot of document.getElementsByClassName("column-plot")) {
             plot.style.fill = this.defaultPlotFill;
         }
+        for (var anchor of document.getElementsByClassName("graphCircle")) {
+            anchor.style.fill = this.defaultAnchorFill;
+        }
         svg.onmouseup = this.selectPlots;
         svg.onmousemove = this.expandSelect;
         var selectBox = this.svgHelper.drawRectByClass(event.clientX - mouseLeftOffset, event.clientY - mouseTopOffset, 5, 5, "select-box");
@@ -966,12 +970,18 @@
         var svgRect = svg.getBoundingClientRect();
         var selectBoxes = svg.getElementsByClassName("select-box");
         var columnPlots = event.target.parentNode.getElementsByClassName("column-plot");
+        var anchorPlots = event.target.parentNode.getElementsByClassName("graphCircle");
         for(var selectBox of selectBoxes) {
             selectBox.setAttributeNS(null, "width", event.clientX - svgRect.left);
             selectBox.setAttributeNS(null, "height", event.clientY - svgRect.top);
             for(var columnPlot of columnPlots) {
                 if(chartUtilities.isSvgColliding(selectBoxes[0].getBoundingClientRect(), columnPlot.getBoundingClientRect())) {
                     columnPlot.style.fill = "#b94749";
+                }
+            }
+            for(var anchorPlot of anchorPlots) {
+                if(chartUtilities.isSvgColliding(selectBoxes[0].getBoundingClientRect(), anchorPlot.getBoundingClientRect())) {
+                    anchorPlot.style.fill = "#b94749";
                 }
             }
         }
