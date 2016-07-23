@@ -2,12 +2,12 @@
 	"metadata": {
 		"caption"   : "Multi-Variate Chart",
 		"subCaption": "Correlation of Age with Nutrition",
-		"type"      : "column",
+		"type"      : "line",
 		"height"    : 280,
 		"width"     : 380,
 		"units"     : "months,mg,mg,kg,",
-		"sortBy"    : "average",
-		"sortOrder" : "descending"
+		"sortBy"    : "value",
+		"sortOrder" : "ascending"
 	},
 	"data": {
 		"Time"     : "JAN,FEB,MAR,APR,MAY,JUN,JUL",
