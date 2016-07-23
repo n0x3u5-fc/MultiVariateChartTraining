@@ -1008,28 +1008,54 @@
         var svg = event.target.parentNode;
         var mouseLeftOffset = svg.getBoundingClientRect().left;
         var mouseTopOffset  = svg.getBoundingClientRect().top;
+        var customDragSelect = new CustomEvent("customDragSelect", {
+            "detail": {
+                "mousex": event.clientX - mouseLeftOffset,
+                "mousey": event.clientY - mouseTopOffset
+            }
+        });
+        for(var chartSvg of document.getElementsByClassName("chart-svg")) {
+            chartSvg.dispatchEvent(customDragSelect);
+        }
+    };
+    EventAgents.prototype.customDragSelect = function(event) {
         for (var plot of document.getElementsByClassName("column-plot")) {
             plot.style.fill = this.defaultPlotFill;
         }
         for (var anchor of document.getElementsByClassName("graphCircle")) {
             anchor.style.fill = this.defaultAnchorFill;
         }
-        svg.onmouseup = this.selectPlots;
-        svg.onmousemove = this.expandSelect;
-        var selectBox = this.svgHelper.drawRectByClass(event.clientX - mouseLeftOffset, event.clientY - mouseTopOffset, 5, 5, "select-box");
+        event.target.onmousemove = this.expandSelect;
+        event.target.onmouseup = this.selectPlots;
+        var selectBox = this.svgHelper.drawRectByClass(event.detail.mousex,
+            event.detail.mousey, 5, 5, "select-box");
         selectBox.setAttributeNS(null, "fill", "red");
         selectBox.setAttributeNS(null, "fill-opacity", 0.4);
-        svg.appendChild(selectBox);
+        event.target.appendChild(selectBox);
     };
     EventAgents.prototype.expandSelect = function(event) {
+        var svg = event.target.parentNode;
+        var mouseLeftOffset = svg.getBoundingClientRect().left;
+        var mouseTopOffset  = svg.getBoundingClientRect().top;
+        var customExpandSelect = new CustomEvent("customExpandSelect", {
+            "detail": {
+                "mousex": event.clientX - mouseLeftOffset,
+                "mousey": event.clientY - mouseTopOffset
+            }
+        });
+        for(var chartSvg of document.getElementsByClassName("chart-svg")) {
+            chartSvg.dispatchEvent(customExpandSelect);
+        }
+    };
+    EventAgents.prototype.customExpandSelect = function(event) {
         var svg = event.target.parentNode;
         var svgRect = svg.getBoundingClientRect();
         var selectBoxes = svg.getElementsByClassName("select-box");
         var columnPlots = event.target.parentNode.getElementsByClassName("column-plot");
         var anchorPlots = event.target.parentNode.getElementsByClassName("graphCircle");
         for(var selectBox of selectBoxes) {
-            selectBox.setAttributeNS(null, "width", event.clientX - svgRect.left);
-            selectBox.setAttributeNS(null, "height", event.clientY - svgRect.top);
+            selectBox.setAttributeNS(null, "width", event.detail.mousex);
+            selectBox.setAttributeNS(null, "height", event.detail.mousey);
             for(var columnPlot of columnPlots) {
                 if(chartUtilities.isSvgColliding(selectBoxes[0].getBoundingClientRect(),
                     columnPlot.getBoundingClientRect())) {
@@ -1045,10 +1071,17 @@
         }
     };
     EventAgents.prototype.selectPlots = function(event) {
-        event.target.parentNode.onmouseup = null;
-        event.target.parentNode.onmousemove = null;
-        var selectBoxes = event.target.parentNode.getElementsByClassName("select-box");
-        event.target.parentNode.removeChild(selectBoxes[0]);
+        var customSelectPlots = new Event("customSelectPlots");
+        for(var chartSvg of document.getElementsByClassName("chart-svg")) {
+            chartSvg.dispatchEvent(customSelectPlots);
+        }
+    };
+    EventAgents.prototype.customSelectPlots = function(event) {
+        event.target.onmouseup = null;
+        event.target.onmousemove = null;
+        var selectBoxes = document.getElementsByClassName("select-box");
+        console.log(event.target);
+        event.target.removeChild(selectBoxes[0]);
     };
 
     EventAgents.prototype.crosshairHandler = function(svgs) {
@@ -1072,7 +1105,10 @@
                     rect.addEventListener("crosshairRemoveEvent", this.removeOtherCrosshairs.bind(this));
                 }
             }
-            svg.addEventListener("mousedown", this.dragSelect.bind(this));
+            svg.addEventListener("mousedown", this.dragSelect);
+            svg.addEventListener("customDragSelect", this.customDragSelect.bind(this));
+            svg.addEventListener("customExpandSelect", this.customExpandSelect.bind(this));
+            svg.addEventListener("customSelectPlots", this.customSelectPlots.bind(this));
         }
     };
 
