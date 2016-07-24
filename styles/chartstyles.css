@@ -45,6 +45,15 @@ text {
 	font-weight: lighter;
 	stroke-width: 0px;
 }
+.y-title {
+	fill: #054281;
+	text-transform: uppercase;
+	font-weight: bolder;
+}
+.y-title-rect {
+	stroke: #d6eafc;
+	fill: #f5fafe;
+}
 
 .graphLine {
 	stroke: #3272ca;
@@ -60,9 +69,6 @@ text {
 .column-plot {
 	fill: #3273cb;
 }
-/*.column-plot:hover {
-	fill: #b94748;
-}*/
 
 .graphCircle {
 	stroke: #3272ca;
