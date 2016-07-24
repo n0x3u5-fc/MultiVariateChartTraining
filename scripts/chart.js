@@ -59,23 +59,26 @@
         this.sortData(this.sortBy);
         var chartProperties = new ChartPropertyCalculator(this.chartData);
         var that = this;
-        window.addEventListener("resize", function() {
-            var chartDiv = document.getElementById("chart-area");
-            while(chartDiv.firstChild) {
-                chartDiv.removeChild(chartDiv.firstChild);
-            }
-            if(that.type === "line") {
-                chartRenderer = new LineChartRenderer(that.chartData, chartProperties);
-                chartRenderer.createCaptions("chart-area", that.caption, that.subCaption);
-                chartRenderer.displayCharts(that.height, that.width);
-            } else if(that.type === "column") {
-                chartRenderer = new ColumnChartRenderer(that.chartData, chartProperties);
-                chartRenderer.createCaptions("chart-area", that.caption, that.subCaption);
-                chartRenderer.displayCharts(that.height, that.width);
-            } else {
-                console.log("Sorry Dave. I can't let you do that.");
-            }
-        });
+        // window.addEventListener("resize", function() {
+        //     console.log("whaaa");
+        //     var chartDiv = document.getElementById("chart-area");
+        //     while(chartDiv.firstChild) {
+        //         chartDiv.removeChild(chartDiv.firstChild);
+        //     }
+        //     if(that.type === "line") {
+        //         chartRenderer = new LineChartRenderer(that.chartData, chartProperties);
+        //         chartRenderer.createCaptions("chart-area", that.caption, that.subCaption);
+        //         chartRenderer.displayCharts(that.height, that.width);
+        //     } else if(that.type === "column") {
+        //         chartRenderer = new ColumnChartRenderer(that.chartData, chartProperties);
+        //         chartRenderer.createCaptions("chart-area", that.caption, that.subCaption);
+        //         chartRenderer.displayCharts(that.height, that.width);
+        //     } else {
+        //         console.log("Sorry Dave. I can't let you do that.");
+        //     }
+        //     var eventAgent = new EventAgents(this.type);
+        //     eventAgent.crosshairHandler(document.getElementsByClassName("chart-svg"));
+        // });
         if(this.type === "line") {
             chartRenderer = new LineChartRenderer(this.chartData, chartProperties);
             chartRenderer.createCaptions("chart-area", this.caption, this.subCaption);
@@ -1343,7 +1346,6 @@
         event.target.onmouseup = null;
         event.target.onmousemove = null;
         var selectBoxes = document.getElementsByClassName("select-box");
-        console.log(event.target);
         event.target.removeChild(selectBoxes[0]);
     };
 
