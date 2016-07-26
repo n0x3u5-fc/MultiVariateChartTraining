@@ -1012,7 +1012,7 @@ var EventAgents = function(chartType) {
     this.svgHelper = new SvgHelper();
     if(document.getElementsByClassName("graphCircle")[0]) {
         this.defaultAnchorStroke = getComputedStyle(document.getElementsByClassName("graphCircle")[0]).stroke;
-        this.defaultAnchorFill = getComputedStyle(document.getElementsByClassName("graphCircle")[0]).fill;
+        this.defaultAnchorFill   = getComputedStyle(document.getElementsByClassName("graphCircle")[0]).fill;
     }
     if(document.getElementsByClassName("column-plot")[0]) {
         this.defaultPlotFill = getComputedStyle(document.getElementsByClassName("column-plot")[0]).fill;
@@ -1192,7 +1192,7 @@ EventAgents.prototype.removeOtherCrosshairs = function(event) {
 EventAgents.prototype.prepPlot = function(event) {
     var mouseLeftOffset = event.target.getBoundingClientRect().left;
     var mouseTopOffset  = event.target.getBoundingClientRect().top;
-    var plotx = event.target.getAttributeNS(null, "x");
+    var plotx           = event.target.getAttributeNS(null, "x");
     var plotHighlight   = new CustomEvent("plotLightEvent", {
         "detail": {
             "mousex"      : event.clientX - mouseLeftOffset + 62,
@@ -1225,7 +1225,7 @@ EventAgents.prototype.prepAllPlots = function(event) {
 EventAgents.prototype.prepTooltips = function(event) {
     var mouseLeftOffset = event.target.parentNode.getBoundingClientRect().left;
     var mouseTopOffset  = event.target.parentNode.getBoundingClientRect().top;
-    var plotx = event.target.getAttributeNS(null, "x");
+    var plotx           = event.target.getAttributeNS(null, "x");
     var tooltipMovement = new CustomEvent("tooltipMoveEvent", {
         "detail": {
             "mousex": event.clientX - mouseLeftOffset - 15,
@@ -1377,4 +1377,12 @@ EventAgents.prototype.crosshairHandler = function(svgs) {
         svg.addEventListener("customExpandSelect", this.customExpandSelect.bind(this));
         svg.addEventListener("customSelectPlots", this.customSelectPlots.bind(this));
     }
+};
+
+var Chart = function(url) {
+    this.render = function() {
+        var data = new Data();
+        data.ajaxLoader(url, data.dataParser.bind(data));
+        data.customSort = this.customSort;
+    };
 };
