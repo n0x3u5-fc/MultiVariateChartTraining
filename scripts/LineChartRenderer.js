@@ -55,21 +55,18 @@ LineChartRenderer.prototype.drawCompleteCharts = function(i, charts, multiCharts
                                                      chartLbWidth, charts[i]);
     mappedCharts.push(mappedData);
 
-    // var yAxis = new YAxis();
-    // yAxis.startX = chartLbWidth;
-    // yAxis.startY = chartLbHeight - 55;
-    // yAxis.endX = chartLbWidth;
-    // yAxis.endY = chartUbHeight - 55;
-    // yAxis.className = "yAxis";
-    // yAxis.render();
+    var yAxis = new YAxis(chartLbWidth, chartLbHeight - 55, chartLbWidth, chartUbHeight - 55, "yAxis");
+    yAxis.render(svg);
+    yAxis.renderTicks(svg, mappedData.yTicks);
+    yAxis.renderTickValues(svg, mappedData.yTicks, charts[i].yTicks);
+    yAxis.renderDivs(svg, mappedData.yTicks, chartHeight, chartLbWidth, chartWidth);
 
-    var yline = svgHelper.drawLineByClass(chartLbWidth, chartLbHeight - 55,
-                                          chartLbWidth, chartUbHeight - 55, "yAxis");
-    svg.appendChild(yline);
-
-    var xline = svgHelper.drawLineByClass(chartUbWidth, chartUbHeight - 55, chartLbWidth,
-                                          chartUbHeight - 55, "xAxis");
-    svg.appendChild(xline);
+    var xAxis = new XAxis(chartUbWidth, chartUbHeight - 55, chartLbWidth, chartUbHeight - 55, "xAxis");
+    xAxis.render(svg);
+    xAxis.renderTicks(svg, mappedData.xTicks);
+    if (i >= multiCharts.length - chartsInARow) {
+        xAxis.renderTickValues(svg, mappedData.xTicks, charts[i].xData)
+    }
 
     var yTitleContent = charts[i].yUnit === "" ?
         charts[i].yTitle : charts[i].yTitle + " (" + charts[i].yUnit + ")";
@@ -78,49 +75,7 @@ LineChartRenderer.prototype.drawCompleteCharts = function(i, charts, multiCharts
     var yTitleRect = svgHelper.drawRectByClass(chartLbWidth, chartLbHeight - 55 - 40, 30, chartWidth, "y-title-rect");
     svg.appendChild(yTitleRect);
     svg.appendChild(yTitle);
-
-    // if (i === multiCharts.length - 1) {
-    //     var xTitleContent = charts[i].xUnit === "" ?
-    //         charts[i].xTitle : charts[i].xTitle + " (" + charts[i].xUnit + ")";
-    //     var xTitle = svgHelper.drawTextByClass((chartWidth / 2), chartUbHeight + 4,
-    //                                            xTitleContent, "x-title");
-    //     svg.appendChild(xTitle);
-    // }
-
-    for (var xTick of mappedData.xTicks) {
-        var xTickLine = svgHelper.drawLineByClass(xTick, chartUbHeight - 55, xTick,
-                                                  chartUbHeight + 5 - 55, "xTick");
-        svg.appendChild(xTickLine);
-
-        if (i >= multiCharts.length - chartsInARow) {
-            var xValuesContent = charts[i].xData[mappedData.xTicks.indexOf(xTick)];
-            var xValues = svgHelper.drawTextByClass(xTick - 13, chartUbHeight - 23,
-                                                    xValuesContent, "x-value");
-            svg.appendChild(xValues);
-        }
-    }
-
-    for (var yTick of mappedData.yTicks) {
-        var yTickLine = svgHelper.drawLineByClass(chartLbWidth - 5, yTick - 55,
-                                                  chartLbWidth, yTick - 55,
-                                                  "yTick");
-        svg.appendChild(yTickLine);
-
-        // var yDivLine = svgHelper.drawLineByClass(chartLbWidth,
-        //     height - yTick + 55, chartUbWidth, height - yTick + 55,
-        //     "yDiv");
-        // svg.appendChild(yDivLine);
-        var yDivRect = svgHelper.drawRectByClass(chartLbWidth, yTick - 55,
-                                                 chartHeight - yTick + mappedData.yTicks[0], chartWidth,
-                                                 "yDiv");
-        svg.appendChild(yDivRect);
-
-        var yValuesContent = charts[i].yTicks[mappedData.yTicks.indexOf(yTick)];
-        var yValues = svgHelper.drawTextByClass(0 + 50, chartUbHeight - yTick + chartLbHeight - 50,
-                                                yValuesContent, "y-value");
-        yValues.setAttributeNS(null, "text-anchor", "end");
-        svg.appendChild(yValues);
-    }
+    
     for (var l = 0; l < mappedData.yData.length - 1; l++) {
         var graphLine;
         var c = 0;

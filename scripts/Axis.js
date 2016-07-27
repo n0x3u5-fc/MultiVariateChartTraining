@@ -1,12 +1,14 @@
-var Axis = function() {
+var Axis = function(startX, startY, endX, endY, className) {
 	'use strict';
+	this.startX    = startX;
+	this.startY    = startY;
+	this.endX      = endX;
+	this.endY      = endY;
+	this.className = className;
+	this.svgHelper = new SvgHelper();
 };
-Axis.prototype.startX        = 0;
-Axis.prototype.startY        = 0;
-Axis.prototype.endX          = 0;
-Axis.prototype.endY          = 0;
-Axis.prototype.className	 = "";
-Axis.prototype.render = function(svgHelper) {
+Axis.prototype.render = function(svg) {
 	'use strict';
-	svgHelper.drawLine(this.startX, this.startY, this.endX, this.endY, this.className);
+	var yLine = this.svgHelper.drawLineByClass(this.startX, this.startY, this.endX, this.endY, this.className);
+	svg.appendChild(yLine);
 };
