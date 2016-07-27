@@ -25,6 +25,7 @@
   "homepage": "https://github.com/n0x3u5-fc/MultiVariateChartTraining#readme",
   "devDependencies": {
     "google-closure-compiler": "^20160713.1.0",
-    "gulp": "^3.9.1"
+    "gulp": "^3.9.1",
+    "gulp-sourcemaps": "^1.6.0"
   }
 }
