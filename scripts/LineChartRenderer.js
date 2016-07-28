@@ -40,8 +40,9 @@ LineChartRenderer.prototype.createCaptions = function(targetDiv, caption, subCap
     subCaptionHeader.innerHTML = subCaption;
     renderDiv.appendChild(subCaptionHeader);
 };
+
 LineChartRenderer.prototype.drawCompleteCharts = function(i, charts, multiCharts,
-    chartsInARow, svgHelper, svg, height, width) {
+    chartsInARow, svgHelper, svg, height, width, columnsAreComplete) {
     'use strict';
     var mappedCharts = [];
     var chartUbHeight = Math.ceil(height - (0.001 * height)) + 55;
@@ -55,17 +56,19 @@ LineChartRenderer.prototype.drawCompleteCharts = function(i, charts, multiCharts
                                                      chartLbWidth, charts[i]);
     mappedCharts.push(mappedData);
 
-    var yAxis = new YAxis(chartLbWidth, chartLbHeight - 55, chartLbWidth, chartUbHeight - 55, "yAxis");
+    var yAxis = new YAxis(chartLbWidth, chartLbHeight - 55, chartLbWidth, chartUbHeight - 55,
+                          "yAxis", columnsAreComplete);
     yAxis.render(svg);
     yAxis.renderTicks(svg, mappedData.yTicks);
     yAxis.renderTickValues(svg, mappedData.yTicks, charts[i].yTicks);
     yAxis.renderDivs(svg, mappedData.yTicks, chartHeight, chartLbWidth, chartWidth);
 
-    var xAxis = new XAxis(chartUbWidth, chartUbHeight - 55, chartLbWidth, chartUbHeight - 55, "xAxis");
+    var xAxis = new XAxis(chartUbWidth, chartUbHeight - 55, chartLbWidth, chartUbHeight - 55,
+                          "xAxis", columnsAreComplete);
     xAxis.render(svg);
     xAxis.renderTicks(svg, mappedData.xTicks);
     if (i >= multiCharts.length - chartsInARow) {
-        xAxis.renderTickValues(svg, mappedData.xTicks, charts[i].xData)
+        xAxis.renderTickValues(svg, mappedData.xTicks, charts[i].xData);
     }
 
     var yTitleContent = charts[i].yUnit === "" ?
@@ -75,7 +78,7 @@ LineChartRenderer.prototype.drawCompleteCharts = function(i, charts, multiCharts
     var yTitleRect = svgHelper.drawRectByClass(chartLbWidth, chartLbHeight - 55 - 40, 30, chartWidth, "y-title-rect");
     svg.appendChild(yTitleRect);
     svg.appendChild(yTitle);
-    
+
     for (var l = 0; l < mappedData.yData.length - 1; l++) {
         var graphLine;
         var c = 0;
@@ -119,7 +122,7 @@ LineChartRenderer.prototype.drawCompleteCharts = function(i, charts, multiCharts
     svg.appendChild(rect);
 };
 LineChartRenderer.prototype.drawIncompleteCharts = function(i, charts, multiCharts,
-    chartsInARow, svgHelper, svg, height, width) {
+    chartsInARow, svgHelper, svg, height, width, columnsAreComplete) {
     'use strict';
     var mappedCharts = [];
     var chartUbHeight = Math.ceil(height - (0.095 * height)) + 55;
@@ -133,34 +136,19 @@ LineChartRenderer.prototype.drawIncompleteCharts = function(i, charts, multiChar
                                                          chartLbWidth, charts[i]);
     mappedCharts.push(mappedData);
 
-    var yline = svgHelper.drawLineByClass(chartLbWidth, chartLbHeight - 15,
-                                          chartLbWidth, chartUbHeight - 15, "yAxis");
-    svg.appendChild(yline);
+    var yAxis = new YAxis(chartLbWidth, chartLbHeight - 15, chartLbWidth, chartUbHeight - 15,
+                          "yAxis", columnsAreComplete);
+    yAxis.render(svg);
+    yAxis.renderTicks(svg, mappedData.yTicks);
+    yAxis.renderTickValues(svg, mappedData.yTicks, charts[i].yTicks);
+    yAxis.renderDivs(svg, mappedData.yTicks, chartHeight, chartLbWidth, chartWidth);
 
-    var xline = svgHelper.drawLineByClass(chartUbWidth, chartUbHeight - 15, chartLbWidth,
-                                          chartUbHeight - 15, "xAxis");
-    svg.appendChild(xline);
-
-    for (var yTick of mappedData.yTicks) {
-        var yTickLine = svgHelper.drawLineByClass(chartLbWidth - 5, yTick - 15,
-                                                  chartLbWidth, yTick - 15,
-                                                  "yTick");
-        svg.appendChild(yTickLine);
-
-        // var yDivLine = svgHelper.drawLineByClass(chartLbWidth,
-        //     height - yTick + 55, chartUbWidth, height - yTick + 55,
-        //     "yDiv");
-        // svg.appendChild(yDivLine);
-        var yDivRect = svgHelper.drawRectByClass(chartLbWidth, yTick - 15,
-                                                 chartHeight - yTick + mappedData.yTicks[0], chartWidth,
-                                                 "yDiv");
-        svg.appendChild(yDivRect);
-
-        var yValuesContent = charts[i].yTicks[mappedData.yTicks.indexOf(yTick)];
-        var yValues = svgHelper.drawTextByClass(0 + 50, chartUbHeight - yTick + chartLbHeight - 10,
-                                                yValuesContent, "y-value");
-        yValues.setAttributeNS(null, "text-anchor", "end");
-        svg.appendChild(yValues);
+    var xAxis = new XAxis(chartUbWidth, chartLbHeight - 15, chartLbWidth, chartLbHeight - 15,
+                          "xAxis", columnsAreComplete);
+    xAxis.render(svg);
+    xAxis.renderTicks(svg, mappedData.xTicks);
+    if(i < chartsInARow) {
+        xAxis.renderTickValues(svg, mappedData.xTicks, charts[i].xData);
     }
 
     var yTitleRect = svgHelper.drawRectByClass(chartLbWidth, chartUbHeight - 7, 30, chartWidth, "y-title-rect");
@@ -170,27 +158,6 @@ LineChartRenderer.prototype.drawIncompleteCharts = function(i, charts, multiChar
     var yTitle = svgHelper.drawTextByClass((chartUbWidth / 2) - 15, chartUbHeight + 15, yTitleContent,
                                            "y-title");
     svg.appendChild(yTitle);
-
-    // if (i === multiCharts.length - 1) {
-    //     var xTitleContent = charts[i].xUnit === "" ?
-    //         charts[i].xTitle : charts[i].xTitle + " (" + charts[i].xUnit + ")";
-    //     var xTitle = svgHelper.drawTextByClass((chartWidth / 2), chartUbHeight + 4,
-    //                                            xTitleContent, "x-title");
-    //     svg.appendChild(xTitle);
-    // }
-
-    for (var xTick of mappedData.xTicks) {
-        var xTickLine = svgHelper.drawLineByClass(xTick, chartLbHeight - 5 - 15, xTick,
-                                                  chartLbHeight - 15, "xTick");
-        svg.appendChild(xTickLine);
-
-        if(i < chartsInARow) {
-            var xValuesContent = charts[i].xData[mappedData.xTicks.indexOf(xTick)];
-            var xValues = svgHelper.drawTextByClass(xTick - 13, chartLbHeight - 35,
-                                                    xValuesContent, "x-value");
-            svg.appendChild(xValues);
-        }
-    }
 
     for (var l = 0; l < mappedData.yData.length - 1; l++) {
         var graphLine;
@@ -253,10 +220,10 @@ LineChartRenderer.prototype.createCharts = function(charts, height, width) {
 
         if(columnsAreComplete) {
             this.drawCompleteCharts(i, charts, multiCharts, chartsInARow, svgHelper,
-                svg, height, width);
+                svg, height, width, columnsAreComplete);
         } else {
             this.drawIncompleteCharts(i, charts, multiCharts, chartsInARow, svgHelper,
-                svg, height, width);
+                svg, height, width, columnsAreComplete);
         }
 
         multiCharts[i].appendChild(svg);
