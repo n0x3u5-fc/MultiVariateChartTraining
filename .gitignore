@@ -47,3 +47,4 @@ Temporary Items
 .apdisk
 jsconfig.json
 .jshintrc
+node_modules

@@ -7,7 +7,7 @@
 		"width"     : 380,
 		"units"     : "months,mg,mg,kg,",
 		"sortBy"    : "value",
-		"sortOrder" : "ascending"
+		"sortOrder" : "descending"
 	},
 	"data": {
 		"Time"     : "JAN,FEB,MAR,APR,MAY,JUN,SEPT",

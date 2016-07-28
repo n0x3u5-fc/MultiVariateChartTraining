@@ -1,11 +1,10 @@
-var data = new Data();
-data.ajaxLoader('res/data/user_data.json', data.dataParser.bind(data));
-data.customSort = function() {
-    //custom average
+var chart = new Chart('res/data/user_data.json');
+//custom average function
+chart.customSort = function() {
     'use strict';
     var averages = [];
     var sortOrder = "descending";
-    for(var chartDatum of data.chartData) {
+    for(var chartDatum of this.chartData) {
         var sum = 0, length = 0;
         for(var yDatum of chartDatum.yData) {
             if(yDatum !== "") {
@@ -15,5 +14,7 @@ data.customSort = function() {
         }
         averages.push(sum / length);
     }
-    data.chartData = data.multiSort(averages, data.chartData, sortOrder);
+    this.chartData = this.multiSort(averages, this.chartData, sortOrder);
 };
+
+chart.render();

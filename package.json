@@ -1,0 +1,31 @@
+{
+  "name": "multivariate-chart-training",
+  "version": "0.2.5",
+  "description": "A full-fledged Muti Variate Chart developed using JavaScript",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/n0x3u5-fc/MultiVariateChartTraining.git"
+  },
+  "keywords": [
+    "chart",
+    "charts",
+    "multi",
+    "variate",
+    "multivariate",
+    "trellis"
+  ],
+  "author": "Nakshatra Mukhopadhyay",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/n0x3u5-fc/MultiVariateChartTraining/issues"
+  },
+  "homepage": "https://github.com/n0x3u5-fc/MultiVariateChartTraining#readme",
+  "devDependencies": {
+    "google-closure-compiler": "^20160713.1.0",
+    "gulp": "^3.9.1",
+    "gulp-sourcemaps": "^1.6.0"
+  }
+}
