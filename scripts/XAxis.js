@@ -1,3 +1,6 @@
+/**
+ * @constructor
+ */
 var XAxis = function(startX, startY, endX, endY, className, columnsAreComplete) {
 	'use strict';
 	Axis.call(this, startX, startY, endX, endY, className, columnsAreComplete);

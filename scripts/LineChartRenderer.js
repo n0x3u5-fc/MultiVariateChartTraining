@@ -1,3 +1,6 @@
+/**
+ * @constructor
+ */
 var LineChartRenderer = function(charts, chartProperties) {
     'use strict';
     this.charts = charts;

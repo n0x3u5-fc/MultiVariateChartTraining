@@ -1,3 +1,6 @@
+/**
+ * @constructor
+ */
 var Data = function() {
     'use strict';
     this.caption    = "";

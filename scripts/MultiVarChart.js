@@ -1,3 +1,6 @@
+/**
+ * @constructor
+ */
 var MultiVarChart = function(index, type, xTitle, yTitle, xData, yData, xUnit, yUnit) {
 	'use strict';
     this.index  = index;

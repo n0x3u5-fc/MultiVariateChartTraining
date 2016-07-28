@@ -1,3 +1,6 @@
+/**
+ * @constructor
+ */
 var Axis = function(startX, startY, endX, endY, className, columnsAreComplete) {
 	'use strict';
 	this.startX    = startX;
