@@ -1,8 +1,6 @@
 /**
- * Calculates and display all properties of all charts one chart at a time
- *
  * @constructor
- * @param {Object[]} MultiVarChart - An array of charts whse properties need calculating
+ * Calculates and display all properties of all charts one chart at a time
  */
 var ChartPropertyCalculator = function(charts) {
     'use strict';
@@ -87,7 +85,7 @@ ChartPropertyCalculator.prototype.dataMapper = function(height, width, lbHeight,
 /**
  * Calculates the tick mark values so that the axes look pretty
  * @param {number} yMin - The minimum value of the user given Y data
- * @param {number} yMin - The maximum value of the user given Y data
+ * @param {number} yMax - The maximum value of the user given Y data
  * @param {number} [ticks=8] - An optional value suggesting the number of ticks to be used
  */
 ChartPropertyCalculator.prototype.calculateYAxis = function(yMin, yMax, ticks) {

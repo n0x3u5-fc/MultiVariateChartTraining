@@ -1,3 +1,6 @@
+/**
+ * @constructor
+ */
 var MappedChart = function(index, xTitle, yTitle, xData, yData, yTicks, xTicks) {
 	'use strict';
     this.index  = index;

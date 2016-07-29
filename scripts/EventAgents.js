@@ -1,3 +1,6 @@
+/**
+ * @constructor
+ */
 var EventAgents = function(chartType) {
     'use strict';
     this.chartType = chartType;

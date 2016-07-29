@@ -1,3 +1,6 @@
+/**
+ * @constructor
+ */
 var Chart = function(url) {
     'use strict';
     this.render = function() {
