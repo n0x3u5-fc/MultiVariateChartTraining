@@ -6,6 +6,8 @@ var Chart = function(url) {
     this.render = function() {
         var data = new Data();
         data.ajaxLoader(url, data.dataParser.bind(data));
-        data.customSort = this.customSort;
+        if(this.customSort) {
+        	data.customSort = this.customSort;
+        }
     };
 };
