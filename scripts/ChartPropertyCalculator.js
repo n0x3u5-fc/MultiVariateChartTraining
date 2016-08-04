@@ -14,8 +14,8 @@ ChartPropertyCalculator.prototype.dataMapper = function(height, width, lbHeight,
     var xTicks = [];
     var yData  = [];
     var xData  = [];
-
     var chartType = chart.type;
+    var chartVis = chart.vis;
     var yTicksMin = chart.yTicks[0];
     var yTicksMax = chart.yTicks[chart.yTicks.length - 1];
     var xTicksMin = chart.xTicks[0];
@@ -24,59 +24,96 @@ ChartPropertyCalculator.prototype.dataMapper = function(height, width, lbHeight,
     var yDataMax  = Math.max.apply(Math, chart.yData.map(chartUtilities.nullMaxMapper));
     var xDataMin  = 0;
     var xDataMax  = chart.xData.length - 1;
+    if (chartVis === "trellis") {
+        for (var yTick of chart.yTicks) {
+            var yTickVal = lbHeight;
+            var yTickInterval = height / (yTicksMax - yTicksMin);
+            yTickVal += yTickInterval * (yTick - yTicksMin);
+            yTicks.push(Math.floor(yTickVal));
+        }
+        for (var yDatum of chart.yData) {
+            if (yDatum === "") {
+                yData.push("");
+            } else {
+                var yDataVal  = 0;
+                var yInterval = height / (yTicksMax - yTicksMin);
+                yDataVal += yInterval * (yDatum - yTicksMin);
+                yData.push(Math.floor(yDataVal));
+            }
+        }
+        // yTicks.push(tickVal);
+        if(chartType === "column") {
+            var divDiff = Math.floor((width - 80) / (chart.xData.length - 1));
+            var tickVal = lbWidth + 40;
+            for (var xTick of chart.xData) {
+                xTicks.push(tickVal);
+                tickVal += divDiff;
+            }
+            for (var i = 0; i <= xDataMax; i++) {
+                var xDataVal = 40;
+                var xInterval = (width - 80) / (xDataMax - xDataMin);
+                if (i === 0) {
+                    xDataVal += xInterval * (i - xTicksMin);
+                } else {
+                    xDataVal += xInterval * (i - xDataMin);
+                }
+                xData.push(Math.floor(xDataVal));
+            }
+        } else if(chartType === "line") {
+            var divDiff = Math.floor(width / (chart.xData.length - 1));
+            var tickVal = lbWidth;
+            for (var xTick of chart.xData) {
+                xTicks.push(tickVal);
+                tickVal += divDiff;
+            }
+            for (var i = 0; i <= xDataMax; i++) {
+                var xDataVal = 0;
+                var xInterval = width / (xDataMax - xDataMin);
+                if (i === 0) {
+                    xDataVal += xInterval * (i - xTicksMin);
+                } else {
+                    xDataVal += xInterval * (i - xDataMin);
+                }
+                xData.push(Math.floor(xDataVal));
+            }
+        }
+    } else if(chartVis === "crosstabs"){
+        for (var yTick of chart.yTicks) {
+            var yTickVal = lbWidth;
+            var yTickInterval = width / (yTicksMax - yTicksMin);
+            yTickVal += yTickInterval * (yTick - yTicksMin);
+            yTicks.push(Math.floor(yTickVal));
+        }
+        for (var yDatum of chart.yData) {
+            if (yDatum === "") {
+                yData.push("");
+            } else {
+                var yDataVal  = 0;
+                var yInterval = width / (yTicksMax - yTicksMin);
+                yDataVal += yInterval * (yDatum - yTicksMin);
+                yData.push(Math.floor(yDataVal));
+            }
+        }
+        if (chartType === "bar") {
+            var divDiff = Math.floor((height - 45) / (chart.xData.length - 1));
+            var tickVal = lbHeight + 20;
+            for (var xTick of chart.xData) {
+                xTicks.push(tickVal);
+                tickVal += divDiff;
+            }
+            for (var i = 0; i <= xDataMax; i++) {
+                var xDataVal = 20;
+                var xInterval = (height - 45) / (xDataMax - xDataMin);
+                if (i === 0) {
+                    xDataVal += xInterval * (i - xDataMin);
+                } else {
+                    xDataVal += xInterval * (i - xDataMin);
+                }
+                xData.push(Math.floor(xDataVal));
+            }
+        }
+    }
 
-    for (var yTick of chart.yTicks) {
-        var yTickVal = lbHeight;
-        var yTickInterval = height / (yTicksMax - yTicksMin);
-        yTickVal += yTickInterval * (yTick - yTicksMin);
-        yTicks.push(Math.floor(yTickVal));
-    }
-    for (var yDatum of chart.yData) {
-        if (yDatum === "") {
-            yData.push("");
-        } else {
-            var yDataVal  = 0;
-            var yInterval = height / (yTicksMax - yTicksMin);
-            yDataVal += yInterval * (yDatum - yTicksMin);
-            yData.push(Math.floor(yDataVal));
-        }
-    }
-    // yTicks.push(tickVal);
-    if(chartType === "column") {
-        var divDiff = Math.floor((width - 80) / (chart.xData.length - 1));
-        var tickVal = lbWidth + 40;
-        for (var xTick of chart.xData) {
-            xTicks.push(tickVal);
-            tickVal += divDiff;
-        }
-        for (var i = 0; i <= xDataMax; i++) {
-            var xDataVal = 40;
-            var xInterval = (width - 80) / (xDataMax - xDataMin);
-            if (i === 0) {
-                xDataVal += xInterval * (i - xTicksMin);
-            } else {
-                xDataVal += xInterval * (i - xDataMin);
-            }
-            xData.push(Math.floor(xDataVal));
-        }
-    } else {
-        var divDiff = Math.floor(width / (chart.xData.length - 1));
-        var tickVal = lbWidth;
-        for (var xTick of chart.xData) {
-            xTicks.push(tickVal);
-            tickVal += divDiff;
-        }
-        for (var i = 0; i <= xDataMax; i++) {
-            var xDataVal = 0;
-            var xInterval = width / (xDataMax - xDataMin);
-            if (i === 0) {
-                xDataVal += xInterval * (i - xTicksMin);
-            } else {
-                xDataVal += xInterval * (i - xDataMin);
-            }
-            xData.push(Math.floor(xDataVal));
-        }
-    }
     var mappedChart = new MappedChart(chart.index, chart.xTitle,
         chart.yTitle, xData, yData, yTicks, xTicks);
     return mappedChart;

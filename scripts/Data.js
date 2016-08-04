@@ -37,6 +37,7 @@ Data.prototype.dataParser = function(json) {
     this.subCaption = json.metadata.subCaption;
     this.height     = json.metadata.height;
     this.width      = json.metadata.width;
+    this.vis        = json.metadata.visualization;
     this.type       = json.metadata.type;
     this.sortBy     = json.metadata.sortBy;
     this.sortOrder  = json.metadata.sortOrder;
@@ -53,7 +54,7 @@ Data.prototype.dataParser = function(json) {
 
         if (!this.allSame(yData, "")) {
             var units = json.metadata.units.split(",");
-            var chart = new MultiVarChart(i, this.type, jsonDataKeys[0],
+            var chart = new MultiVarChart(i, this.vis, this.type, jsonDataKeys[0],
                 jsonDataKeys[i], xData, yData, units[0], units[i]);
             this.chartData.push(chart);
         }
@@ -85,16 +86,27 @@ Data.prototype.dataParser = function(json) {
     //     var eventAgent = new EventAgents(this.type);
     //     eventAgent.crosshairHandler(document.getElementsByClassName("chart-svg"));
     // });
-    if(this.type === "line") {
-        chartRenderer = new LineChartRenderer(this.chartData, chartProperties);
-        chartRenderer.createCaptions("chart-area", this.caption, this.subCaption);
-        chartRenderer.displayCharts(this.height, this.width);
-    } else if(this.type === "column") {
-        chartRenderer = new ColumnChartRenderer(this.chartData, chartProperties);
-        chartRenderer.createCaptions("chart-area", this.caption, this.subCaption);
-        chartRenderer.displayCharts(this.height, this.width);
+    if(this.vis === "crosstabs") {
+        if(this.type === "bar") {
+            chartRenderer = new BarChartRenderer(this.chartData, chartProperties);
+            chartRenderer.displayCharts(this.height, this.width);
+        } else {
+            console.log("I'm sorry, Dave. You are not allowed to do that.");
+        }
+    } else if(this.vis === "trellis") {
+        if(this.type === "line") {
+            chartRenderer = new LineChartRenderer(this.chartData, chartProperties);
+            chartRenderer.createCaptions("chart-area", this.caption, this.subCaption);
+            chartRenderer.displayCharts(this.height, this.width);
+        } else if(this.type === "column") {
+            chartRenderer = new ColumnChartRenderer(this.chartData, chartProperties);
+            chartRenderer.createCaptions("chart-area", this.caption, this.subCaption);
+            chartRenderer.displayCharts(this.height, this.width);
+        } else {
+            console.log("Sorry Dave. I can't let you do that.");
+        }
     } else {
-        console.log("Sorry Dave. I can't let you do that.");
+        console.log("Sorry Dave. I'm afraid I can't let you do that.");
     }
     var eventAgent = new EventAgents(this.type);
     eventAgent.crosshairHandler(document.getElementsByClassName("chart-svg"));
