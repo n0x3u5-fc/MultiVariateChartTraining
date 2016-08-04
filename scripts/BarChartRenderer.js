@@ -8,7 +8,7 @@ var BarChartRenderer = function(charts, chartProperties) {
 };
 BarChartRenderer.prototype.displayCharts = function(height, width) {
     'use strict';
-    var maxY = 0, minY = 0;
+    var maxY = -Infinity, minY = Infinity;
     for (var i = 0; i < this.charts.length; i++) {
         var tempMaxY = Math.max.apply(Math, this.charts[i].yData.map(chartUtilities.nullMaxMapper));
         var tempMinY = Math.min.apply(Math, this.charts[i].yData.map(chartUtilities.nullMinMapper));
@@ -22,9 +22,11 @@ BarChartRenderer.prototype.displayCharts = function(height, width) {
             this.createDivs("chart-area");
         }
     }
+
     for(i = 0; i < this.charts.length; i++) {
         if (minY !== Infinity || maxY !== -Infinity) {
-            this.charts[i].yTicks = this.chartProperties.calculateYAxis(0, this.charts[i].xData.length);
+            console.log(this.charts[i]);
+            this.charts[i].yTicks = this.chartProperties.calculateYAxis(minY, maxY);
             this.charts[i].xTicks = this.chartProperties.calculateYAxis(minY, maxY);
         }
     }
@@ -53,9 +55,10 @@ BarChartRenderer.prototype.drawCompleteCharts = function(i, charts, multiCharts,
     var mappedData = this.chartProperties.dataMapper(chartHeight, chartWidth, chartLbHeight,
                                                      chartLbWidth, charts[i]);
     mappedCharts.push(mappedData);
-
+    console.log(mappedData);
     var yAxis = new YAxis(chartLbWidth, chartLbHeight - 55, chartLbWidth, chartUbHeight - 55,
                           "yAxis", columnsAreComplete);
+    yAxis.type = "category";
     yAxis.render(svg);
     yAxis.renderTicks(svg, mappedData.xTicks);
     yAxis.renderTickValues(svg, mappedData.xTicks, charts[i].xData);
@@ -63,10 +66,11 @@ BarChartRenderer.prototype.drawCompleteCharts = function(i, charts, multiCharts,
 
     var xAxis = new XAxis(chartUbWidth, chartUbHeight - 55, chartLbWidth, chartUbHeight - 55,
                           "xAxis", columnsAreComplete);
+    xAxis.type = "numeric";
     xAxis.render(svg);
     xAxis.renderTicks(svg, mappedData.yTicks);
     if (i >= multiCharts.length - chartsInARow) {
-        xAxis.renderTickValues(svg, mappedData.yTicks, charts[i].xTicks);
+        xAxis.renderTickValues(svg, mappedData.yTicks, charts[i].yTicks);
     }
 
     var yTitleRect = svgHelper.drawRectByClass(chartLbWidth, chartLbHeight - 55 - 40, 30, chartWidth, "y-title-rect");
@@ -77,37 +81,37 @@ BarChartRenderer.prototype.drawCompleteCharts = function(i, charts, multiCharts,
                                            "y-title");
     svg.appendChild(yTitle);
 
-    /*for (var k = 0; k < mappedData.yData.length; k++) {
+    for (var k = 0; k < mappedData.yData.length; k++) {
         if (mappedData.yData[k] !== "") {
-            var anchor = svgHelper.drawCircleByClass(mappedData.xData[k] + chartLbWidth,
-                                    chartHeight - mappedData.yData[k] + chartLbHeight - 55,
+            var anchor = svgHelper.drawCircleByClass(mappedData.yData[k] + chartLbWidth,
+                                    mappedData.xData[k] + chartLbHeight - 55,
                                     4, "graphCircle");
             anchor.setAttributeNS(null, "data-value", charts[i].yData[k]);
             // svg.appendChild(anchor);
-            var plotWidth = (chartWidth / mappedData.xData.length) - 10;
+            var plotHeight = (chartHeight / mappedData.xData.length) - 10;
             if(svg.getElementsByClassName("zeroPlane").length > 0) {
-                var xZeroLine = svg.getElementsByClassName("zeroPlane");
-                var zeroPlaneY = xZeroLine[0].getAttributeNS(null, "y1");
-                if(charts[i].yData[k] < 0) {
-                    var columnHeight = chartHeight - mappedData.yData[k] + chartLbHeight - 55 - zeroPlaneY;
-                    columnPlot = svgHelper.drawRectByClass(mappedData.xData[k] + chartLbWidth - (plotWidth / 2),
-                    zeroPlaneY - 1, columnHeight, plotWidth, "column-plot");
-                } else {
-                    columnPlot = svgHelper.drawRectByClass(mappedData.xData[k] + chartLbWidth - (plotWidth / 2),
-                    chartUbHeight - mappedData.yData[k] - 55,
-                    mappedData.yData[k] - (chartUbHeight - zeroPlaneY) + 55, plotWidth,
-                    "column-plot");
-                }
+                // var xZeroLine = svg.getElementsByClassName("zeroPlane");
+                // var zeroPlaneY = xZeroLine[0].getAttributeNS(null, "y1");
+                // if(charts[i].yData[k] < 0) {
+                //     var columnHeight = chartHeight - mappedData.yData[k] + chartLbHeight - 55 - zeroPlaneY;
+                //     columnPlot = svgHelper.drawRectByClass(mappedData.xData[k] + chartLbWidth - (plotWidth / 2),
+                //     zeroPlaneY - 1, columnHeight, plotWidth, "column-plot");
+                // } else {
+                //     columnPlot = svgHelper.drawRectByClass(mappedData.xData[k] + chartLbWidth - (plotWidth / 2),
+                //     chartUbHeight - mappedData.yData[k] - 55,
+                //     mappedData.yData[k] - (chartUbHeight - zeroPlaneY) + 55, plotWidth,
+                //     "column-plot");
+                // }
             } else {
-                columnPlot = svgHelper.drawRectByClass(mappedData.xData[k] + chartLbWidth - (plotWidth / 2),
-                chartUbHeight - mappedData.yData[k] - 55,
-                mappedData.yData[k], plotWidth,
+                columnPlot = svgHelper.drawRectByClass(chartLbWidth,
+                mappedData.xData[k] + chartLbHeight - 55 - (plotHeight / 2),
+                plotHeight, mappedData.yData[k],
                 "column-plot");
             }
             columnPlot.setAttributeNS(null, "data-value", charts[i].yData[k]);
             svg.appendChild(columnPlot);
         }
-    } */
+    }
 };
 
 BarChartRenderer.prototype.drawIncompleteCharts = function(i, charts, multiCharts,
@@ -203,11 +207,11 @@ BarChartRenderer.prototype.createCharts = function(charts, height, width) {
         }
 
         multiCharts[i].appendChild(svg);
-        var xValueElements = svg.getElementsByClassName("x-value");
-        for(var e = 0; e < xValueElements.length; e++) {
-            var rotationPt = svgHelper.getRotationPoint(xValueElements[e]);
-            xValueElements[e].setAttributeNS(null, "transform",
-                "rotate(270 " + rotationPt + ")");
-        }
+        // var xValueElements = svg.getElementsByClassName("x-value");
+        // for(var e = 0; e < xValueElements.length; e++) {
+        //     var rotationPt = svgHelper.getRotationPoint(xValueElements[e]);
+        //     xValueElements[e].setAttributeNS(null, "transform",
+        //         "rotate(270 " + rotationPt + ")");
+        // }
     }
 };

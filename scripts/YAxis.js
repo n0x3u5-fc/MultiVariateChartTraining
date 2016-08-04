@@ -27,11 +27,24 @@ YAxis.prototype.renderTickValues = function(svg, yTicks, yData) {
 	for(var yTick of yTicks) {
 		var yValuesContent = yData[yTicks.indexOf(yTick)];
         if(this.columnsAreComplete) {
-            yValues = this.svgHelper.drawTextByClass(50 - 5, this.endY + this.startY - yTick + 55 + 5,
-                                                     yValuesContent, "y-value");
+            if(this.type === "category") {
+                yValues = this.svgHelper.drawTextByClass(50 - 5, yTick - this.startY + 5,
+                                                         yValuesContent, "y-value");
+            } else {
+                yValues = this.svgHelper.drawTextByClass(50 - 5,
+                                                         this.endY + this.startY - yTick + 55 + 5,
+                                                         yValuesContent, "y-value");
+            }
         } else {
-            yValues = this.svgHelper.drawTextByClass(0 + 50, this.endY + this.startY - yTick + 15 + 5,
-                                                     yValuesContent, "y-value");
+            if(this.type === "category") {
+                yValues = this.svgHelper.drawTextByClass(0 + 50,
+                                                         this.endY + this.startY - yTick + 15 + 5,
+                                                         yValuesContent, "y-value");
+            } else {
+                yValues = this.svgHelper.drawTextByClass(0 + 50,
+                                                         this.endY + this.startY - yTick + 15 + 5,
+                                                         yValuesContent, "y-value");
+            }
         }
         yValues.setAttributeNS(null, "text-anchor", "end");
         svg.appendChild(yValues);
@@ -43,12 +56,12 @@ YAxis.prototype.renderDivs = function(svg, yTicks, chartHeight, chartLbWidth, ch
 	for(var yTick of yTicks) {
         if(this.columnsAreComplete) {
             yDivRect = this.svgHelper.drawRectByClass(chartLbWidth, yTick - 55,
-                                                 chartHeight - yTick + yTicks[0], chartWidth,
-                                                 "yDiv");
+                                                      chartHeight - yTick + yTicks[0], chartWidth,
+                                                      "yDiv");
         } else {
             yDivRect = this.svgHelper.drawRectByClass(chartLbWidth, yTick - 15,
-                                                 chartHeight - yTick + yTicks[0], chartWidth,
-                                                 "yDiv");
+                                                      chartHeight - yTick + yTicks[0], chartWidth,
+                                                      "yDiv");
         }
         svg.appendChild(yDivRect);
 	}
@@ -60,13 +73,34 @@ YAxis.prototype.renderZeroPlane = function(svg, yTicks, yData, chartWidth) {
         var yValuesContent = yData[yTicks.indexOf(yTick)];
         if(yValuesContent == 0) {
             if(this.columnsAreComplete) {
-                xZeroLine = this.svgHelper.drawLineByClass(this.startX, this.endY + this.startY - yTick + 55,
-                                                       this.startX + chartWidth, this.endY + this.startY - yTick + 55, "zeroPlane");
+                if(this.type === "category") {
+                    xZeroLine = this.svgHelper.drawLineByClass(this.startX,
+                                                               yTick - 5,
+                                                               this.startX,
+                                                               yTick + (this.endY - this.startY) - 5,
+                                                               "zeroPlane");
+                } else {
+                    xZeroLine = this.svgHelper.drawLineByClass(this.startX,
+                                                               this.endY + this.startY - yTick + 55,
+                                                               this.startX + chartWidth,
+                                                               this.endY + this.startY - yTick + 55,
+                                                               "zeroPlane");
+                }
             } else {
-                xZeroLine = this.svgHelper.drawLineByClass(this.startX, this.endY + this.startY - yTick + 15,
-                                                       this.startX + chartWidth, this.endY + this.startY - yTick + 15, "zeroPlane");
+                if(this.type === "category") {
+                    xZeroLine = this.svgHelper.drawLineByClass(this.startX,
+                                                               this.endY + this.startY - yTick + 15,
+                                                               this.startX + chartWidth,
+                                                               this.endY + this.startY - yTick + 15,
+                                                               "zeroPlane");
+                } else {
+                    xZeroLine = this.svgHelper.drawLineByClass(this.startX,
+                                                               this.endY + this.startY - yTick + 15,
+                                                               this.startX + chartWidth,
+                                                               this.endY + this.startY - yTick + 15,"zeroPlane");
+                }
             }
-            xZeroLine.setAttributeNS(null, "stroke-opacity", 0);
+            xZeroLine.setAttributeNS(null, "stroke-opacity", 100);
             svg.appendChild(xZeroLine);
             yValuesContent = 0;
         }
@@ -79,7 +113,8 @@ YAxis.prototype.renderZeroPlane = function(svg, yTicks, yData, chartWidth) {
     //     "yDiv");
     // svg.appendChild(yDivLine);
     // var yDivRect = svgHelper.drawRectByClass(chartLbWidth, yTick - 55,
-    //                                          chartHeight - yTick + mappedData.yTicks[0], chartWidth,
+    //                                          chartHeight - yTick + mappedData.yTicks[0],
+    //                                          chartWidth,
     //                                          "yDiv");
     // svg.appendChild(yDivRect);
 // };

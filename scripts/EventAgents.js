@@ -212,7 +212,9 @@ EventAgents.prototype.prepAllPlots = function(event) {
     var targetSvgHeight = Number(event.target.getAttributeNS(null, "height"));
     var targetSvgX      = Number(event.target.getAttributeNS(null, "x"));
     var targetSvgY      = Number(event.target.getAttributeNS(null, "y"));
-    if(event.target.getBBox().x == event.detail.hoveredPlotX) {
+    var hoveredPlotX = Math.floor(Number(event.detail.hoveredPlotX) * 1000) / 1000;
+    var targetBBoxX = Math.floor(event.target.getBBox().x * 1000) / 1000;
+    if(targetBBoxX == hoveredPlotX) {
         event.target.style.fill = "#b94748";
     }
     tooltipBg = this.svgHelper.drawRectByClass(event.detail.mousex, event.detail.mousey, 20, 60,
@@ -247,7 +249,9 @@ EventAgents.prototype.moveTooltips = function(event) {
     var tooltips   = event.target.parentNode.getElementsByClassName("otherTooltip");
     var tooltipBgs = event.target.parentNode.getElementsByClassName("otherTooltipBg");
     var hoverColumnLeft;
-    if(event.target.getBBox().x == event.detail.hoveredPlotX) {
+    var hoveredPlotX = Math.floor(Number(event.detail.hoveredPlotX) * 1000) / 1000;
+    var targetBBoxX = Math.floor(event.target.getBBox().x * 1000) / 1000;
+    if(targetBBoxX == hoveredPlotX) {
         tooltipBgs[0].style.visibility = "initial";
         tooltipBgs[0].setAttributeNS(null, "x", event.detail.mousex);
         tooltipBgs[0].setAttributeNS(null, "y", event.detail.mousey);
