@@ -28,7 +28,7 @@ YAxis.prototype.renderTickValues = function(svg, yTicks, yData) {
 		var yValuesContent = yData[yTicks.indexOf(yTick)];
         if(this.columnsAreComplete) {
             if(this.type === "category") {
-                yValues = this.svgHelper.drawTextByClass(50 - 5, yTick - this.startY + 5,
+                yValues = this.svgHelper.drawTextByClass(50 - 5, yTick - 55 + 5,
                                                          yValuesContent, "y-value");
             } else {
                 yValues = this.svgHelper.drawTextByClass(50 - 5,
@@ -101,7 +101,7 @@ YAxis.prototype.renderZeroPlane = function(svg, yTicks, yData, chartWidth) {
                 }
             }
             xZeroLine.setAttributeNS(null, "stroke-opacity", 100);
-            svg.appendChild(xZeroLine);
+            // svg.appendChild(xZeroLine);
             yValuesContent = 0;
         }
     }

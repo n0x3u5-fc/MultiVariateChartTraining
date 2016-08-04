@@ -122,7 +122,7 @@ Data.prototype.sortData = function(sortBy) {
             this.sortByValue();
             break;
         default:
-            console.log("default");
+            console.log("no sorting applied");
     }
 };
 

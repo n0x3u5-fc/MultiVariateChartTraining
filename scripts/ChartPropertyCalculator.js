@@ -95,7 +95,7 @@ ChartPropertyCalculator.prototype.dataMapper = function(height, width, lbHeight,
             }
         }
         if (chartType === "bar") {
-            var divDiff = Math.floor((height - 45) / (chart.xData.length - 1));
+            var divDiff = Math.floor((height - 35) / (chart.xData.length - 1));
             var tickVal = lbHeight + 20;
             for (var xTick of chart.xData) {
                 xTicks.push(tickVal);
@@ -103,7 +103,7 @@ ChartPropertyCalculator.prototype.dataMapper = function(height, width, lbHeight,
             }
             for (var i = 0; i <= xDataMax; i++) {
                 var xDataVal = 20;
-                var xInterval = (height - 45) / (xDataMax - xDataMin);
+                var xInterval = (height - 35) / (xDataMax - xDataMin);
                 if (i === 0) {
                     xDataVal += xInterval * (i - xDataMin);
                 } else {

@@ -50,6 +50,20 @@ chartUtilities.getInterpolatedVal = function(x1, y1, x2, y2, x) {
     return interpolatedVal;
 };
 
+chartUtilities.shortenLargeNumber = function(num, digits) {
+    'use strict';
+    var units = ['k', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y'],
+        decimal;
+    for(var i=units.length-1; i>=0; i--) {
+        decimal = Math.pow(1000, i+1);
+
+        if(num <= -decimal || num >= decimal) {
+            return +(num / decimal).toFixed(digits) + units[i];
+        }
+    }
+    return num;
+}
+
 chartUtilities.inheritsFrom = function(child, parent) {
     'use strict';
     child.prototype = Object.create(parent.prototype);

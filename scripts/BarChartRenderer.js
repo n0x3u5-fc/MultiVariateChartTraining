@@ -45,6 +45,7 @@ BarChartRenderer.prototype.drawCompleteCharts = function(i, charts, multiCharts,
     'use strict';
     var columnPlot;
     var mappedCharts  = [];
+    var formattedTickValues = [];
     var chartUbHeight = Math.ceil(height - (0.001 * height)) + 55;
     var chartUbWidth  = Math.ceil(width - (0.025 * width)) + 55;
     var chartLbHeight = Math.floor(0 + (0.2 * height)) + 55;
@@ -70,7 +71,10 @@ BarChartRenderer.prototype.drawCompleteCharts = function(i, charts, multiCharts,
     xAxis.render(svg);
     xAxis.renderTicks(svg, mappedData.yTicks);
     if (i >= multiCharts.length - chartsInARow) {
-        xAxis.renderTickValues(svg, mappedData.yTicks, charts[i].yTicks);
+        for(var yTick of charts[i].yTicks) {
+            formattedTickValues.push(chartUtilities.shortenLargeNumber(yTick, 2));
+        }
+        xAxis.renderTickValues(svg, mappedData.yTicks, formattedTickValues);
     }
 
     var yTitleRect = svgHelper.drawRectByClass(chartLbWidth, chartLbHeight - 55 - 40, 30, chartWidth, "y-title-rect");
@@ -88,7 +92,7 @@ BarChartRenderer.prototype.drawCompleteCharts = function(i, charts, multiCharts,
                                     4, "graphCircle");
             anchor.setAttributeNS(null, "data-value", charts[i].yData[k]);
             // svg.appendChild(anchor);
-            var plotHeight = (chartHeight / mappedData.xData.length) - 10;
+            var plotHeight = (chartHeight / mappedData.xData.length) - 13;
             if(svg.getElementsByClassName("zeroPlane").length > 0) {
                 // var xZeroLine = svg.getElementsByClassName("zeroPlane");
                 // var zeroPlaneY = xZeroLine[0].getAttributeNS(null, "y1");
@@ -207,11 +211,11 @@ BarChartRenderer.prototype.createCharts = function(charts, height, width) {
         }
 
         multiCharts[i].appendChild(svg);
-        // var xValueElements = svg.getElementsByClassName("x-value");
-        // for(var e = 0; e < xValueElements.length; e++) {
-        //     var rotationPt = svgHelper.getRotationPoint(xValueElements[e]);
-        //     xValueElements[e].setAttributeNS(null, "transform",
-        //         "rotate(270 " + rotationPt + ")");
-        // }
+        var xValueElements = svg.getElementsByClassName("x-value");
+        for(var e = 0; e < xValueElements.length; e++) {
+            var rotationPt = svgHelper.getRotationPoint(xValueElements[e]);
+            xValueElements[e].setAttributeNS(null, "transform",
+                "rotate(270 " + rotationPt + ")");
+        }
     }
 };
