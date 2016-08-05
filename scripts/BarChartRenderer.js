@@ -6,7 +6,13 @@ var BarChartRenderer = function(charts, chartProperties) {
 	this.charts = charts;
     this.chartProperties = chartProperties;
 };
-BarChartRenderer.prototype.displayCharts = function(height, width) {
+BarChartRenderer.prototype.displayHeaders = function(keys) {
+    'use strict';
+    for(var key of keys) {
+        console.log(key);
+    }
+};
+BarChartRenderer.prototype.displayCharts = function(height, width, rowCount) {
     'use strict';
     var maxY = -Infinity, minY = Infinity;
     for (var i = 0; i < this.charts.length; i++) {
@@ -19,24 +25,23 @@ BarChartRenderer.prototype.displayCharts = function(height, width) {
             minY = tempMinY;
         }
         if (minY !== Infinity || maxY !== -Infinity) {
-            this.createDivs("chart-area");
+            this.createDivs("chart-area", rowCount);
         }
     }
 
     for(i = 0; i < this.charts.length; i++) {
         if (minY !== Infinity || maxY !== -Infinity) {
-            console.log(this.charts[i]);
             this.charts[i].yTicks = this.chartProperties.calculateYAxis(minY, maxY);
             this.charts[i].xTicks = this.chartProperties.calculateYAxis(minY, maxY);
         }
     }
-    this.createCharts(this.charts, height, width);
+    this.createCharts(this.charts, height, width, rowCount);
 };
-BarChartRenderer.prototype.createDivs = function(targetDiv) {
+BarChartRenderer.prototype.createDivs = function(targetDiv, rowCount) {
     'use strict';
-    var div = document.createElement('div');
-    div.setAttribute('class', "multi-chart");
-    div.style.display = "inline";
+    var div = document.createElement('span');
+    div.setAttribute('class', "multi-chart" + rowCount);
+    div.style.display = "inline-block";
     var renderDiv = document.getElementById(targetDiv);
     renderDiv.appendChild(div);
 };
@@ -46,49 +51,48 @@ BarChartRenderer.prototype.drawCompleteCharts = function(i, charts, multiCharts,
     var columnPlot;
     var mappedCharts  = [];
     var formattedTickValues = [];
-    var chartUbHeight = Math.ceil(height - (0.001 * height)) + 55;
-    var chartUbWidth  = Math.ceil(width - (0.025 * width)) + 55;
-    var chartLbHeight = Math.floor(0 + (0.2 * height)) + 55;
-    var chartLbWidth  = Math.floor(0 + (0.025 * height)) + 55;
+    var chartUbHeight = Math.ceil(height);
+    var chartUbWidth  = Math.ceil(width);
+    var chartLbHeight = Math.floor(0);
+    var chartLbWidth  = Math.floor(1);
     var chartHeight   = chartUbHeight - chartLbHeight;
     var chartWidth    = chartUbWidth - chartLbWidth;
 
     var mappedData = this.chartProperties.dataMapper(chartHeight, chartWidth, chartLbHeight,
                                                      chartLbWidth, charts[i]);
     mappedCharts.push(mappedData);
-    console.log(mappedData);
-    var yAxis = new YAxis(chartLbWidth, chartLbHeight - 55, chartLbWidth, chartUbHeight - 55,
+    var yAxis = new YAxis(chartLbWidth, chartLbHeight, chartLbWidth, chartUbHeight,
                           "yAxis", columnsAreComplete);
     yAxis.type = "category";
     yAxis.render(svg);
-    yAxis.renderTicks(svg, mappedData.xTicks);
-    yAxis.renderTickValues(svg, mappedData.xTicks, charts[i].xData);
+    // yAxis.renderTicks(svg, mappedData.xTicks);
+    // yAxis.renderTickValues(svg, mappedData.xTicks, charts[i].xData);
     yAxis.renderZeroPlane(svg, mappedData.yTicks, charts[i].yTicks, chartWidth);
 
-    var xAxis = new XAxis(chartUbWidth, chartUbHeight - 55, chartLbWidth, chartUbHeight - 55,
+    var xAxis = new XAxis(chartUbWidth, chartUbHeight, chartLbWidth, chartUbHeight,
                           "xAxis", columnsAreComplete);
     xAxis.type = "numeric";
     xAxis.render(svg);
-    xAxis.renderTicks(svg, mappedData.yTicks);
+    // xAxis.renderTicks(svg, mappedData.yTicks);
     if (i >= multiCharts.length - chartsInARow) {
         for(var yTick of charts[i].yTicks) {
             formattedTickValues.push(chartUtilities.shortenLargeNumber(yTick, 2));
         }
-        xAxis.renderTickValues(svg, mappedData.yTicks, formattedTickValues);
+        // xAxis.renderTickValues(svg, mappedData.yTicks, formattedTickValues);
     }
 
-    var yTitleRect = svgHelper.drawRectByClass(chartLbWidth, chartLbHeight - 55 - 40, 30, chartWidth, "y-title-rect");
-    svg.appendChild(yTitleRect);
+    var yTitleRect = svgHelper.drawRectByClass(chartLbWidth, chartLbHeight - 40, 30, chartWidth, "y-title-rect");
+    // svg.appendChild(yTitleRect);
     var yTitleContent = charts[i].yUnit === "" ?
         charts[i].yTitle : charts[i].yTitle + " (" + charts[i].yUnit + ")";
-    var yTitle = svgHelper.drawTextByClass((chartUbWidth / 2) - 15, chartLbHeight - 55 - 20, yTitleContent,
+    var yTitle = svgHelper.drawTextByClass((chartUbWidth / 2) - 15, chartLbHeight - 20, yTitleContent,
                                            "y-title");
-    svg.appendChild(yTitle);
+    // svg.appendChild(yTitle);
 
     for (var k = 0; k < mappedData.yData.length; k++) {
         if (mappedData.yData[k] !== "") {
             var anchor = svgHelper.drawCircleByClass(mappedData.yData[k] + chartLbWidth,
-                                    mappedData.xData[k] + chartLbHeight - 55,
+                                    mappedData.xData[k] + chartLbHeight,
                                     4, "graphCircle");
             anchor.setAttributeNS(null, "data-value", charts[i].yData[k]);
             // svg.appendChild(anchor);
@@ -108,7 +112,7 @@ BarChartRenderer.prototype.drawCompleteCharts = function(i, charts, multiCharts,
                 // }
             } else {
                 columnPlot = svgHelper.drawRectByClass(chartLbWidth,
-                mappedData.xData[k] + chartLbHeight - 55 - (plotHeight / 2),
+                mappedData.xData[k] + chartLbHeight - (plotHeight / 2),
                 plotHeight, mappedData.yData[k],
                 "column-plot");
             }
@@ -191,16 +195,19 @@ BarChartRenderer.prototype.drawIncompleteCharts = function(i, charts, multiChart
     }
 };
 
-BarChartRenderer.prototype.createCharts = function(charts, height, width) {
+BarChartRenderer.prototype.createCharts = function(charts, height, width, rowCount) {
     'use strict';
     var columnsAreComplete;
     var svgHelper    = new SvgHelper();
-    var chartsInARow = Math.floor(window.innerWidth / (width + 55));
+    var chartsInARow = Math.floor(window.innerWidth / (width));
 
-    var multiCharts = document.getElementsByClassName("multi-chart");
+    var multiCharts = document.getElementsByClassName("multi-chart" + rowCount);
     columnsAreComplete = true;              // since crosstabs always have their columns complete
+
+    this.displayHeaders(charts[0].keys);
+
     for (var i = 0; i < multiCharts.length; i++) {
-        var svg = svgHelper.createSvgByClass(height + 55, width + 55, "chart-svg");
+        var svg = svgHelper.createSvgByClass(height, width, "chart-svg");
 
         if(columnsAreComplete) {
             this.drawCompleteCharts(i, charts, multiCharts, chartsInARow, svgHelper,

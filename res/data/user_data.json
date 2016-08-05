@@ -2,14 +2,14 @@
 	"metadata": {
 		"caption"      : "Multi-Variate Chart",
 		"subCaption"   : "Correlation of Age with Nutrition",
-		"visualization": "crosstabs",
-		"type"         : "bar",
-		"height"       : 130,
+		"visualization": "trellis",
+		"type"         : "column",
+		"height"       : 230,
 		"width"        : 280,
-		"units"        : "months,mg,mg,kg,"
+		"units"        : "months,mg,mg,kg,g"
 	},
 	"data": {
-		"Product": "Amaretto,Columbian,Decaf Irish Cream,Total",
+		"Product": "JAN,FEB,MAR,APR",
 		"Central": "14011,28913,26155,69080",
 		"East"   : "2993,47386,6261,56640",
 		"South"  : ",21664,11592,33265",

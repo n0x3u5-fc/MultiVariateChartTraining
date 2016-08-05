@@ -1,0 +1,40 @@
+{
+	"metadata": {
+		"caption"      : "Multi-Variate Chart",
+		"subCaption"   : "Correlation of Age with Nutrition",
+		"visualization": "crosstabs",
+		"type"         : "bar",
+		"height"       : 130,
+		"width"        : 330,
+		"units"        : ",,,"
+	},
+	"data": [{
+		"Product Type": "Coffee",
+		"Product"     : "Amaretto,Columbian,Decaf Irish Cream,Total",
+		"Central"     : "14011,28913,26155,69080",
+		"East"        : "2993,47386,6261,56640",
+		"South"       : ",21664,11592,33265",
+		"West"        : "9265,30357,18235,57856"
+	}, {
+		"Product Type": "Espresso",
+		"Product"     : "Caffe Latte,Caffe Mocha,Decaf Espresso,Regular Espresso,Total",
+		"Central"     : ",35218,24485,,59703",
+		"East"        : ",16646,7722,24036,48405",
+		"South"       : "15442,14163,15384,,44989",
+		"West"        : "20458,18876,30578,,69911"
+	}, {
+		"Product Type": "Herbal Tea",
+		"Product"     : "Chamomile,Lemon,Mint,Total",
+		"Central"     : "36570,21978,9337,67885",
+		"East"        : "2194,27176,11992,41362",
+		"South"       : "11186,14497,,25683",
+		"West"        : "25632,32274,14380,72285"
+	}, {
+		"Product Type": "Tea",
+		"Product"     : "Daarjeeling,Earl Grey,Green Tea,Total",
+		"Central"     : "30289,32881,5211,68380",
+		"East"        : "14096,6505,11571,32172",
+		"South"       : "0,0,0,0",
+		"West"        : "28769,27387,16063,72220"
+	}]
+}
