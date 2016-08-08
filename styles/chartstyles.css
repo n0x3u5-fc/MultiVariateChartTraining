@@ -28,8 +28,8 @@
 }
 
 .xTick, .yTick {
-	stroke: #aeaeae;
-	stroke-width: 2px;
+	stroke: #000000;
+	stroke-width: 1px;
 }
 
 .yDiv {

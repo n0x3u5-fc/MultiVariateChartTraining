@@ -34,7 +34,8 @@ Data.prototype.ajaxLoader = function(url, callback) {
 Data.prototype.dataParser = function(json) {
     'use strict';
 
-    var jsonDataKeys, numCharts, chartRenderer, rowCount;
+    var i, jsonDataKeys, numCharts, chartRenderer, rowCount,
+        maxY = -Infinity, minY = Infinity;
 
     this.caption    = json.metadata.caption;
     this.subCaption = json.metadata.subCaption;
@@ -42,16 +43,27 @@ Data.prototype.dataParser = function(json) {
     this.width      = json.metadata.width;
     this.vis        = json.metadata.visualization;
     this.type       = json.metadata.type;
+    this.color      = json.metadata.plotColor;
     this.sortBy     = json.metadata.sortBy;
     this.sortOrder  = json.metadata.sortOrder;
 
     if(this.vis === "crosstabs") {
         for(var datum of json.data) {
+            var keys = Object.keys(datum);
+            for(i = 2; i < keys.length; i++) {
+                var yValues = datum[keys[i]].split(",").map(Number);
+                yValues.map(function(currentValue, index) {
+                    maxY = currentValue > maxY ? currentValue : maxY;
+                    minY = currentValue < minY ? currentValue : minY;
+                });
+            }
+        }
+        for(var datum of json.data) {
             jsonDataKeys = Object.keys(datum);
             numCharts    = jsonDataKeys.length - 2;
             rowCount     = json.data.indexOf(datum);
             this.chartData = [];
-            for (var i = 2; i < jsonDataKeys.length; i++) {
+            for (i = 2; i < jsonDataKeys.length; i++) {
                 var category = datum[jsonDataKeys[0]];
                 var xData = datum[jsonDataKeys[1]].split(",");
                 var yData = datum[jsonDataKeys[i]]
@@ -62,6 +74,8 @@ Data.prototype.dataParser = function(json) {
                     var chart = new MultiVarChart(i, this.vis, this.type, jsonDataKeys[0],
                                                 jsonDataKeys[i], xData, yData, units[0], units[i]);
                     chart.keys     = jsonDataKeys;
+                    chart.minY     = minY;
+                    chart.maxY     = maxY;
                     chart.category = category;
                     this.chartData.push(chart);
                 }
@@ -76,7 +90,18 @@ Data.prototype.dataParser = function(json) {
 
             if(this.type === "bar") {
                 chartRenderer = new BarChartRenderer(this.chartData, chartProperties);
-                chartRenderer.displayCharts(this.height, this.width, rowCount);
+                chartRenderer.plotColor = this.color;
+                var width = Math.floor((document.body.clientWidth - 10) / jsonDataKeys.length);
+                var headerHeight = 20;
+                var footerHeight = 50;
+                var height = Math.floor((window.innerHeight) / json.data.length);
+                if(json.data.indexOf(datum) === 0) {
+                    chartRenderer.displayHeaders(headerHeight, width, jsonDataKeys);
+                }
+                chartRenderer.displayCharts(height - 30, width, rowCount);
+                if(json.data.indexOf(datum) === json.data.length - 1) {
+                    chartRenderer.drawX(footerHeight, width, jsonDataKeys);
+                }
             } else {
                 console.log("I'm sorry, Dave. You are not allowed to do that.");
             }
@@ -85,7 +110,7 @@ Data.prototype.dataParser = function(json) {
         jsonDataKeys = Object.keys(json.data);
         numCharts    = jsonDataKeys.length - 1;
 
-        for (var i = 1; i <= numCharts; i++) {
+        for (i = 1; i <= numCharts; i++) {
             var xData = json.data[jsonDataKeys[0]].split(",");
             var yData = json.data[jsonDataKeys[i]]
                 .split(",")

@@ -6,7 +6,8 @@
 		"type"         : "bar",
 		"height"       : 130,
 		"width"        : 330,
-		"units"        : ",,,"
+		"units"        : ",,,",
+		"plotColor"	   : "#000000"
 	},
 	"data": [{
 		"Product Type": "Coffee",

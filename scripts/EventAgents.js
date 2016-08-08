@@ -390,9 +390,12 @@ EventAgents.prototype.crosshairHandler = function(svgs) {
                 rect.addEventListener("crosshairRemoveEvent", this.removeOtherCrosshairs.bind(this));
             }
         }
-        svg.addEventListener("mousedown", this.dragSelect);
-        svg.addEventListener("customDragSelect", this.customDragSelect.bind(this));
-        svg.addEventListener("customExpandSelect", this.customExpandSelect.bind(this));
-        svg.addEventListener("customSelectPlots", this.customSelectPlots.bind(this));
+        var svgClass = svg.getAttributeNS(null, "class");
+        if(this.chartType !== "bar") {
+            svg.addEventListener("mousedown", this.dragSelect);
+            svg.addEventListener("customDragSelect", this.customDragSelect.bind(this));
+            svg.addEventListener("customExpandSelect", this.customExpandSelect.bind(this));
+            svg.addEventListener("customSelectPlots", this.customSelectPlots.bind(this));
+        }
     }
 };
