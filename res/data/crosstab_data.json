@@ -7,8 +7,8 @@
 		"height": 130,
 		"width": 330,
 		"units": ",,,",
-		"positivePlotColor": "#383838",
-		"negativePlotColor": "#ff0000"
+		"positivePlotColor": "#515151",
+		"negativePlotColor": "#AA0B0B"
 	},
 	"data": [{
 		"Product Type": "Coffee",

@@ -34,8 +34,8 @@ Data.prototype.ajaxLoader = function(url, callback) {
 Data.prototype.dataParser = function(json) {
     'use strict';
 
-    var i, jsonDataKeys, yObjectKeys, numCharts, chartRenderer, rowCount,
-        maxY = -Infinity, minY = Infinity;
+    var i, jsonDataKeys, yObjectKeys, numCharts, chartRenderer, rowCount, criteria = [], 
+    maxY = -Infinity, minY = Infinity;
 
     this.caption       = json.metadata.caption;
     this.subCaption    = json.metadata.subCaption;
@@ -111,11 +111,15 @@ Data.prototype.dataParser = function(json) {
                 if(json.data.indexOf(datum) === json.data.length - 1) {
                     chartRenderer.drawX(footerHeight, width, jsonDataKeys);
                 }
-                chartRenderer.colorPlots();
             } else {
                 console.log("I'm sorry, Dave. You are not allowed to do that.");
             }
         }
+        var allPlots = document.getElementsByClassName("bar-plot");
+        Array.from(allPlots).map(function(currentValue, index, array) {
+            criteria.push(currentValue.getAttributeNS(null, "data-criteria"));
+        });
+        chartRenderer.colorPlots(criteria);
     } else if(this.vis === "trellis"){
         jsonDataKeys = Object.keys(json.data);
         numCharts    = jsonDataKeys.length - 1;

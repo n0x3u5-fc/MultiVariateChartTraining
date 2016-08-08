@@ -52,7 +52,7 @@ chartUtilities.getInterpolatedVal = function(x1, y1, x2, y2, x) {
 
 chartUtilities.generateColor = function(color, lum) {
     'use strict';
-    lum = Math.abs(lum * 3);
+    lum = 1 - Math.abs(lum);
     // validate color string
     color = String(color).replace(/[^0-9a-f]/gi, '');
     if (color.length < 6) {
