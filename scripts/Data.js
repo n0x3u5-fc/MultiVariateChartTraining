@@ -33,38 +33,119 @@ Data.prototype.ajaxLoader = function(url, callback) {
 
 Data.prototype.dataParser = function(json) {
     'use strict';
+
+    var i, jsonDataKeys, numCharts, chartRenderer, rowCount,
+        maxY = -Infinity, minY = Infinity;
+
     this.caption    = json.metadata.caption;
     this.subCaption = json.metadata.subCaption;
     this.height     = json.metadata.height;
     this.width      = json.metadata.width;
     this.vis        = json.metadata.visualization;
     this.type       = json.metadata.type;
+    this.color      = json.metadata.plotColor;
     this.sortBy     = json.metadata.sortBy;
     this.sortOrder  = json.metadata.sortOrder;
 
-    var jsonDataKeys = Object.keys(json.data);
-    var numCharts    = jsonDataKeys.length - 1;
-    var chartRenderer;
-
-    for (var i = 1; i <= numCharts; i++) {
-        var xData = json.data[jsonDataKeys[0]].split(",");
-        var yData = json.data[jsonDataKeys[i]]
-            .split(",")
-            .map(this.numberMapper);
-
-        if (!this.allSame(yData, "")) {
-            var units = json.metadata.units.split(",");
-            var chart = new MultiVarChart(i, this.vis, this.type, jsonDataKeys[0],
-                jsonDataKeys[i], xData, yData, units[0], units[i]);
-            this.chartData.push(chart);
+    if(this.vis === "crosstabs") {
+        for(var datum of json.data) {
+            var keys = Object.keys(datum);
+            for(i = 2; i < keys.length; i++) {
+                var yValues = datum[keys[i]].split(",").map(Number);
+                yValues.map(function(currentValue, index) {
+                    maxY = currentValue > maxY ? currentValue : maxY;
+                    minY = currentValue < minY ? currentValue : minY;
+                });
+            }
         }
-    }
-    if(typeof this.customSort == "function") {
-        this.customSort();
+        for(var datum of json.data) {
+            jsonDataKeys = Object.keys(datum);
+            numCharts    = jsonDataKeys.length - 2;
+            rowCount     = json.data.indexOf(datum);
+            this.chartData = [];
+            for (i = 2; i < jsonDataKeys.length; i++) {
+                var category = datum[jsonDataKeys[0]];
+                var xData = datum[jsonDataKeys[1]].split(",");
+                var yData = datum[jsonDataKeys[i]]
+                    .split(",")
+                    .map(this.numberMapper);
+                if (!this.allSame(yData, "")) {
+                    var units = json.metadata.units.split(",");
+                    var chart = new MultiVarChart(i, this.vis, this.type, jsonDataKeys[0],
+                                                jsonDataKeys[i], xData, yData, units[0], units[i]);
+                    chart.keys     = jsonDataKeys;
+                    chart.minY     = minY;
+                    chart.maxY     = maxY;
+                    chart.category = category;
+                    this.chartData.push(chart);
+                }
+            }
+            if(typeof this.customSort == "function") {
+                this.customSort();
+            } else {
+                this.sortData(this.sortBy);
+            }
+
+            var chartProperties = new ChartPropertyCalculator(this.chartData);
+
+            if(this.type === "bar") {
+                chartRenderer = new BarChartRenderer(this.chartData, chartProperties);
+                chartRenderer.plotColor = this.color;
+                var width = Math.floor((document.body.clientWidth - 10) / jsonDataKeys.length);
+                var headerHeight = 20;
+                var footerHeight = 50;
+                var height = Math.floor((window.innerHeight) / json.data.length);
+                if(json.data.indexOf(datum) === 0) {
+                    chartRenderer.displayHeaders(headerHeight, width, jsonDataKeys);
+                }
+                chartRenderer.displayCharts(height - 30, width, rowCount);
+                if(json.data.indexOf(datum) === json.data.length - 1) {
+                    chartRenderer.drawX(footerHeight, width, jsonDataKeys);
+                }
+            } else {
+                console.log("I'm sorry, Dave. You are not allowed to do that.");
+            }
+        }
+    } else if(this.vis === "trellis"){
+        jsonDataKeys = Object.keys(json.data);
+        numCharts    = jsonDataKeys.length - 1;
+
+        for (i = 1; i <= numCharts; i++) {
+            var xData = json.data[jsonDataKeys[0]].split(",");
+            var yData = json.data[jsonDataKeys[i]]
+                .split(",")
+                .map(this.numberMapper);
+
+            if (!this.allSame(yData, "")) {
+                var units = json.metadata.units.split(",");
+                var chart = new MultiVarChart(i, this.vis, this.type, jsonDataKeys[0],
+                    jsonDataKeys[i], xData, yData, units[0], units[i]);
+                this.chartData.push(chart);
+            }
+        }
+
+        if(typeof this.customSort == "function") {
+            this.customSort();
+        } else {
+            this.sortData(this.sortBy);
+        }
+
+        var chartProperties = new ChartPropertyCalculator(this.chartData);
+
+        if(this.type === "line") {
+            chartRenderer = new LineChartRenderer(this.chartData, chartProperties);
+            chartRenderer.createCaptions("chart-area", this.caption, this.subCaption);
+            chartRenderer.displayCharts(this.height, this.width);
+        } else if(this.type === "column") {
+            chartRenderer = new ColumnChartRenderer(this.chartData, chartProperties);
+            chartRenderer.createCaptions("chart-area", this.caption, this.subCaption);
+            chartRenderer.displayCharts(this.height, this.width);
+        } else {
+            console.log("Sorry Dave. I can't let you do that.");
+        }
     } else {
-        this.sortData(this.sortBy);
+        console.log("Sorry Dave. I'm afraid I can't let you do that.");
     }
-    var chartProperties = new ChartPropertyCalculator(this.chartData);
     // var that = this;
     // window.addEventListener("resize", function() {
     //     console.log("whaaa");
@@ -86,28 +167,6 @@ Data.prototype.dataParser = function(json) {
     //     var eventAgent = new EventAgents(this.type);
     //     eventAgent.crosshairHandler(document.getElementsByClassName("chart-svg"));
     // });
-    if(this.vis === "crosstabs") {
-        if(this.type === "bar") {
-            chartRenderer = new BarChartRenderer(this.chartData, chartProperties);
-            chartRenderer.displayCharts(this.height, this.width);
-        } else {
-            console.log("I'm sorry, Dave. You are not allowed to do that.");
-        }
-    } else if(this.vis === "trellis") {
-        if(this.type === "line") {
-            chartRenderer = new LineChartRenderer(this.chartData, chartProperties);
-            chartRenderer.createCaptions("chart-area", this.caption, this.subCaption);
-            chartRenderer.displayCharts(this.height, this.width);
-        } else if(this.type === "column") {
-            chartRenderer = new ColumnChartRenderer(this.chartData, chartProperties);
-            chartRenderer.createCaptions("chart-area", this.caption, this.subCaption);
-            chartRenderer.displayCharts(this.height, this.width);
-        } else {
-            console.log("Sorry Dave. I can't let you do that.");
-        }
-    } else {
-        console.log("Sorry Dave. I'm afraid I can't let you do that.");
-    }
     var eventAgent = new EventAgents(this.type);
     eventAgent.crosshairHandler(document.getElementsByClassName("chart-svg"));
 };
@@ -122,7 +181,7 @@ Data.prototype.sortData = function(sortBy) {
             this.sortByValue();
             break;
         default:
-            console.log("default");
+            console.log("no sorting applied");
     }
 };
 

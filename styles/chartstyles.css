@@ -20,7 +20,7 @@
 }
 
 .xAxis, .yAxis {
-	stroke: #d1d1d1;
+	stroke: #000000;
 }
 
 .xAxis {
@@ -28,8 +28,8 @@
 }
 
 .xTick, .yTick {
-	stroke: #aeaeae;
-	stroke-width: 2px;
+	stroke: #000000;
+	stroke-width: 1px;
 }
 
 .yDiv {
