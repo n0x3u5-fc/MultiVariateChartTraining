@@ -31,6 +31,7 @@ BarChartRenderer.prototype.displayHeaders = function(height, width, keys) {
     }
 };
 BarChartRenderer.prototype.drawRowName = function(charts, multiCharts, svgHelper, svg, height, width, rowCount) {
+    'use strict';
     var mappedCharts  = [];
     var chartUbHeight = Math.ceil(height);
     var chartUbWidth  = Math.ceil(width);
@@ -50,6 +51,7 @@ BarChartRenderer.prototype.drawRowName = function(charts, multiCharts, svgHelper
     svg.style.borderBottom = "1px solid black";
 };
 BarChartRenderer.prototype.drawYLabels = function(charts, multiCharts, svgHelper, svg, height, width, i) {
+    'use strict';
     var mappedCharts  = [];
     var chartUbHeight = Math.ceil(height);
     var chartUbWidth  = Math.ceil(width);
@@ -74,6 +76,7 @@ BarChartRenderer.prototype.drawYLabels = function(charts, multiCharts, svgHelper
     svg.style.borderBottom = "1px solid black";
 };
 BarChartRenderer.prototype.drawX = function(height, width, keys) {
+    'use strict';
     var mappedCharts  = [];
     var formattedTickValues = [];
     var chartUbHeight = Math.ceil(height);
@@ -161,20 +164,30 @@ BarChartRenderer.prototype.createDivs = function(targetDiv, rowCount) {
     var renderDiv = document.getElementById(targetDiv);
     renderDiv.appendChild(div);
 };
-BarChartRenderer.prototype.colorPlots = function() {
+BarChartRenderer.prototype.colorPlots = function(criteria) {
     'use strict';
-    var color;
+    var color, lumRatio;
     var charts = document.getElementsByClassName("chart-svg");
     var that = this;
+    var losses = criteria.filter(function(currentValue) {
+        if(currentValue < 0) { return true; } else { return false; }
+    });
+    var lossDiff = Math.max.apply(Math, losses) - Math.min.apply(Math, losses);
+    console.log(lossDiff);
+    var profits = criteria.filter(function(currentValue) {
+        if(currentValue >= 0) { return true; } else { return false; }
+    });
+    var profitDiff = Math.max.apply(Math, profits) - Math.min.apply(Math, profits);
+    console.log(profitDiff);
     Array.from(charts).map(function(currentValue, index) {
         var plots = currentValue.getElementsByClassName("bar-plot");
         Array.from(plots).map(function(currentValue, index, array) {
             var colorCriteria = Number(currentValue.getAttributeNS(null, "data-criteria"));
-            var dataValue = Number(currentValue.getAttributeNS(null, "data-value"));
-            var lumRatio = colorCriteria / dataValue;
             if(colorCriteria < 0) {
+                lumRatio = colorCriteria / lossDiff;
                 color = chartUtilities.generateColor(that.negativeColor, lumRatio);
             } else {
+                lumRatio = colorCriteria / profitDiff;
                 color = chartUtilities.generateColor(that.plotColor, lumRatio);
             }
             currentValue.setAttributeNS(null, "fill", color);
