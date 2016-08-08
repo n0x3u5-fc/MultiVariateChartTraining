@@ -50,24 +50,34 @@ chartUtilities.getInterpolatedVal = function(x1, y1, x2, y2, x) {
     return interpolatedVal;
 };
 
-chartUtilities.generateColor = function(color, lum) {
+chartUtilities.generateColor = function(colorStart, colorEnd, lum) {
     'use strict';
-    lum = 1 - Math.abs(lum);
     // validate color string
-    color = String(color).replace(/[^0-9a-f]/gi, '');
-    if (color.length < 6) {
-        color = color[0]+color[0]+color[1]+color[1]+color[2]+color[2];
+    colorStart = String(colorStart).replace(/[^0-9a-f]/gi, '');
+    if (colorStart.length < 6) {
+        colorStart = colorStart[0]+colorStart[0]+colorStart[1]+colorStart[1]+colorStart[2]+colorStart[2];
+    }
+    colorEnd = String(colorEnd).replace(/[^0-9a-f]/gi, '');
+    if (colorEnd.length < 6) {
+        colorEnd = colorEnd[0]+colorEnd[0]+colorEnd[1]+colorEnd[1]+colorEnd[2]+colorEnd[2];
     }
     lum = lum || 0;
 
-    // convert to decimal and change luminosity
-    var rgb = "#", c, i;
-    for (i = 0; i < 3; i++) {
-        c = parseInt(color.substr(i*2,2), 16);
-        c = Math.round(Math.min(Math.max(0, c + (c * lum)), 255)).toString(16);
-        rgb += ("00"+c).substr(c.length);
-    }
-    return rgb;
+    var r = Math.ceil(parseInt(colorStart.substring(0,2), 16) * lum +
+                      parseInt(colorEnd.substring(0,2), 16) * (1-lum));
+    var g = Math.ceil(parseInt(colorStart.substring(2,4), 16) * lum +
+                      parseInt(colorEnd.substring(2,4), 16) * (1-lum));
+    var b = Math.ceil(parseInt(colorStart.substring(4,6), 16) * lum +
+                      parseInt(colorEnd.substring(4,6), 16) * (1-lum));
+
+    var rgb = chartUtilities.hex(r) + chartUtilities.hex(g) + chartUtilities.hex(b);
+    return "#" + rgb;
+};
+
+chartUtilities.hex = function(x) {
+    'use strict';
+    x = x.toString(16);
+    return (x.length == 1) ? '0' + x : x;
 };
 
 chartUtilities.shortenLargeNumber = function(num, digits) {

@@ -48,9 +48,11 @@ BarChartRenderer.prototype.drawRowName = function(charts, multiCharts, svgHelper
                                                  charts[rowCount].category, "category-text");
     svg.appendChild(categoryText);
     svg.setAttributeNS(null, "class", "row-category");
-    svg.style.borderBottom = "1px solid black";
+    if(rowCount !== charts.length - 1) {
+        svg.style.borderBottom = "1px solid black";
+    }
 };
-BarChartRenderer.prototype.drawYLabels = function(charts, multiCharts, svgHelper, svg, height, width, i) {
+BarChartRenderer.prototype.drawYLabels = function(charts, multiCharts, svgHelper, svg, height, width, i, rowCount) {
     'use strict';
     var mappedCharts  = [];
     var chartUbHeight = Math.ceil(height);
@@ -73,7 +75,9 @@ BarChartRenderer.prototype.drawYLabels = function(charts, multiCharts, svgHelper
         svg.appendChild(yValues);
     }
     svg.setAttributeNS(null, "class", "y-labels");
-    svg.style.borderBottom = "1px solid black";
+    if(rowCount !== charts.length - 1) {
+        svg.style.borderBottom = "1px solid black";
+    }
 };
 BarChartRenderer.prototype.drawX = function(height, width, keys) {
     'use strict';
@@ -113,7 +117,7 @@ BarChartRenderer.prototype.drawX = function(height, width, keys) {
         var that = this;
         Array.from(footerSvgs).map(function(currentValue, index) {
             if(index > 1) {
-                xAxis.render(footerSvg);
+                // xAxis.render(footerSvg);
                 xAxis.renderTicks(footerSvg, mappedData.yTicks);
                 for(var yTick of that.charts[0].yTicks) {
                     formattedTickValues.push(chartUtilities.shortenLargeNumber(yTick, 2));
@@ -173,29 +177,28 @@ BarChartRenderer.prototype.colorPlots = function(criteria) {
         if(currentValue < 0) { return true; } else { return false; }
     });
     var lossDiff = Math.max.apply(Math, losses) - Math.min.apply(Math, losses);
-    console.log(lossDiff);
     var profits = criteria.filter(function(currentValue) {
         if(currentValue >= 0) { return true; } else { return false; }
     });
     var profitDiff = Math.max.apply(Math, profits) - Math.min.apply(Math, profits);
-    console.log(profitDiff);
     Array.from(charts).map(function(currentValue, index) {
         var plots = currentValue.getElementsByClassName("bar-plot");
         Array.from(plots).map(function(currentValue, index, array) {
             var colorCriteria = Number(currentValue.getAttributeNS(null, "data-criteria"));
             if(colorCriteria < 0) {
                 lumRatio = colorCriteria / lossDiff;
-                color = chartUtilities.generateColor(that.negativeColor, lumRatio);
+                color = chartUtilities.generateColor(that.negativeColor, that.negativeColorEnd, lumRatio);
             } else {
                 lumRatio = colorCriteria / profitDiff;
-                color = chartUtilities.generateColor(that.plotColor, lumRatio);
+                color = chartUtilities.generateColor(that.plotColor, that.plotColorEnd, lumRatio);
             }
+            console.log(color);
             currentValue.setAttributeNS(null, "fill", color);
         });
     });
 };
 BarChartRenderer.prototype.drawCompleteCharts = function(i, charts, multiCharts,
-    chartsInARow, svgHelper, svg, height, width, columnsAreComplete) {
+    chartsInARow, svgHelper, svg, height, width, columnsAreComplete, rowCount) {
     'use strict';
     var columnPlot;
     var mappedCharts  = [];
@@ -206,14 +209,13 @@ BarChartRenderer.prototype.drawCompleteCharts = function(i, charts, multiCharts,
     var chartLbWidth  = Math.floor(1);
     var chartHeight   = chartUbHeight - chartLbHeight;
     var chartWidth    = chartUbWidth - chartLbWidth;
-
     var mappedData = this.chartProperties.dataMapper(chartHeight, chartWidth, chartLbHeight,
                                                      chartLbWidth, charts[i]);
     mappedCharts.push(mappedData);
     var yAxis = new YAxis(chartLbWidth, chartLbHeight, chartLbWidth, chartUbHeight,
                           "yAxis", columnsAreComplete);
     yAxis.type = "category";
-    yAxis.render(svg);
+    // yAxis.render(svg);
     // yAxis.renderTicks(svg, mappedData.xTicks);
     // yAxis.renderTickValues(svg, mappedData.xTicks, charts[i].xData);
     yAxis.renderZeroPlane(svg, mappedData.yTicks, charts[i].yTicks, chartWidth);
@@ -221,7 +223,9 @@ BarChartRenderer.prototype.drawCompleteCharts = function(i, charts, multiCharts,
     var xAxis = new XAxis(chartUbWidth, chartUbHeight, chartLbWidth, chartUbHeight,
                           "xAxis", columnsAreComplete);
     xAxis.type = "numeric";
-    xAxis.render(svg);
+    if(rowCount !== charts.length - 1) {
+        xAxis.render(svg);
+    }
     // xAxis.renderTicks(svg, mappedData.yTicks);
     if (i >= multiCharts.length - chartsInARow) {
         for(var yTick of charts[i].yTicks) {
@@ -260,7 +264,13 @@ BarChartRenderer.prototype.drawCompleteCharts = function(i, charts, multiCharts,
                 //     "column-plot");
                 // }
             } else {
-                columnPlot = svgHelper.drawRectByClass(chartLbWidth,
+                var zeroes = charts[i].yData.filter(function(currentValue) {
+                    if(currentValue === 0) { return true; } else { return false; }
+                });
+                if(mappedData.yData[k] < 2 && zeroes.length === 0) {
+                    mappedData.yData[k] = 2;
+                }
+                columnPlot = svgHelper.drawRectByClass(chartLbWidth - 1,
                 mappedData.xData[k] + chartLbHeight - (plotHeight / 2),
                 plotHeight, mappedData.yData[k],
                 "bar-plot");
@@ -359,17 +369,20 @@ BarChartRenderer.prototype.createCharts = function(charts, height, width, rowCou
         if(i === 0) {
             this.drawRowName(charts, multiCharts, svgHelper, svg, height, width, rowCount);
         } else if(i === 1) {
-            this.drawYLabels(charts, multiCharts, svgHelper, svg, height, width, i);
+            this.drawYLabels(charts, multiCharts, svgHelper, svg, height, width, i, rowCount);
         } else {
             if(columnsAreComplete) {
                 this.drawCompleteCharts(i - 2, charts, multiCharts, chartsInARow, svgHelper,
-                    svg, height, width, columnsAreComplete);
+                    svg, height, width, columnsAreComplete, rowCount);
             } else {
                 this.drawIncompleteCharts(i - 2, charts, multiCharts, chartsInARow, svgHelper,
                     svg, height, width, columnsAreComplete);
             }
         }
         multiCharts[i].appendChild(svg);
+        if(i > 0) {
+            multiCharts[i].style.borderRight = "1px solid black";
+        }
         var xValueElements = svg.getElementsByClassName("x-value");
         for(var e = 0; e < xValueElements.length; e++) {
             var rotationPt = svgHelper.getRotationPoint(xValueElements[e]);

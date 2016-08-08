@@ -34,19 +34,21 @@ Data.prototype.ajaxLoader = function(url, callback) {
 Data.prototype.dataParser = function(json) {
     'use strict';
 
-    var i, jsonDataKeys, yObjectKeys, numCharts, chartRenderer, rowCount, criteria = [], 
+    var i, jsonDataKeys, yObjectKeys, numCharts, chartRenderer, rowCount, criteria = [],
     maxY = -Infinity, minY = Infinity;
 
-    this.caption       = json.metadata.caption;
-    this.subCaption    = json.metadata.subCaption;
-    this.height        = json.metadata.height;
-    this.width         = json.metadata.width;
-    this.vis           = json.metadata.visualization;
-    this.type          = json.metadata.type;
-    this.positiveColor = json.metadata.positivePlotColor;
-    this.negativeColor = json.metadata.negativePlotColor;
-    this.sortBy        = json.metadata.sortBy;
-    this.sortOrder     = json.metadata.sortOrder;
+    this.vis                = json.metadata.visualization;
+    this.type               = json.metadata.type;
+    this.width              = json.metadata.width;
+    this.sortBy             = json.metadata.sortBy;
+    this.height             = json.metadata.height;
+    this.caption            = json.metadata.caption;
+    this.sortOrder          = json.metadata.sortOrder;
+    this.subCaption         = json.metadata.subCaption;
+    this.positiveColorEnd   = json.metadata.positiveGradientEnd;
+    this.negativeColorEnd   = json.metadata.negativeGradientEnd;
+    this.positiveColorStart = json.metadata.positiveGradientStart;
+    this.negativeColorStart = json.metadata.negativeGradientStart;
 
     if(this.vis === "crosstabs") {
         for(var datum of json.data) {
@@ -97,8 +99,10 @@ Data.prototype.dataParser = function(json) {
 
             if(this.type === "bar") {
                 chartRenderer = new BarChartRenderer(this.chartData, chartProperties);
-                chartRenderer.plotColor = this.positiveColor;
-                chartRenderer.negativeColor = this.negativeColor;
+                chartRenderer.plotColor        = this.positiveColorStart;
+                chartRenderer.plotColorEnd     = this.positiveColorEnd;
+                chartRenderer.negativeColor    = this.negativeColorStart;
+                chartRenderer.negativeColorEnd = this.negativeColorEnd;
                 var width = Math.floor((document.body.clientWidth - 20) / jsonDataKeys.length);
                 var headerHeight = 20;
                 var footerHeight = 50;
