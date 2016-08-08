@@ -34,24 +34,26 @@ Data.prototype.ajaxLoader = function(url, callback) {
 Data.prototype.dataParser = function(json) {
     'use strict';
 
-    var i, jsonDataKeys, numCharts, chartRenderer, rowCount,
+    var i, jsonDataKeys, yObjectKeys, numCharts, chartRenderer, rowCount,
         maxY = -Infinity, minY = Infinity;
 
-    this.caption    = json.metadata.caption;
-    this.subCaption = json.metadata.subCaption;
-    this.height     = json.metadata.height;
-    this.width      = json.metadata.width;
-    this.vis        = json.metadata.visualization;
-    this.type       = json.metadata.type;
-    this.color      = json.metadata.plotColor;
-    this.sortBy     = json.metadata.sortBy;
-    this.sortOrder  = json.metadata.sortOrder;
+    this.caption       = json.metadata.caption;
+    this.subCaption    = json.metadata.subCaption;
+    this.height        = json.metadata.height;
+    this.width         = json.metadata.width;
+    this.vis           = json.metadata.visualization;
+    this.type          = json.metadata.type;
+    this.positiveColor = json.metadata.positivePlotColor;
+    this.negativeColor = json.metadata.negativePlotColor;
+    this.sortBy        = json.metadata.sortBy;
+    this.sortOrder     = json.metadata.sortOrder;
 
     if(this.vis === "crosstabs") {
         for(var datum of json.data) {
             var keys = Object.keys(datum);
             for(i = 2; i < keys.length; i++) {
-                var yValues = datum[keys[i]].split(",").map(Number);
+                yObjectKeys = Object.keys(datum[keys[i]]);
+                var yValues = datum[keys[i]][yObjectKeys[0]].split(",").map(Number);
                 yValues.map(function(currentValue, index) {
                     maxY = currentValue > maxY ? currentValue : maxY;
                     minY = currentValue < minY ? currentValue : minY;
@@ -64,19 +66,24 @@ Data.prototype.dataParser = function(json) {
             rowCount     = json.data.indexOf(datum);
             this.chartData = [];
             for (i = 2; i < jsonDataKeys.length; i++) {
+                yObjectKeys = Object.keys(datum[jsonDataKeys[i]]);
                 var category = datum[jsonDataKeys[0]];
                 var xData = datum[jsonDataKeys[1]].split(",");
-                var yData = datum[jsonDataKeys[i]]
+                var yData = datum[jsonDataKeys[i]][yObjectKeys[0]]
+                    .split(",")
+                    .map(this.numberMapper);
+                var colorCriteria = datum[jsonDataKeys[i]][yObjectKeys[1]]
                     .split(",")
                     .map(this.numberMapper);
                 if (!this.allSame(yData, "")) {
                     var units = json.metadata.units.split(",");
                     var chart = new MultiVarChart(i, this.vis, this.type, jsonDataKeys[0],
                                                 jsonDataKeys[i], xData, yData, units[0], units[i]);
-                    chart.keys     = jsonDataKeys;
-                    chart.minY     = minY;
-                    chart.maxY     = maxY;
-                    chart.category = category;
+                    chart.keys          = jsonDataKeys;
+                    chart.minY          = minY;
+                    chart.maxY          = maxY;
+                    chart.category      = category;
+                    chart.colorCriteria = colorCriteria;
                     this.chartData.push(chart);
                 }
             }
@@ -90,11 +97,13 @@ Data.prototype.dataParser = function(json) {
 
             if(this.type === "bar") {
                 chartRenderer = new BarChartRenderer(this.chartData, chartProperties);
-                chartRenderer.plotColor = this.color;
-                var width = Math.floor((document.body.clientWidth - 10) / jsonDataKeys.length);
+                chartRenderer.plotColor = this.positiveColor;
+                chartRenderer.negativeColor = this.negativeColor;
+                var width = Math.floor((document.body.clientWidth - 20) / jsonDataKeys.length);
                 var headerHeight = 20;
                 var footerHeight = 50;
                 var height = Math.floor((window.innerHeight) / json.data.length);
+                if(height < 110) { height = 110; }
                 if(json.data.indexOf(datum) === 0) {
                     chartRenderer.displayHeaders(headerHeight, width, jsonDataKeys);
                 }
@@ -102,6 +111,7 @@ Data.prototype.dataParser = function(json) {
                 if(json.data.indexOf(datum) === json.data.length - 1) {
                     chartRenderer.drawX(footerHeight, width, jsonDataKeys);
                 }
+                chartRenderer.colorPlots();
             } else {
                 console.log("I'm sorry, Dave. You are not allowed to do that.");
             }

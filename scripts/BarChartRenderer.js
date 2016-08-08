@@ -161,6 +161,26 @@ BarChartRenderer.prototype.createDivs = function(targetDiv, rowCount) {
     var renderDiv = document.getElementById(targetDiv);
     renderDiv.appendChild(div);
 };
+BarChartRenderer.prototype.colorPlots = function() {
+    'use strict';
+    var color;
+    var charts = document.getElementsByClassName("chart-svg");
+    var that = this;
+    Array.from(charts).map(function(currentValue, index) {
+        var plots = currentValue.getElementsByClassName("bar-plot");
+        Array.from(plots).map(function(currentValue, index, array) {
+            var colorCriteria = Number(currentValue.getAttributeNS(null, "data-criteria"));
+            var dataValue = Number(currentValue.getAttributeNS(null, "data-value"));
+            var lumRatio = colorCriteria / dataValue;
+            if(colorCriteria < 0) {
+                color = chartUtilities.generateColor(that.negativeColor, lumRatio);
+            } else {
+                color = chartUtilities.generateColor(that.plotColor, lumRatio);
+            }
+            currentValue.setAttributeNS(null, "fill", color);
+        });
+    });
+};
 BarChartRenderer.prototype.drawCompleteCharts = function(i, charts, multiCharts,
     chartsInARow, svgHelper, svg, height, width, columnsAreComplete) {
     'use strict';
@@ -231,10 +251,10 @@ BarChartRenderer.prototype.drawCompleteCharts = function(i, charts, multiCharts,
                 mappedData.xData[k] + chartLbHeight - (plotHeight / 2),
                 plotHeight, mappedData.yData[k],
                 "bar-plot");
-                console.log(this.plotColor);
-                columnPlot.setAttributeNS(null, "fill", this.plotColor);
             }
+            columnPlot.setAttributeNS(null, "data-criteria", charts[i].colorCriteria[k]);
             columnPlot.setAttributeNS(null, "data-value", charts[i].yData[k]);
+            // columnPlot.setAttributeNS(null, "data-color", );
             svg.appendChild(columnPlot);
         }
     }

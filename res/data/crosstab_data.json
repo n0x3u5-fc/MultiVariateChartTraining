@@ -1,41 +1,90 @@
 {
 	"metadata": {
-		"caption"      : "Multi-Variate Chart",
-		"subCaption"   : "Correlation of Age with Nutrition",
+		"caption": "Multi-Variate Chart",
+		"subCaption": "Correlation of Age with Nutrition",
 		"visualization": "crosstabs",
-		"type"         : "bar",
-		"height"       : 130,
-		"width"        : 330,
-		"units"        : ",,,",
-		"plotColor"	   : "#000000"
+		"type": "bar",
+		"height": 130,
+		"width": 330,
+		"units": ",,,",
+		"positivePlotColor": "#383838",
+		"negativePlotColor": "#ff0000"
 	},
 	"data": [{
 		"Product Type": "Coffee",
-		"Product"     : "Amaretto,Columbian,Decaf Irish Cream,Total",
-		"Central"     : "14011,28913,26155,69080",
-		"East"        : "2993,47386,6261,56640",
-		"South"       : ",21664,11592,33265",
-		"West"        : "9265,30357,18235,57856"
+		"Product": "Amaretto,Columbian,Decaf Irish Cream,Total",
+		"Central": {
+			"sales": "14011,28913,26155,69080",
+			"profits": "5105,8528,9632,23265"
+		},
+		"East": {
+			"sales": "2993,47386,6261,56640",
+			"profits": "1009,27253,2727,30989"
+		},
+		"South": {
+			"sales": ",21664,11592,33265",
+			"profits": ",8767,2933,11700"
+		},
+		"West": {
+			"sales": "9265,30357,18235,57856",
+			"profits": "-1225,11253,-1305,8724"
+		}
 	}, {
 		"Product Type": "Espresso",
-		"Product"     : "Caffe Latte,Caffe Mocha,Decaf Espresso,Regular Espresso,Total",
-		"Central"     : ",35218,24485,,59703",
-		"East"        : ",16646,7722,24036,48405",
-		"South"       : "15442,14163,15384,,44989",
-		"West"        : "20458,18876,30578,,69911"
+		"Product": "Caffe Latte,Caffe Mocha,Decaf Espresso,Regular Espresso,Total",
+		"Central": {
+			"sales": ",35218,24485,,59703",
+			"profits": ",14640,8860,,23500"
+		},
+		"East": {
+			"sales": ",16646,7722,24036,48405",
+			"profits": ",-6230,2410,10062,6242"
+		},
+		"South": {
+			"sales": "15442,14163,15384,,44989",
+			"profits": "3872,5201,5930,,15003"
+		},
+		"West": {
+			"sales": "20458,18876,30578,,69911",
+			"profits": "7502,4064,12302,,23868"
+		}
 	}, {
 		"Product Type": "Herbal Tea",
-		"Product"     : "Chamomile,Lemon,Mint,Total",
-		"Central"     : "36570,21978,9337,67885",
-		"East"        : "2194,27176,11992,41362",
-		"South"       : "11186,14497,,25683",
-		"West"        : "25632,32274,14380,72285"
+		"Product": "Chamomile,Lemon,Mint,Total",
+		"Central": {
+			"sales": "36570,21978,9337,67885",
+			"profits": "14434,6251,4069,24754"
+		},
+		"East": {
+			"sales": "2194,27176,11992,41362",
+			"profits": "765,7901,-2242,6424"
+		},
+		"South": {
+			"sales": "11186,14497,,25683",
+			"profits": "3180,2593,,5774"
+		},
+		"West": {
+			"sales": "25632,32274,14380,72285",
+			"profits": "8852,13120,4330,26301"
+		}
 	}, {
 		"Product Type": "Tea",
-		"Product"     : "Daarjeeling,Earl Grey,Green Tea,Total",
-		"Central"     : "30289,32881,5211,68380",
-		"East"        : "14096,6505,11571,32172",
-		"South"       : "0,0,0,0",
-		"West"        : "28769,27387,16063,72220"
+		"Product": "Daarjeeling,Earl Grey,Green Tea,Total",
+		"Central": {
+			"sales": "30289,32881,5211,68380",
+			"profits": "10772,10331,1227,22330"
+		},
+		"East": {
+			"sales": "14096,6505,11571,32172",
+			"profits": "6497,3405,5654,15557"
+		},
+		"South": {
+			"sales": "0,0,0,0",
+			"profits": "0,0,0,0"
+		},
+		"West": {
+			"sales": "28769,27387,16063,72220",
+			"profits": "11780,10425,-7109,15097"
+		}
 	}]
 }
