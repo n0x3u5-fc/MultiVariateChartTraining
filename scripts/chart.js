@@ -1,3 +1,4 @@
+goog.provide("Chart");
 /**
  * @constructor
  */
@@ -10,4 +11,4 @@ var Chart = function(url) {
         	data.customSort = this.customSort;
         }
     };
-};
+}

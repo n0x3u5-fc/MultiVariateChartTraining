@@ -92,7 +92,22 @@ chartUtilities.shortenLargeNumber = function(num, digits) {
         }
     }
     return num;
-}
+};
+
+chartUtilities.allSame = function(arr, val) {
+    'use strict';
+    for (var elem of arr) {
+        if (elem !== val) {
+            return false;
+        }
+    }
+    return true;
+};
+
+chartUtilities.numberMapper = function(numStr) {
+    'use strict';
+    return numStr === "" ? "" : Number(numStr);
+};
 
 chartUtilities.inheritsFrom = function(child, parent) {
     'use strict';

@@ -104,7 +104,7 @@ BarChartRenderer.prototype.drawX = function(height, width, keys) {
 
         var footerSvg = svgHelper.createSvgByClass(height, width, "footer-svg");
         var footerDivs = document.getElementsByClassName("multi-chart-footer");
-        var xAxis = new XAxis(chartLbWidth, 0, chartUbWidth, 0, "xAxis", true);
+        var xAxis = new Chart.XAxis(chartLbWidth, 0, chartUbWidth, 0, "xAxis", true);
         xAxis.type = "numeric";
         Array.from(footerDivs).map(function(currentValue, index) {
             currentValue.style.borderTop = "1px solid black";
@@ -192,7 +192,6 @@ BarChartRenderer.prototype.colorPlots = function(criteria) {
                 lumRatio = colorCriteria / profitDiff;
                 color = chartUtilities.generateColor(that.plotColor, that.plotColorEnd, lumRatio);
             }
-            console.log(color);
             currentValue.setAttributeNS(null, "fill", color);
         });
     });
@@ -212,7 +211,7 @@ BarChartRenderer.prototype.drawCompleteCharts = function(i, charts, multiCharts,
     var mappedData = this.chartProperties.dataMapper(chartHeight, chartWidth, chartLbHeight,
                                                      chartLbWidth, charts[i]);
     mappedCharts.push(mappedData);
-    var yAxis = new YAxis(chartLbWidth, chartLbHeight, chartLbWidth, chartUbHeight,
+    var yAxis = new Chart.YAxis(chartLbWidth, chartLbHeight, chartLbWidth, chartUbHeight,
                           "yAxis", columnsAreComplete);
     yAxis.type = "category";
     // yAxis.render(svg);
@@ -220,7 +219,7 @@ BarChartRenderer.prototype.drawCompleteCharts = function(i, charts, multiCharts,
     // yAxis.renderTickValues(svg, mappedData.xTicks, charts[i].xData);
     yAxis.renderZeroPlane(svg, mappedData.yTicks, charts[i].yTicks, chartWidth);
 
-    var xAxis = new XAxis(chartUbWidth, chartUbHeight, chartLbWidth, chartUbHeight,
+    var xAxis = new Chart.XAxis(chartUbWidth, chartUbHeight, chartLbWidth, chartUbHeight,
                           "xAxis", columnsAreComplete);
     xAxis.type = "numeric";
     if(rowCount !== charts.length - 1) {
@@ -299,7 +298,7 @@ BarChartRenderer.prototype.drawIncompleteCharts = function(i, charts, multiChart
                                                          chartLbWidth, charts[i]);
     mappedCharts.push(mappedData);
 
-    var yAxis = new YAxis(chartLbWidth, chartLbHeight - 15, chartLbWidth, chartUbHeight - 15,
+    var yAxis = new Chart.YAxis(chartLbWidth, chartLbHeight - 15, chartLbWidth, chartUbHeight - 15,
                           "yAxis", columnsAreComplete);
     yAxis.render(svg);
     yAxis.renderTicks(svg, mappedData.yTicks);
@@ -307,7 +306,7 @@ BarChartRenderer.prototype.drawIncompleteCharts = function(i, charts, multiChart
     yAxis.renderDivs(svg, mappedData.yTicks, chartHeight, chartLbWidth, chartWidth);
     yAxis.renderZeroPlane(svg, mappedData.yTicks, charts[i].yTicks, chartWidth);
 
-    var xAxis = new XAxis(chartLbWidth, chartLbHeight - 15, chartLbWidth, chartLbHeight - 15,
+    var xAxis = new Chart.XAxis(chartLbWidth, chartLbHeight - 15, chartLbWidth, chartLbHeight - 15,
                           "xAxis", columnsAreComplete);
     xAxis.render(svg);
     xAxis.renderTicks(svg, mappedData.xTicks);

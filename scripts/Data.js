@@ -73,11 +73,11 @@ Data.prototype.dataParser = function(json) {
                 var xData = datum[jsonDataKeys[1]].split(",");
                 var yData = datum[jsonDataKeys[i]][yObjectKeys[0]]
                     .split(",")
-                    .map(this.numberMapper);
+                    .map(chartUtilities.numberMapper);
                 var colorCriteria = datum[jsonDataKeys[i]][yObjectKeys[1]]
                     .split(",")
-                    .map(this.numberMapper);
-                if (!this.allSame(yData, "")) {
+                    .map(chartUtilities.numberMapper);
+                if (!chartUtilities.allSame(yData, "")) {
                     var units = json.metadata.units.split(",");
                     var chart = new MultiVarChart(i, this.vis, this.type, jsonDataKeys[0],
                                                 jsonDataKeys[i], xData, yData, units[0], units[i]);
@@ -132,9 +132,9 @@ Data.prototype.dataParser = function(json) {
             var xData = json.data[jsonDataKeys[0]].split(",");
             var yData = json.data[jsonDataKeys[i]]
                 .split(",")
-                .map(this.numberMapper);
+                .map(chartUtilities.numberMapper);
 
-            if (!this.allSame(yData, "")) {
+            if (!chartUtilities.allSame(yData, "")) {
                 var units = json.metadata.units.split(",");
                 var chart = new MultiVarChart(i, this.vis, this.type, jsonDataKeys[0],
                     jsonDataKeys[i], xData, yData, units[0], units[i]);
@@ -247,19 +247,4 @@ Data.prototype.multiSort = function(supportingArray, sortingArray, order) {
         sortingArray[j] = arr[j].sort;
     }
     return sortingArray;
-};
-
-Data.prototype.allSame = function(arr, val) {
-    'use strict';
-    for (var elem of arr) {
-        if (elem !== val) {
-            return false;
-        }
-    }
-    return true;
-};
-
-Data.prototype.numberMapper = function(numStr) {
-    'use strict';
-    return numStr === "" ? "" : Number(numStr);
 };
