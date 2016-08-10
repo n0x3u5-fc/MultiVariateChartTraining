@@ -92,6 +92,27 @@ chartUtilities.shortenLargeNumber = function(num, digits) {
         }
     }
     return num;
+};
+
+chartUtilities.allSame = function(arr, val) {
+    'use strict';
+    for (var elem of arr) {
+        if (elem !== val) {
+            return false;
+        }
+    }
+    return true;
+};
+
+chartUtilities.numberMapper = function(numStr) {
+    'use strict';
+    return numStr === "" ? "" : Number(numStr);
+};
+
+chartUtilities.truncateString = function(str) {
+    'use strict';
+    var truncLen = 4;
+    return (str.length > truncLen) ? str.substr(0, truncLen-1) + '...' : str;
 }
 
 chartUtilities.inheritsFrom = function(child, parent) {

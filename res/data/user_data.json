@@ -1,18 +1,87 @@
 {
 	"metadata": {
-		"caption"      : "Multi-Variate Chart",
-		"subCaption"   : "Correlation of Age with Nutrition",
-		"visualization": "trellis",
-		"type"         : "column",
-		"height"       : 230,
-		"width"        : 280,
-		"units"        : "months,mg,mg,kg,g"
+		"caption": "Multi-Variate Chart",
+		"subCaption": "Correlation of Age with Nutrition",
+		"visualization": "crosstabs",
+		"type": "bar",
+		"height": 230,
+		"width": 280,
+		"positiveGradientStart": "#17202a",
+		"positiveGradientEnd": "#abb2b9",
+		"negativeGradientStart": "#ffa07a",
+		"negativeGradientEnd": "#cd5c5c"
 	},
-	"data": {
-		"Product": "JAN,FEB,MAR,APR",
-		"Central": "14011,28913,26155,69080",
-		"East"   : "2993,47386,6261,56640",
-		"South"  : ",21664,11592,33265",
-		"West"   : "9265,30357,18235,57856"
-	}
+	"data": [{
+		"Product Type": "Coffee",
+		"Zone": "Central",
+		"Product": "Amaretto",
+		"Sum of Profits": 5105,
+		"Sum of Sales": 14011
+	}, {
+		"Product Type": "Coffee",
+		"Zone": "Central",
+		"Product": "Columbian",
+		"Profit": 8528,
+		"Sum of Sales": 28913
+	}, {
+		"Product Type": "Coffee",
+		"Zone": "Central",
+		"Product": "Decaf Irish Cream",
+		"Profit": 9632,
+		"Sum of Sales": 26155
+	}, {
+		"Product Type": "Coffee",
+		"Zone": "East",
+		"Product": "Amaretto",
+		"Sum of Profits": 1009,
+		"Sum of Sales": 2993
+	}, {
+		"Product Type": "Coffee",
+		"Zone": "East",
+		"Product": "Columbian",
+		"Profit": 27253,
+		"Sum of Sales": 47386
+	}, {
+		"Product Type": "Coffee",
+		"Zone": "East",
+		"Product": "Decaf Irish Cream",
+		"Profit": 2727,
+		"Sum of Sales": 6261
+	}, {
+		"Product Type": "Coffee",
+		"Zone": "South",
+		"Product": "Amaretto",
+		"Sum of Profits": 0,
+		"Sum of Sales": 0
+	}, {
+		"Product Type": "Coffee",
+		"Zone": "South",
+		"Product": "Columbian",
+		"Profit": 8767,
+		"Sum of Sales": 21664
+	}, {
+		"Product Type": "Coffee",
+		"Zone": "South",
+		"Product": "Decaf Irish Cream",
+		"Profit": 2933,
+		"Sum of Sales": 11592
+	}, {
+		"Product Type": "Coffee",
+		"Zone": "West",
+		"Product": "Amaretto",
+		"Sum of Profits": -1225,
+		"Sum of Sales": 9265
+	}, {
+		"Product Type": "Coffee",
+		"Zone": "West",
+		"Product": "Columbian",
+		"Profit": 11253,
+		"Sum of Sales": 30357
+	}, {
+		"Product Type": "Coffee",
+		"Zone": "West",
+		"Product": "Decaf Irish Cream",
+		"Profit": -1305,
+		"Sum of Sales": 18235
+	}]
 }

@@ -37,7 +37,6 @@ Data.prototype.dataParser = function(json) {
     var i, jsonDataKeys, yObjectKeys, numCharts, chartRenderer, rowCount, criteria = [],
     maxY = -Infinity, minY = Infinity;
 
-    this.vis                = json.metadata.visualization;
     this.type               = json.metadata.type;
     this.width              = json.metadata.width;
     this.sortBy             = json.metadata.sortBy;
@@ -49,6 +48,12 @@ Data.prototype.dataParser = function(json) {
     this.negativeColorEnd   = json.metadata.negativeGradientEnd;
     this.positiveColorStart = json.metadata.positiveGradientStart;
     this.negativeColorStart = json.metadata.negativeGradientStart;
+
+    if(json.data.length > 1) {
+        this.vis = "crosstabs";
+    } else {
+        this.vis = "trellis";
+    }
 
     if(this.vis === "crosstabs") {
         for(var datum of json.data) {
@@ -69,18 +74,25 @@ Data.prototype.dataParser = function(json) {
             this.chartData = [];
             for (i = 2; i < jsonDataKeys.length; i++) {
                 yObjectKeys = Object.keys(datum[jsonDataKeys[i]]);
+                var units;
                 var category = datum[jsonDataKeys[0]];
                 var xData = datum[jsonDataKeys[1]].split(",");
                 var yData = datum[jsonDataKeys[i]][yObjectKeys[0]]
                     .split(",")
-                    .map(this.numberMapper);
+                    .map(chartUtilities.numberMapper);
                 var colorCriteria = datum[jsonDataKeys[i]][yObjectKeys[1]]
                     .split(",")
-                    .map(this.numberMapper);
-                if (!this.allSame(yData, "")) {
-                    var units = json.metadata.units.split(",");
-                    var chart = new MultiVarChart(i, this.vis, this.type, jsonDataKeys[0],
+                    .map(chartUtilities.numberMapper);
+                if (!chartUtilities.allSame(yData, "")) {
+                    if(json.metadata.units !== undefined) {
+                        units = json.metadata.units.split(",");
+                        var chart = new MultiVarChart(i, this.vis, this.type, jsonDataKeys[0],
                                                 jsonDataKeys[i], xData, yData, units[0], units[i]);
+                    } else {
+                        units = [];
+                        var chart = new MultiVarChart(i, this.vis, this.type, jsonDataKeys[0],
+                                                jsonDataKeys[i], xData, yData, units[0], units[i]);
+                    }
                     chart.keys          = jsonDataKeys;
                     chart.minY          = minY;
                     chart.maxY          = maxY;
@@ -103,6 +115,7 @@ Data.prototype.dataParser = function(json) {
                 chartRenderer.plotColorEnd     = this.positiveColorEnd;
                 chartRenderer.negativeColor    = this.negativeColorStart;
                 chartRenderer.negativeColorEnd = this.negativeColorEnd;
+                chartRenderer.totalRows        = json.data.length;
                 var width = Math.floor((document.body.clientWidth - 20) / jsonDataKeys.length);
                 var headerHeight = 20;
                 var footerHeight = 50;
@@ -111,7 +124,7 @@ Data.prototype.dataParser = function(json) {
                 if(json.data.indexOf(datum) === 0) {
                     chartRenderer.displayHeaders(headerHeight, width, jsonDataKeys);
                 }
-                chartRenderer.displayCharts(height - 30, width, rowCount);
+                chartRenderer.displayCharts(height - 25, width, rowCount);
                 if(json.data.indexOf(datum) === json.data.length - 1) {
                     chartRenderer.drawX(footerHeight, width, jsonDataKeys);
                 }
@@ -125,19 +138,37 @@ Data.prototype.dataParser = function(json) {
         });
         chartRenderer.colorPlots(criteria);
     } else if(this.vis === "trellis"){
-        jsonDataKeys = Object.keys(json.data);
+        var chart;
+
+        jsonDataKeys = Object.keys(json.data[0]);
         numCharts    = jsonDataKeys.length - 1;
 
-        for (i = 1; i <= numCharts; i++) {
-            var xData = json.data[jsonDataKeys[0]].split(",");
-            var yData = json.data[jsonDataKeys[i]]
-                .split(",")
-                .map(this.numberMapper);
-
-            if (!this.allSame(yData, "")) {
-                var units = json.metadata.units.split(",");
-                var chart = new MultiVarChart(i, this.vis, this.type, jsonDataKeys[0],
-                    jsonDataKeys[i], xData, yData, units[0], units[i]);
+        for (i = 2; i <= numCharts; i++) {
+            var yData;
+                xData = json.data[0][jsonDataKeys[1]]
+                        .split(",")
+                        .map(chartUtilities.truncateString);
+            if(typeof json.data[0][jsonDataKeys[i]] === "object") {
+                var yKeys = Object.keys(json.data[0][jsonDataKeys[i]])[0];
+                yData = json.data[0][jsonDataKeys[i]][yKeys]
+                        .split(",")
+                        .map(chartUtilities.numberMapper);
+            } else {
+                yData = json.data[0][jsonDataKeys[i]]
+                        .split(",")
+                        .map(chartUtilities.numberMapper);
+            }
+            var units;
+            if (!chartUtilities.allSame(yData, "")) {
+                if(json.metadata.units !== undefined) {
+                    var units = json.metadata.units.split(",");
+                    chart = new MultiVarChart(i, this.vis, this.type, jsonDataKeys[0],
+                        jsonDataKeys[i], xData, yData, units[0], units[i - 1]);
+                } else {
+                    units = [];
+                    chart = new MultiVarChart(i, this.vis, this.type, jsonDataKeys[0],
+                        jsonDataKeys[i], xData, yData, units[0], units[i - 1]);
+                }
                 this.chartData.push(chart);
             }
         }
@@ -247,19 +278,4 @@ Data.prototype.multiSort = function(supportingArray, sortingArray, order) {
         sortingArray[j] = arr[j].sort;
     }
     return sortingArray;
-};
-
-Data.prototype.allSame = function(arr, val) {
-    'use strict';
-    for (var elem of arr) {
-        if (elem !== val) {
-            return false;
-        }
-    }
-    return true;
-};
-
-Data.prototype.numberMapper = function(numStr) {
-    'use strict';
-    return numStr === "" ? "" : Number(numStr);
 };

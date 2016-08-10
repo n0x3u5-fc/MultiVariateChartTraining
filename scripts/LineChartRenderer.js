@@ -59,14 +59,14 @@ LineChartRenderer.prototype.drawCompleteCharts = function(i, charts, multiCharts
                                                      chartLbWidth, charts[i]);
     mappedCharts.push(mappedData);
 
-    var yAxis = new YAxis(chartLbWidth, chartLbHeight - 55, chartLbWidth, chartUbHeight - 55,
+    var yAxis = new Chart.YAxis(chartLbWidth, chartLbHeight - 55, chartLbWidth, chartUbHeight - 55,
                           "yAxis", columnsAreComplete);
     yAxis.render(svg);
     yAxis.renderTicks(svg, mappedData.yTicks);
     yAxis.renderTickValues(svg, mappedData.yTicks, charts[i].yTicks);
     yAxis.renderDivs(svg, mappedData.yTicks, chartHeight, chartLbWidth, chartWidth);
 
-    var xAxis = new XAxis(chartUbWidth, chartUbHeight - 55, chartLbWidth, chartUbHeight - 55,
+    var xAxis = new Chart.XAxis(chartUbWidth, chartUbHeight - 55, chartLbWidth, chartUbHeight - 55,
                           "xAxis", columnsAreComplete);
     xAxis.render(svg);
     xAxis.renderTicks(svg, mappedData.xTicks);
@@ -139,14 +139,14 @@ LineChartRenderer.prototype.drawIncompleteCharts = function(i, charts, multiChar
                                                          chartLbWidth, charts[i]);
     mappedCharts.push(mappedData);
 
-    var yAxis = new YAxis(chartLbWidth, chartLbHeight - 15, chartLbWidth, chartUbHeight - 15,
+    var yAxis = new Chart.YAxis(chartLbWidth, chartLbHeight - 15, chartLbWidth, chartUbHeight - 15,
                           "yAxis", columnsAreComplete);
     yAxis.render(svg);
     yAxis.renderTicks(svg, mappedData.yTicks);
     yAxis.renderTickValues(svg, mappedData.yTicks, charts[i].yTicks);
     yAxis.renderDivs(svg, mappedData.yTicks, chartHeight, chartLbWidth, chartWidth);
 
-    var xAxis = new XAxis(chartUbWidth, chartLbHeight - 15, chartLbWidth, chartLbHeight - 15,
+    var xAxis = new Chart.XAxis(chartUbWidth, chartLbHeight - 15, chartLbWidth, chartLbHeight - 15,
                           "xAxis", columnsAreComplete);
     xAxis.render(svg);
     xAxis.renderTicks(svg, mappedData.xTicks);
