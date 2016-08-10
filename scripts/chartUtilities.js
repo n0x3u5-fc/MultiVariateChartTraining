@@ -109,6 +109,12 @@ chartUtilities.numberMapper = function(numStr) {
     return numStr === "" ? "" : Number(numStr);
 };
 
+chartUtilities.truncateString = function(str) {
+    'use strict';
+    var truncLen = 4;
+    return (str.length > truncLen) ? str.substr(0, truncLen-1) + '...' : str;
+}
+
 chartUtilities.inheritsFrom = function(child, parent) {
     'use strict';
     child.prototype = Object.create(parent.prototype);

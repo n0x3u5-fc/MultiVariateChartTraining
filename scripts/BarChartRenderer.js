@@ -30,7 +30,7 @@ BarChartRenderer.prototype.displayHeaders = function(height, width, keys) {
         headerSvg.appendChild(headerText);
     }
 };
-BarChartRenderer.prototype.drawRowName = function(charts, multiCharts, svgHelper, svg, height, width, rowCount) {
+BarChartRenderer.prototype.drawRowName = function(charts, multiCharts, svgHelper, svg, height, width, i, rowCount) {
     'use strict';
     var mappedCharts  = [];
     var chartUbHeight = Math.ceil(height);
@@ -45,10 +45,10 @@ BarChartRenderer.prototype.drawRowName = function(charts, multiCharts, svgHelper
     mappedCharts.push(mappedData);
 
     var categoryText = svgHelper.drawTextByClass(16, mappedData.xTicks[0] + 8,
-                                                 charts[rowCount].category, "category-text");
+                                                 charts[i].category, "category-text");
     svg.appendChild(categoryText);
     svg.setAttributeNS(null, "class", "row-category");
-    if(rowCount !== charts.length - 1) {
+    if(i !== charts.length - 1 && rowCount !== this.totalRows - 1) {
         svg.style.borderBottom = "1px solid black";
     }
 };
@@ -75,7 +75,7 @@ BarChartRenderer.prototype.drawYLabels = function(charts, multiCharts, svgHelper
         svg.appendChild(yValues);
     }
     svg.setAttributeNS(null, "class", "y-labels");
-    if(rowCount !== charts.length - 1) {
+    if(i !== charts.length - 1 && rowCount !== this.totalRows - 1) {
         svg.style.borderBottom = "1px solid black";
     }
 };
@@ -222,7 +222,7 @@ BarChartRenderer.prototype.drawCompleteCharts = function(i, charts, multiCharts,
     var xAxis = new Chart.XAxis(chartUbWidth, chartUbHeight, chartLbWidth, chartUbHeight,
                           "xAxis", columnsAreComplete);
     xAxis.type = "numeric";
-    if(rowCount !== charts.length - 1) {
+    if(rowCount !== this.totalRows - 1) {
         xAxis.render(svg);
     }
     // xAxis.renderTicks(svg, mappedData.yTicks);
@@ -249,6 +249,7 @@ BarChartRenderer.prototype.drawCompleteCharts = function(i, charts, multiCharts,
             anchor.setAttributeNS(null, "data-value", charts[i].yData[k]);
             // svg.appendChild(anchor);
             var plotHeight = (chartHeight / mappedData.xData.length) - 13;
+            if(plotHeight > 40) { plotHeight = 40; }
             if(svg.getElementsByClassName("zeroPlane").length > 0) {
                 // var xZeroLine = svg.getElementsByClassName("zeroPlane");
                 // var zeroPlaneY = xZeroLine[0].getAttributeNS(null, "y1");
@@ -366,7 +367,7 @@ BarChartRenderer.prototype.createCharts = function(charts, height, width, rowCou
     for (var i = 0; i < multiCharts.length; i++) {
         var svg = svgHelper.createSvgByClass(height, width, "chart-svg");
         if(i === 0) {
-            this.drawRowName(charts, multiCharts, svgHelper, svg, height, width, rowCount);
+            this.drawRowName(charts, multiCharts, svgHelper, svg, height, width, i, rowCount);
         } else if(i === 1) {
             this.drawYLabels(charts, multiCharts, svgHelper, svg, height, width, i, rowCount);
         } else {

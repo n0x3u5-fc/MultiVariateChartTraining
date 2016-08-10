@@ -10,6 +10,6 @@ var MultiVarChart = function(index, vis, type, xTitle, yTitle, xData, yData, xUn
 	this.yTitle = yTitle;
 	this.xData  = xData;
 	this.yData  = yData;
-	this.xUnit  = xUnit;
-	this.yUnit  = yUnit;
+	this.xUnit  = xUnit ? xUnit : "";
+	this.yUnit  = yUnit ? yUnit : "";
 };
