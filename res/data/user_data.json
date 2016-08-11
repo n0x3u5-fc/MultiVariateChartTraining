@@ -2,9 +2,9 @@
 	"metadata": {
 		"caption": "Multi-Variate Chart",
 		"subCaption": "Correlation of Age with Nutrition",
-		"visualization": "crosstabs",
-		"type": "bar",
-		"height": 230,
+		"visualization": "trellis",
+		"type": "column",
+		"height": 250,
 		"width": 280,
 		"positiveGradientStart": "#17202a",
 		"positiveGradientEnd": "#abb2b9",
@@ -21,13 +21,13 @@
 		"Product Type": "Coffee",
 		"Zone": "Central",
 		"Product": "Columbian",
-		"Profit": 8528,
+		"Sum of Profits": 8528,
 		"Sum of Sales": 28913
 	}, {
 		"Product Type": "Coffee",
 		"Zone": "Central",
 		"Product": "Decaf Irish Cream",
-		"Profit": 9632,
+		"Sum of Profits": 9632,
 		"Sum of Sales": 26155
 	}, {
 		"Product Type": "Coffee",
@@ -39,13 +39,13 @@
 		"Product Type": "Coffee",
 		"Zone": "East",
 		"Product": "Columbian",
-		"Profit": 27253,
+		"Sum of Profits": 27253,
 		"Sum of Sales": 47386
 	}, {
 		"Product Type": "Coffee",
 		"Zone": "East",
 		"Product": "Decaf Irish Cream",
-		"Profit": 2727,
+		"Sum of Profits": 2727,
 		"Sum of Sales": 6261
 	}, {
 		"Product Type": "Coffee",
@@ -57,13 +57,13 @@
 		"Product Type": "Coffee",
 		"Zone": "South",
 		"Product": "Columbian",
-		"Profit": 8767,
+		"Sum of Profits": 8767,
 		"Sum of Sales": 21664
 	}, {
 		"Product Type": "Coffee",
 		"Zone": "South",
 		"Product": "Decaf Irish Cream",
-		"Profit": 2933,
+		"Sum of Profits": 2933,
 		"Sum of Sales": 11592
 	}, {
 		"Product Type": "Coffee",
@@ -75,13 +75,13 @@
 		"Product Type": "Coffee",
 		"Zone": "West",
 		"Product": "Columbian",
-		"Profit": 11253,
+		"Sum of Profits": 11253,
 		"Sum of Sales": 30357
 	}, {
 		"Product Type": "Coffee",
 		"Zone": "West",
 		"Product": "Decaf Irish Cream",
-		"Profit": -1305,
+		"Sum of Profits": -1305,
 		"Sum of Sales": 18235
 	}]
 }
