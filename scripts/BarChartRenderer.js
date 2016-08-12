@@ -69,9 +69,6 @@ BarChartRenderer.prototype.drawYLabels = function(charts, multiCharts, svgHelper
     for(var yTick of mappedData.xTicks) {
         var yValuesContent = charts[i].xData[mappedData.xTicks.indexOf(yTick)];
         var yValues = svgHelper.drawTextByClass(16, yTick + 8, yValuesContent, "y-value");
-        if(mappedData.xTicks.indexOf(yTick) === mappedData.xTicks.length - 1) {
-            yValues.style.strokeWidth = 1.1;
-        }
         svg.appendChild(yValues);
     }
     svg.setAttributeNS(null, "class", "y-labels");
@@ -79,7 +76,7 @@ BarChartRenderer.prototype.drawYLabels = function(charts, multiCharts, svgHelper
         svg.style.borderBottom = "1px solid black";
     }
 };
-BarChartRenderer.prototype.drawX = function(height, width, keys) {
+BarChartRenderer.prototype.drawX = function(height, width, keys, title) {
     'use strict';
     var mappedCharts  = [];
     var formattedTickValues = [];
@@ -126,6 +123,11 @@ BarChartRenderer.prototype.drawX = function(height, width, keys) {
         });
         xAxis.chartVis = "crosstabs";
         xAxis.renderTickValues(footerSvg, mappedData.yTicks, formattedTickValues);
+        if(keys.indexOf(key) > 1) {
+            var xTitle = svgHelper.drawTextByClass((chartWidth / 2) - (title.length * 3),
+                                                   chartHeight / 1.2, title, "x-title");
+            footerSvg.appendChild(xTitle);
+        }
     }
 };
 BarChartRenderer.prototype.displayCharts = function(height, width, rowCount) {
@@ -249,7 +251,7 @@ BarChartRenderer.prototype.drawCompleteCharts = function(i, charts, multiCharts,
             anchor.setAttributeNS(null, "data-value", charts[i].yData[k]);
             // svg.appendChild(anchor);
             var plotHeight = (chartHeight / mappedData.xData.length) - 13;
-            if(plotHeight > 40) { plotHeight = 40; }
+            if(plotHeight > 27) { plotHeight = 27; }
             if(svg.getElementsByClassName("zeroPlane").length > 0) {
                 // var xZeroLine = svg.getElementsByClassName("zeroPlane");
                 // var zeroPlaneY = xZeroLine[0].getAttributeNS(null, "y1");
