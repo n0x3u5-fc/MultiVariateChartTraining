@@ -35,13 +35,14 @@ Data.prototype.dataParser = function(json) {
     'use strict';
 
     var i, idx, objKeys, jsonDataKeys, yObjectKeys, numCharts, chartRenderer, rowCount,
-        headerName,
+        headerName, crosstabHeaders, xTitle,
         criteria = [],
         categoryNames = [],
         headerNames = [],
         productNames = [],
         productData = [],
         colorCriteria = [],
+        dataValues = [],
         maxY = -Infinity,
         minY = Infinity,
         data = this;
@@ -59,17 +60,18 @@ Data.prototype.dataParser = function(json) {
     this.positiveColorStart = json.metadata.positiveGradientStart;
     this.negativeColorStart = json.metadata.negativeGradientStart;
 
-    // if(json.data.length > 1) {
-    //     this.vis = "crosstabs";
-    // } else {
-    //     this.vis = "trellis";
-    // }
-
     json.data.map(function(currentValue) {
         objKeys = Object.keys(currentValue);
         if(categoryNames.indexOf(currentValue[objKeys[0]]) === -1) {
             categoryNames.push(currentValue[objKeys[0]]);
         }
+        dataValues.push(currentValue[objKeys[3]]);
+        xTitle = objKeys[3];
+    });
+
+    dataValues.map(function(currentValue, index) {
+        maxY = currentValue > maxY ? currentValue : maxY;
+        minY = currentValue < minY ? currentValue : minY;
     });
 
     categoryNames.forEach(function(currentValue, index) {
@@ -95,12 +97,24 @@ Data.prototype.dataParser = function(json) {
                     if(productNames.indexOf(currentValue[objKeys[2]]) === -1) {
                         productNames.push(currentValue[objKeys[2]]);
                     }
-                    colorCriteria.push(currentValue[objKeys[3]]);
-                    productData.push(currentValue[objKeys[4]]);
+                    productData.push(currentValue[objKeys[3]]);
+                    colorCriteria.push(currentValue[objKeys[4]]);
                 }
             });
-            var chart = new MultiVarChart(index + 2, data.vis, data.type, objKeys[4],
+            var chart = new MultiVarChart(index + 2, data.vis, data.type, objKeys[3],
                                           headerNames[index], productNames, productData);
+            crosstabHeaders = headerNames.slice();
+            crosstabHeaders.unshift(objKeys[2]);
+            crosstabHeaders.unshift(objKeys[0]);
+
+            if(data.vis === "crosstab") {
+                chart.keys          = crosstabHeaders;
+                chart.minY          = minY;
+                chart.maxY          = maxY;
+                chart.category      = categoryName;
+                chart.colorCriteria = colorCriteria;
+            }
+
             data.chartData.push(chart);
         });
 
@@ -112,41 +126,54 @@ Data.prototype.dataParser = function(json) {
 
         var chartProperties = new ChartPropertyCalculator(data.chartData);
 
-        if(data.type === "line") {
-            chartRenderer = new LineChartRenderer(data.chartData, chartProperties);
-            chartRenderer.createCaptions("chart-area", data.caption, data.subCaption);
-            chartRenderer.displayCharts(data.height, data.width);
-        } else if(data.type === "column") {
-            chartRenderer = new ColumnChartRenderer(data.chartData, chartProperties);
-            chartRenderer.createCaptions("chart-area", data.caption, data.subCaption);
-            chartRenderer.displayCharts(data.height, data.width);
-        } else if(data.type === "bar") {
-            chartRenderer = new BarChartRenderer(data.chartData, chartProperties);
-            chartRenderer.plotColor        = data.positiveColorStart;
-            chartRenderer.plotColorEnd     = data.positiveColorEnd;
-            chartRenderer.negativeColor    = data.negativeColorStart;
-            chartRenderer.negativeColorEnd = data.negativeColorEnd;
-            chartRenderer.totalRows        = json.data.length;
-            var width = Math.floor((document.body.clientWidth - 20) / jsonDataKeys.length);
-            var headerHeight = 20;
-            var footerHeight = 50;
-            var height = Math.floor((window.innerHeight) / json.data.length);
-            if(height < 110) { height = 110; }
-            if(json.data.indexOf(datum) === 0) {
-                chartRenderer.displayHeaders(headerHeight, width, jsonDataKeys);
+        if(data.vis === "trellis") {
+            if(data.type === "line") {
+                if(categoryNames.indexOf(categoryName) === 0) {
+                    chartRenderer = new LineChartRenderer(data.chartData, chartProperties);
+                    chartRenderer.createCaptions("chart-area", data.caption, data.subCaption);
+                    chartRenderer.displayCharts(data.height, data.width);
+                }
+            } else if(data.type === "column") {
+                if(categoryNames.indexOf(categoryName) === 0) {
+                    chartRenderer = new ColumnChartRenderer(data.chartData, chartProperties);
+                    chartRenderer.createCaptions("chart-area", data.caption, data.subCaption);
+                    chartRenderer.displayCharts(data.height, data.width);
+                }
+            } else {
+                console.log("Sorry Dave. I can't let you render a trellis without columns or lines");
             }
-            chartRenderer.displayCharts(height - 25, width, rowCount);
-            if(json.data.indexOf(datum) === json.data.length - 1) {
-                chartRenderer.drawX(footerHeight, width, jsonDataKeys);
+        } else if(data.vis === "crosstab"){
+            if(data.type === "bar") {
+                chartRenderer = new BarChartRenderer(data.chartData, chartProperties);
+                chartRenderer.plotColor        = data.positiveColorStart;
+                chartRenderer.plotColorEnd     = data.positiveColorEnd;
+                chartRenderer.negativeColor    = data.negativeColorStart;
+                chartRenderer.negativeColorEnd = data.negativeColorEnd;
+                chartRenderer.totalRows        = categoryNames.length;
+                var width = Math.floor((document.body.clientWidth - 20) / crosstabHeaders.length);
+                var headerHeight = 20;
+                var footerHeight = 50;
+                var height = Math.floor((window.innerHeight) / categoryNames.length);
+                if(height < 110) { height = 110; }
+                if(index === 0) {
+                    chartRenderer.displayHeaders(headerHeight, width, crosstabHeaders);
+                }
+                chartRenderer.displayCharts(height - 25, width, categoryNames.indexOf(categoryName));
+                if(index === categoryNames.length - 1) {
+                    chartRenderer.drawX(footerHeight, width, crosstabHeaders, xTitle);
+                }
+                var allPlots = document.getElementsByClassName("bar-plot");
+                Array.from(allPlots).map(function(currentValue, index, array) {
+                    criteria.push(currentValue.getAttributeNS(null, "data-criteria"));
+                });
+                chartRenderer.colorPlots(criteria);
+            } else {
+                console.log("Sorry Dave. I can't let you render a crosstab without bars.");
             }
-            var allPlots = document.getElementsByClassName("bar-plot");
-            Array.from(allPlots).map(function(currentValue, index, array) {
-                criteria.push(currentValue.getAttributeNS(null, "data-criteria"));
-            });
-            chartRenderer.colorPlots(criteria);
         } else {
-            console.log("Sorry Dave. I can't let you do that.");
+            console.log("Sorry Dave. I can't let you render anything other than a trellis or a crosstab");
         }
+        data.chartData = [];
     });
 
     var eventAgent = new EventAgents(this.type);

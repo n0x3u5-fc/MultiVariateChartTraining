@@ -77,7 +77,7 @@ ChartPropertyCalculator.prototype.dataMapper = function(height, width, lbHeight,
                 xData.push(Math.floor(xDataVal));
             }
         }
-    } else if(chartVis === "crosstabs"){
+    } else if(chartVis === "crosstab"){
         for (var yTick of chart.yTicks) {
             var yTickVal = lbWidth;
             var yTickInterval = width / (yTicksMax - yTicksMin);

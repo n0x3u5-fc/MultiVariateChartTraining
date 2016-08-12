@@ -2,8 +2,8 @@
 	"metadata": {
 		"caption": "Multi-Variate Chart",
 		"subCaption": "Correlation of Age with Nutrition",
-		"visualization": "trellis",
-		"type": "column",
+		"visualization": "crosstab",
+		"type": "bar",
 		"height": 250,
 		"width": 280,
 		"positiveGradientStart": "#17202a",
@@ -15,73 +15,313 @@
 		"Product Type": "Coffee",
 		"Zone": "Central",
 		"Product": "Amaretto",
-		"Sum of Profits": 5105,
-		"Sum of Sales": 14011
+		"Sum of Sales": 14011,
+		"Sum of Profits": 5105
 	}, {
 		"Product Type": "Coffee",
 		"Zone": "Central",
 		"Product": "Columbian",
-		"Sum of Profits": 8528,
-		"Sum of Sales": 28913
+		"Sum of Sales": 28913,
+		"Sum of Profits": 8528
 	}, {
 		"Product Type": "Coffee",
 		"Zone": "Central",
 		"Product": "Decaf Irish Cream",
-		"Sum of Profits": 9632,
-		"Sum of Sales": 26155
+		"Sum of Sales": 26155,
+		"Sum of Profits": 9632
 	}, {
 		"Product Type": "Coffee",
 		"Zone": "East",
 		"Product": "Amaretto",
-		"Sum of Profits": 1009,
-		"Sum of Sales": 2993
+		"Sum of Sales": 2993,
+		"Sum of Profits": 1009
 	}, {
 		"Product Type": "Coffee",
 		"Zone": "East",
 		"Product": "Columbian",
-		"Sum of Profits": 27253,
-		"Sum of Sales": 47386
+		"Sum of Sales": 47386,
+		"Sum of Profits": 27253
 	}, {
 		"Product Type": "Coffee",
 		"Zone": "East",
 		"Product": "Decaf Irish Cream",
-		"Sum of Profits": 2727,
-		"Sum of Sales": 6261
+		"Sum of Sales": 6261,
+		"Sum of Profits": 2727
 	}, {
 		"Product Type": "Coffee",
 		"Zone": "South",
 		"Product": "Amaretto",
-		"Sum of Profits": 0,
-		"Sum of Sales": 0
+		"Sum of Sales": 0,
+		"Sum of Profits": 0
 	}, {
 		"Product Type": "Coffee",
 		"Zone": "South",
 		"Product": "Columbian",
-		"Sum of Profits": 8767,
-		"Sum of Sales": 21664
+		"Sum of Sales": 21664,
+		"Sum of Profits": 8767
 	}, {
 		"Product Type": "Coffee",
 		"Zone": "South",
 		"Product": "Decaf Irish Cream",
-		"Sum of Profits": 2933,
-		"Sum of Sales": 11592
+		"Sum of Sales": 11592,
+		"Sum of Profits": 2933
 	}, {
 		"Product Type": "Coffee",
 		"Zone": "West",
 		"Product": "Amaretto",
-		"Sum of Profits": -1225,
-		"Sum of Sales": 9265
+		"Sum of Sales": 9265,
+		"Sum of Profits": -1225
 	}, {
 		"Product Type": "Coffee",
 		"Zone": "West",
 		"Product": "Columbian",
-		"Sum of Profits": 11253,
-		"Sum of Sales": 30357
+		"Sum of Sales": 30357,
+		"Sum of Profits": 11253
 	}, {
 		"Product Type": "Coffee",
 		"Zone": "West",
 		"Product": "Decaf Irish Cream",
-		"Sum of Profits": -1305,
-		"Sum of Sales": 18235
+		"Sum of Sales": 18235,
+		"Sum of Profits": -1305
+	}, {
+		"Product Type": "Espresso",
+		"Zone": "Central",
+		"Product": "Caffe Latte",
+		"Sum of Sales": 0,
+		"Sum of Profits": 0
+	}, {
+		"Product Type": "Espresso",
+		"Zone": "Central",
+		"Product": "Caffe Mocha",
+		"Sum of Sales": 35218,
+		"Sum of Profits": 14640
+	}, {
+		"Product Type": "Espresso",
+		"Zone": "Central",
+		"Product": "Decaf Espresso",
+		"Sum of Sales": 24485,
+		"Sum of Profits": 8860
+	}, {
+		"Product Type": "Espresso",
+		"Zone": "Central",
+		"Product": "Regular Espresso",
+		"Sum of Sales": 0,
+		"Sum of Profits": 0
+	}, {
+		"Product Type": "Espresso",
+		"Zone": "East",
+		"Product": "Caffe Latte",
+		"Sum of Sales": 0,
+		"Sum of Profits": 0
+	}, {
+		"Product Type": "Espresso",
+		"Zone": "East",
+		"Product": "Caffe Mocha",
+		"Sum of Sales": 16646,
+		"Sum of Profits": -6230
+	}, {
+		"Product Type": "Espresso",
+		"Zone": "East",
+		"Product": "Decaf Espresso",
+		"Sum of Sales": 7722,
+		"Sum of Profits": 2410
+	}, {
+		"Product Type": "Espresso",
+		"Zone": "East",
+		"Product": "Regular Espresso",
+		"Sum of Sales": 24036,
+		"Sum of Profits": 10062
+	}, {
+		"Product Type": "Espresso",
+		"Zone": "South",
+		"Product": "Caffe Latte",
+		"Sum of Sales": 15442,
+		"Sum of Profits": 3872
+	}, {
+		"Product Type": "Espresso",
+		"Zone": "South",
+		"Product": "Caffe Mocha",
+		"Sum of Sales": 14163,
+		"Sum of Profits": 5201
+	}, {
+		"Product Type": "Espresso",
+		"Zone": "South",
+		"Product": "Decaf Espresso",
+		"Sum of Sales": 15384,
+		"Sum of Profits": 5930
+	}, {
+		"Product Type": "Espresso",
+		"Zone": "South",
+		"Product": "Regular Espresso",
+		"Sum of Sales": 0,
+		"Sum of Profits": 0
+	}, {
+		"Product Type": "Espresso",
+		"Zone": "West",
+		"Product": "Caffe Latte",
+		"Sum of Sales": 20458,
+		"Sum of Profits": 7502
+	}, {
+		"Product Type": "Espresso",
+		"Zone": "West",
+		"Product": "Caffe Mocha",
+		"Sum of Sales": 18876,
+		"Sum of Profits": 4064
+	}, {
+		"Product Type": "Espresso",
+		"Zone": "West",
+		"Product": "Decaf Espresso",
+		"Sum of Sales": 30578,
+		"Sum of Profits": 12302
+	}, {
+		"Product Type": "Espresso",
+		"Zone": "West",
+		"Product": "Regular Espresso",
+		"Sum of Sales": 0,
+		"Sum of Profits": 0
+	}, {
+		"Product Type": "Herbal Tea",
+		"Zone": "Central",
+		"Product": "Chamomile",
+		"Sum of Sales": 36570,
+		"Sum of Profits": 14434
+	}, {
+		"Product Type": "Herbal Tea",
+		"Zone": "Central",
+		"Product": "Lemon",
+		"Sum of Sales": 21978,
+		"Sum of Profits": 6251
+	}, {
+		"Product Type": "Herbal Tea",
+		"Zone": "Central",
+		"Product": "Mint",
+		"Sum of Sales": 9337,
+		"Sum of Profits": 4069
+	}, {
+		"Product Type": "Herbal Tea",
+		"Zone": "East",
+		"Product": "Chamomile",
+		"Sum of Sales": 2194,
+		"Sum of Profits": 765
+	}, {
+		"Product Type": "Herbal Tea",
+		"Zone": "East",
+		"Product": "Lemon",
+		"Sum of Sales": 27176,
+		"Sum of Profits": 7901
+	}, {
+		"Product Type": "Herbal Tea",
+		"Zone": "East",
+		"Product": "Mint",
+		"Sum of Sales": 11992,
+		"Sum of Profits": -2242
+	}, {
+		"Product Type": "Herbal Tea",
+		"Zone": "South",
+		"Product": "Chamomile",
+		"Sum of Sales": 11186,
+		"Sum of Profits": 3180
+	}, {
+		"Product Type": "Herbal Tea",
+		"Zone": "South",
+		"Product": "Lemon",
+		"Sum of Sales": 14497,
+		"Sum of Profits": 2593
+	}, {
+		"Product Type": "Herbal Tea",
+		"Zone": "South",
+		"Product": "Mint",
+		"Sum of Sales": 0,
+		"Sum of Profits": 0
+	}, {
+		"Product Type": "Herbal Tea",
+		"Zone": "West",
+		"Product": "Chamomile",
+		"Sum of Sales": 25632,
+		"Sum of Profits": 8852
+	}, {
+		"Product Type": "Herbal Tea",
+		"Zone": "West",
+		"Product": "Lemon",
+		"Sum of Sales": 32274,
+		"Sum of Profits": 13120
+	}, {
+		"Product Type": "Herbal Tea",
+		"Zone": "West",
+		"Product": "Mint",
+		"Sum of Sales": 14380,
+		"Sum of Profits": 4330
+	}, {
+		"Product Type": "Tea",
+		"Zone": "Central",
+		"Product": "Darjeeling",
+		"Sum of Sales": 30289,
+		"Sum of Profits": 10772
+	}, {
+		"Product Type": "Tea",
+		"Zone": "Central",
+		"Product": "Earl Grey",
+		"Sum of Sales": 32881,
+		"Sum of Profits": 10331
+	}, {
+		"Product Type": "Tea",
+		"Zone": "Central",
+		"Product": "Green Tea",
+		"Sum of Sales": 5211,
+		"Sum of Profits": 1227
+	}, {
+		"Product Type": "Tea",
+		"Zone": "East",
+		"Product": "Darjeeling",
+		"Sum of Sales": 14096,
+		"Sum of Profits": 6497
+	}, {
+		"Product Type": "Tea",
+		"Zone": "East",
+		"Product": "Earl Grey",
+		"Sum of Sales": 6505,
+		"Sum of Profits": 3405
+	}, {
+		"Product Type": "Tea",
+		"Zone": "East",
+		"Product": "Green Tea",
+		"Sum of Sales": 11571,
+		"Sum of Profits": 5654
+	}, {
+		"Product Type": "Tea",
+		"Zone": "South",
+		"Product": "Darjeeling",
+		"Sum of Sales": 0,
+		"Sum of Profits": 0
+	}, {
+		"Product Type": "Tea",
+		"Zone": "South",
+		"Product": "Earl Grey",
+		"Sum of Sales": 0,
+		"Sum of Profits": 0
+	}, {
+		"Product Type": "Tea",
+		"Zone": "South",
+		"Product": "Green Tea",
+		"Sum of Sales": 0,
+		"Sum of Profits": 0
+	}, {
+		"Product Type": "Tea",
+		"Zone": "West",
+		"Product": "Darjeeling",
+		"Sum of Sales": 28769,
+		"Sum of Profits": 11780
+	}, {
+		"Product Type": "Tea",
+		"Zone": "West",
+		"Product": "Earl Grey",
+		"Sum of Sales": 27387,
+		"Sum of Profits": 10425
+	}, {
+		"Product Type": "Tea",
+		"Zone": "West",
+		"Product": "Green Tea",
+		"Sum of Sales": 16063,
+		"Sum of Profits": -7109
 	}]
 }
