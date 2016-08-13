@@ -49,9 +49,9 @@ Data.prototype.dataParser = function(json) {
 
     this.vis                = json.metadata.visualization;
     this.type               = json.metadata.type;
-    this.width              = json.metadata.width;
+    this.width              = Number(json.metadata.width);
     this.sortBy             = json.metadata.sortBy;
-    this.height             = json.metadata.height;
+    this.height             = Number(json.metadata.height);
     this.caption            = json.metadata.caption;
     this.sortOrder          = json.metadata.sortOrder;
     this.subCaption         = json.metadata.subCaption;
@@ -86,16 +86,22 @@ Data.prototype.dataParser = function(json) {
             }
         });
         headerNames.forEach(function(currentValue, index) {
-            var headerName = currentValue;
-            productNames = [];
-            productData = [];
-            colorCriteria = [];
+            var prod,
+                headerName = currentValue;
+            productNames   = [];
+            productData    = [];
+            colorCriteria  = [];
             json.data.map(function(currentValue) {
                 objKeys = Object.keys(currentValue);
                 if(currentValue[objKeys[0]] === categoryName &&
                     currentValue[objKeys[1]] === headerName) {
                     if(productNames.indexOf(currentValue[objKeys[2]]) === -1) {
-                        productNames.push(currentValue[objKeys[2]]);
+                        if(data.vis === "trellis") {
+                            prod = chartUtilities.truncateString(currentValue[objKeys[2]]);
+                        } else {
+                            prod = currentValue[objKeys[2]];
+                        }
+                        productNames.push(prod);
                     }
                     productData.push(currentValue[objKeys[3]]);
                     colorCriteria.push(currentValue[objKeys[4]]);

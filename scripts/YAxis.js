@@ -29,6 +29,7 @@ goog.require("Chart");
         var yValues;
         for(var yTick of yTicks) {
             var yValuesContent = yData[yTicks.indexOf(yTick)];
+            yValuesContent = chartUtilities.shortenLargeNumber(yValuesContent, 2);
             if(this.columnsAreComplete) {
                 if(this.type === "category") {
                     yValues = this.svgHelper.drawTextByClass(50 - 5, yTick - 55 + 5,
