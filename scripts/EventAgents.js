@@ -139,7 +139,7 @@ EventAgents.prototype.moveOtherCrosshairs = function(event) {
                 tooltipBgX = anchorBox.x + (anchorBox.width) + 3;
                 tooltipY   = anchorBox.y + (anchorBox.height * 2);
                 tooltipBgY = anchorBox.y + anchorBox.height - 3;
-                if (tooltipX + anchorBox.width > chartRect.right) {
+                if (tooltipX + anchorBox.width + chartRect.left > chartRect.right) {
                     tooltipX   -= (anchorBox.width * 5) - 5;
                     tooltipBgX -= (anchorBox.width * 5) - 5;
                 }

@@ -80,7 +80,7 @@ ColumnChartRenderer.prototype.drawCompleteCharts = function(i, charts, multiChar
     svg.appendChild(yTitleRect);
     var yTitleContent = charts[i].yUnit === "" ?
         charts[i].yTitle : charts[i].yTitle + " (" + charts[i].yUnit + ")";
-    var yTitle = svgHelper.drawTextByClass((chartUbWidth / 2) - 15, chartLbHeight - 55 - 20, yTitleContent,
+    var yTitle = svgHelper.drawTextByClass((chartUbWidth / 2) - yTitleContent.length, chartLbHeight - 55 - 20, yTitleContent,
                                            "y-title");
     svg.appendChild(yTitle);
 
@@ -153,7 +153,7 @@ ColumnChartRenderer.prototype.drawIncompleteCharts = function(i, charts, multiCh
     svg.appendChild(yTitleRect);
     var yTitleContent = charts[i].yUnit === "" ?
         charts[i].yTitle : charts[i].yTitle + " (" + charts[i].yUnit + ")";
-    var yTitle = svgHelper.drawTextByClass((chartUbWidth / 2) - 15, chartUbHeight + 15, yTitleContent,
+    var yTitle = svgHelper.drawTextByClass((chartUbWidth / 2) - yTitleContent.length, chartUbHeight + 15, yTitleContent,
                                            "y-title");
     svg.appendChild(yTitle);
 
@@ -195,8 +195,10 @@ ColumnChartRenderer.prototype.createCharts = function(charts, height, width) {
     var columnsAreComplete;
     var svgHelper    = new SvgHelper();
     var chartsInARow = Math.floor(window.innerWidth / (width + 55));
-
     var multiCharts = document.getElementsByClassName("multi-chart");
+    if(chartsInARow > multiCharts.length) {
+        chartsInARow = multiCharts.length;
+    }
     if(multiCharts.length % chartsInARow === 0) {
         columnsAreComplete = true;
     } else {

@@ -13,6 +13,7 @@ var Data = function() {
 
 Data.prototype.ajaxLoader = function(url, callback) {
     'use strict';
+    console.log("Hello, Mint!");
     var httpRequest = new XMLHttpRequest();
     if (!httpRequest) {
         console.log("Unable to create XMLHTTP instance.");

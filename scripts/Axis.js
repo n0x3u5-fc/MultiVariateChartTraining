@@ -1,4 +1,5 @@
 goog.require("Chart");
+goog.require("chartUtilities");
 ;(function() {
 	'use strict';
 	/**

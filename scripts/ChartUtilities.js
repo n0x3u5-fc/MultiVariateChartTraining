@@ -1,3 +1,4 @@
+goog.provide("chartUtilities");
 var chartUtilities = {};
 
 chartUtilities.nullMinMapper = function(val) {
