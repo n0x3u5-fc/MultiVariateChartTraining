@@ -5,10 +5,9 @@ goog.require("Chart");
      * @constructor
      */
     Chart.YAxis = function(startX, startY, endX, endY, className, columnsAreComplete) {
-        'use strict';
         Chart.Axis.call(this, startX, startY, endX, endY, className, columnsAreComplete);
     };
-    chartUtilities.inheritsFrom(Chart.YAxis, Chart.Axis);
+    Chart.chartUtilities.inheritsFrom(Chart.YAxis, Chart.Axis);
     Chart.YAxis.prototype.renderTicks = function(svg, yTicks) {
         'use strict';
         var tickLength = 5;
@@ -25,11 +24,10 @@ goog.require("Chart");
         }
     };
     Chart.YAxis.prototype.renderTickValues = function(svg, yTicks, yData) {
-        'use strict';
         var yValues;
         for(var yTick of yTicks) {
             var yValuesContent = yData[yTicks.indexOf(yTick)];
-            yValuesContent = chartUtilities.shortenLargeNumber(yValuesContent, 2);
+            yValuesContent = Chart.chartUtilities.shortenLargeNumber(yValuesContent, 2);
             if(this.columnsAreComplete) {
                 if(this.type === "category") {
                     yValues = this.svgHelper.drawTextByClass(50 - 5, yTick - 55 + 5,
@@ -55,7 +53,6 @@ goog.require("Chart");
         }
     };
     Chart.YAxis.prototype.renderDivs = function(svg, yTicks, chartHeight, chartLbWidth, chartWidth) {
-        'use strict';
         var yDivRect;
         for(var yTick of yTicks) {
             if(this.columnsAreComplete) {
@@ -71,7 +68,6 @@ goog.require("Chart");
         }
     };
     Chart.YAxis.prototype.renderZeroPlane = function(svg, yTicks, yData, chartWidth) {
-        'use strict';
         var xZeroLine;
         for(var yTick of yTicks) {
             var yValuesContent = yData[yTicks.indexOf(yTick)];
