@@ -9,9 +9,19 @@
     };
 
     Chart.ColumnChartRenderer.prototype.displayCharts = function(height, width) {
+        var minY = Infinity, maxY = -Infinity;
+        var chartsInARow = Math.floor(window.innerWidth / (width + 55));
         for (var i = 0; i < this.charts.length; i++) {
-            var maxY = Math.max.apply(Math, this.charts[i].yData.map(Chart.chartUtilities.nullMaxMapper));
-            var minY = Math.min.apply(Math, this.charts[i].yData.map(Chart.chartUtilities.nullMinMapper));
+            for(var j = i; j < chartsInARow; j++) {
+                var tMaxY = Math.max.apply(Math, this.charts[j].yData.map(Chart.chartUtilities.nullMaxMapper));
+                var tMinY = Math.min.apply(Math, this.charts[j].yData.map(Chart.chartUtilities.nullMinMapper));
+                if(tMaxY > maxY) {
+                    maxY = tMaxY;
+                }
+                if(tMinY < minY) {
+                    minY = tMinY;
+                }
+            }
             if (minY !== Infinity || maxY !== -Infinity) {
                 this.charts[i].yTicks = this.chartProperties.calculateYAxis(minY, maxY);
                 this.charts[i].xTicks = this.chartProperties.calculateYAxis(0,
@@ -61,7 +71,9 @@
                               "yAxis", columnsAreComplete);
         yAxis.render(svg);
         yAxis.renderTicks(svg, mappedData.yTicks);
-        yAxis.renderTickValues(svg, mappedData.yTicks, charts[i].yTicks);
+        if(i % chartsInARow === 0) {
+            yAxis.renderTickValues(svg, mappedData.yTicks, charts[i].yTicks);
+        }
         yAxis.renderDivs(svg, mappedData.yTicks, chartHeight, chartLbWidth, chartWidth);
         yAxis.renderZeroPlane(svg, mappedData.yTicks, charts[i].yTicks, chartWidth);
 
@@ -91,6 +103,7 @@
                 anchor.setAttributeNS(null, "data-value", charts[i].yData[k]);
                 // svg.appendChild(anchor);
                 var plotWidth = (chartWidth / mappedData.xData.length) - 10;
+                if(plotWidth > 40) { plotWidth = 40; }
                 if(svg.getElementsByClassName("zeroPlane").length > 0) {
                     var xZeroLine = svg.getElementsByClassName("zeroPlane");
                     var zeroPlaneY = xZeroLine[0].getAttributeNS(null, "y1");
@@ -136,7 +149,9 @@
                               "yAxis", columnsAreComplete);
         yAxis.render(svg);
         yAxis.renderTicks(svg, mappedData.yTicks);
-        yAxis.renderTickValues(svg, mappedData.yTicks, charts[i].yTicks);
+        if(i % chartsInARow === 0) {
+            yAxis.renderTickValues(svg, mappedData.yTicks, charts[i].yTicks);
+        }
         yAxis.renderDivs(svg, mappedData.yTicks, chartHeight, chartLbWidth, chartWidth);
         yAxis.renderZeroPlane(svg, mappedData.yTicks, charts[i].yTicks, chartWidth);
 
@@ -165,6 +180,7 @@
                 anchor.setAttributeNS(null, "data-value", charts[i].yData[k]);
                 // svg.appendChild(anchor);
                 var plotWidth = (chartWidth / mappedData.xData.length) - 10;
+                if(plotWidth > 40) { plotWidth = 40; }
                 if(svg.getElementsByClassName("zeroPlane").length > 0) {
                     var xZeroLine = svg.getElementsByClassName("zeroPlane");
                     var zeroPlaneY = xZeroLine[0].getAttributeNS(null, "y1");
