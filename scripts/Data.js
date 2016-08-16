@@ -23,7 +23,13 @@
         httpRequest.onreadystatechange = function() {
             if (httpRequest.readyState === XMLHttpRequest.DONE) {
                 if (httpRequest.status === 200) {
-                    callback(JSON.parse(httpRequest.responseText));
+                    try {
+                        callback(JSON.parse(httpRequest.responseText));
+                    } catch(e) {
+                        var chartDiv = document.getElementById("chart-area");
+                        chartDiv.innerHTML = e;
+                        console.log(e);
+                    }
                 } else {
                     console.log("There was a problem with the request");
                 }
@@ -145,7 +151,7 @@
                         chartRenderer.displayCharts(data.height, data.width);
                     }
                 } else {
-                    console.log("Sorry Dave. I can't let you render a trellis without columns or lines");
+                    throw new Error("Sorry. I can't let you render a trellis without columns or lines.");
                 }
             } else if(data.vis === "crosstab"){
                 if(data.type === "bar") {
@@ -174,10 +180,10 @@
                     });
                     chartRenderer.colorPlots(criteria);
                 } else {
-                    console.log("Sorry Dave. I can't let you render a crosstab without bars.");
+                    throw new Error("Sorry. I can't let you render a crosstab without bars.");
                 }
             } else {
-                console.log("Sorry Dave. I can't let you render anything other than a trellis or a crosstab");
+                throw new Error("Sorry. I can't let you render anything other than a trellis or a crosstab.");
             }
             data.chartData = [];
         });
