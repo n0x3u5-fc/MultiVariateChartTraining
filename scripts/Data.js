@@ -159,13 +159,14 @@
                     var headerHeight = 20;
                     var footerHeight = 50;
                     var height = Math.floor((window.innerHeight) / categoryNames.length);
+                    var safetyOffset = crosstabHeaders.length;
                     if(height < 110) { height = 110; }
                     if(index === 0) {
-                        chartRenderer.displayHeaders(headerHeight, width, crosstabHeaders);
+                        chartRenderer.displayHeaders(headerHeight, width - safetyOffset, crosstabHeaders);
                     }
-                    chartRenderer.displayCharts(height - 25, width, categoryNames.indexOf(categoryName));
+                    chartRenderer.displayCharts(height - 25, width - safetyOffset, categoryNames.indexOf(categoryName));
                     if(index === categoryNames.length - 1) {
-                        chartRenderer.drawX(footerHeight, width, crosstabHeaders, xTitle);
+                        chartRenderer.drawX(footerHeight, width - safetyOffset, crosstabHeaders, xTitle);
                     }
                     var allPlots = document.getElementsByClassName("bar-plot");
                     Array.from(allPlots).map(function(currentValue, index, array) {
@@ -181,149 +182,6 @@
             data.chartData = [];
         });
 
-        var eventAgent = new Chart.EventAgents(this.type);
-        eventAgent.crosshairHandler(document.getElementsByClassName("chart-svg"));
-
-        // if(this.vis === "crosstabs") {
-        //     for(var datum of json.data) {
-        //         var keys = Object.keys(datum);
-        //         for(i = 2; i < keys.length; i++) {
-        //             yObjectKeys = Object.keys(datum[keys[i]]);
-        //             var yValues = datum[keys[i]][yObjectKeys[0]].split(",").map(Number);
-        //             yValues.map(function(currentValue, index) {
-        //                 maxY = currentValue > maxY ? currentValue : maxY;
-        //                 minY = currentValue < minY ? currentValue : minY;
-        //             });
-        //         }
-        //     }
-        //     for(var datum of json.data) {
-        //         jsonDataKeys = Object.keys(datum);
-        //         numCharts    = jsonDataKeys.length - 2;
-        //         rowCount     = json.data.indexOf(datum);
-        //         this.chartData = [];
-        //         for (i = 2; i < jsonDataKeys.length; i++) {
-        //             yObjectKeys = Object.keys(datum[jsonDataKeys[i]]);
-        //             var units;
-        //             var category = datum[jsonDataKeys[0]];
-        //             var xData = datum[jsonDataKeys[1]].split(",");
-        //             var yData = datum[jsonDataKeys[i]][yObjectKeys[0]]
-        //                 .split(",")
-        //                 .map(Chart.chartUtilities.numberMapper);
-        //             var colorCriteria = datum[jsonDataKeys[i]][yObjectKeys[1]]
-        //                 .split(",")
-        //                 .map(Chart.chartUtilities.numberMapper);
-        //             if (!Chart.chartUtilities.allSame(yData, "")) {
-        //                 if(json.metadata.units !== undefined) {
-        //                     units = json.metadata.units.split(",");
-        //                     var chart = new MultiVarChart(i, this.vis, this.type, jsonDataKeys[0],
-        //                                             jsonDataKeys[i], xData, yData, units[0], units[i]);
-        //                 } else {
-        //                     units = [];
-        //                     var chart = new MultiVarChart(i, this.vis, this.type, jsonDataKeys[0],
-        //                                             jsonDataKeys[i], xData, yData, units[0], units[i]);
-        //                 }
-        //                 chart.keys          = jsonDataKeys;
-        //                 chart.minY          = minY;
-        //                 chart.maxY          = maxY;
-        //                 chart.category      = category;
-        //                 chart.colorCriteria = colorCriteria;
-        //                 this.chartData.push(chart);
-        //             }
-        //         }
-        //         if(typeof this.customSort == "function") {
-        //             this.customSort();
-        //         } else {
-        //             this.sortData(this.sortBy);
-        //         }
-
-        //         var chartProperties = new ChartPropertyCalculator(this.chartData);
-
-        //         if(this.type === "bar") {
-        //             chartRenderer = new BarChartRenderer(this.chartData, chartProperties);
-        //             chartRenderer.plotColor        = this.positiveColorStart;
-        //             chartRenderer.plotColorEnd     = this.positiveColorEnd;
-        //             chartRenderer.negativeColor    = this.negativeColorStart;
-        //             chartRenderer.negativeColorEnd = this.negativeColorEnd;
-        //             chartRenderer.totalRows        = json.data.length;
-        //             var width = Math.floor((document.body.clientWidth - 20) / jsonDataKeys.length);
-        //             var headerHeight = 20;
-        //             var footerHeight = 50;
-        //             var height = Math.floor((window.innerHeight) / json.data.length);
-        //             if(height < 110) { height = 110; }
-        //             if(json.data.indexOf(datum) === 0) {
-        //                 chartRenderer.displayHeaders(headerHeight, width, jsonDataKeys);
-        //             }
-        //             chartRenderer.displayCharts(height - 25, width, rowCount);
-        //             if(json.data.indexOf(datum) === json.data.length - 1) {
-        //                 chartRenderer.drawX(footerHeight, width, jsonDataKeys);
-        //             }
-        //         } else {
-        //             console.log("I'm sorry, Dave. You are not allowed to do that.");
-        //         }
-        //     }
-        //     var allPlots = document.getElementsByClassName("bar-plot");
-        //     Array.from(allPlots).map(function(currentValue, index, array) {
-        //         criteria.push(currentValue.getAttributeNS(null, "data-criteria"));
-        //     });
-        //     chartRenderer.colorPlots(criteria);
-        // } else if(this.vis === "trellis"){
-        //     var chart;
-
-        //     jsonDataKeys = Object.keys(json.data[0]);
-        //     numCharts    = jsonDataKeys.length - 1;
-
-        //     for (i = 2; i <= numCharts; i++) {
-        //         var yData;
-        //             xData = json.data[0][jsonDataKeys[1]]
-        //                     .split(",")
-        //                     .map(Chart.chartUtilities.truncateString);
-        //         if(typeof json.data[0][jsonDataKeys[i]] === "object") {
-        //             var yKeys = Object.keys(json.data[0][jsonDataKeys[i]])[0];
-        //             yData = json.data[0][jsonDataKeys[i]][yKeys]
-        //                     .split(",")
-        //                     .map(Chart.chartUtilities.numberMapper);
-        //         } else {
-        //             yData = json.data[0][jsonDataKeys[i]]
-        //                     .split(",")
-        //                     .map(Chart.chartUtilities.numberMapper);
-        //         }
-        //         var units;
-        //         if (!Chart.chartUtilities.allSame(yData, "")) {
-        //             if(json.metadata.units !== undefined) {
-        //                 var units = json.metadata.units.split(",");
-        //                 chart = new MultiVarChart(i, this.vis, this.type, jsonDataKeys[0],
-        //                     jsonDataKeys[i], xData, yData, units[0], units[i - 1]);
-        //             } else {
-        //                 units = [];
-        //                 chart = new MultiVarChart(i, this.vis, this.type, jsonDataKeys[0],
-        //                     jsonDataKeys[i], xData, yData, units[0], units[i - 1]);
-        //             }
-                    // this.chartData.push(chart);
-            //     }
-            // }
-
-        //     if(typeof this.customSort == "function") {
-        //         this.customSort();
-        //     } else {
-        //         this.sortData(this.sortBy);
-        //     }
-
-        //     var chartProperties = new ChartPropertyCalculator(this.chartData);
-
-        //     if(this.type === "line") {
-        //         chartRenderer = new LineChartRenderer(this.chartData, chartProperties);
-        //         chartRenderer.createCaptions("chart-area", this.caption, this.subCaption);
-        //         chartRenderer.displayCharts(this.height, this.width);
-        //     } else if(this.type === "column") {
-        //         chartRenderer = new ColumnChartRenderer(this.chartData, chartProperties);
-        //         chartRenderer.createCaptions("chart-area", this.caption, this.subCaption);
-        //         chartRenderer.displayCharts(this.height, this.width);
-        //     } else {
-        //         console.log("Sorry Dave. I can't let you do that.");
-        //     }
-        // } else {
-        //     console.log("Sorry Dave. I'm afraid I can't let you do that.");
-        // }
         // var that = this;
         // window.addEventListener("resize", function() {
         //     console.log("whaaa");
@@ -345,8 +203,9 @@
         //     var eventAgent = new EventAgents(this.type);
         //     eventAgent.crosshairHandler(document.getElementsByClassName("chart-svg"));
         // });
-        // var eventAgent = new EventAgents(this.type);
-        // eventAgent.crosshairHandler(document.getElementsByClassName("chart-svg"));
+
+        var eventAgent = new Chart.EventAgents(this.type);
+        eventAgent.crosshairHandler(document.getElementsByClassName("chart-svg"));
     };
 
     Chart.Data.prototype.sortData = function(sortBy) {
