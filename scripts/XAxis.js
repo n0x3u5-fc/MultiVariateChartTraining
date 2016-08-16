@@ -7,7 +7,7 @@ goog.require("Chart");
     Chart.XAxis = function(startX, startY, endX, endY, className, columnsAreComplete) {
         Chart.Axis.call(this, startX, startY, endX, endY, className, columnsAreComplete);
     };
-    chartUtilities.inheritsFrom(Chart.XAxis, Chart.Axis);
+    Chart.chartUtilities.inheritsFrom(Chart.XAxis, Chart.Axis);
     Chart.XAxis.prototype.renderTicks = function(svg, xTicks) {
         var tickLength = 5;
         var xTickLine;

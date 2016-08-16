@@ -11,7 +11,7 @@ goog.require("chartUtilities");
 		this.endX      = endX;
 		this.endY      = endY;
 		this.className = className;
-		this.svgHelper = new SvgHelper();
+		this.svgHelper = new Chart.SvgHelper();
 		this.columnsAreComplete = columnsAreComplete;
 	};
 	Chart.Axis.prototype.render = function(svg) {
