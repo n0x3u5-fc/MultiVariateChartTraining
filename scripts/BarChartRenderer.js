@@ -214,7 +214,7 @@
         // yAxis.render(svg);
         // yAxis.renderTicks(svg, mappedData.xTicks);
         // yAxis.renderTickValues(svg, mappedData.xTicks, charts[i].xData);
-        yAxis.renderZeroPlane(svg, mappedData.yTicks, charts[i].yTicks, chartWidth);
+        // yAxis.renderZeroPlane(svg, mappedData.yTicks, charts[i].yTicks, chartWidth);
 
         var xAxis = new Chart.XAxis(chartUbWidth, chartUbHeight, chartLbWidth, chartUbHeight,
                               "xAxis", columnsAreComplete);
@@ -301,7 +301,7 @@
         yAxis.renderTicks(svg, mappedData.yTicks);
         yAxis.renderTickValues(svg, mappedData.yTicks, charts[i].yTicks);
         yAxis.renderDivs(svg, mappedData.yTicks, chartHeight, chartLbWidth, chartWidth);
-        yAxis.renderZeroPlane(svg, mappedData.yTicks, charts[i].yTicks, chartWidth);
+        // yAxis.renderZeroPlane(svg, mappedData.yTicks, charts[i].yTicks, chartWidth);
 
         var xAxis = new Chart.XAxis(chartLbWidth, chartLbHeight - 15, chartLbWidth, chartLbHeight - 15,
                               "xAxis", columnsAreComplete);

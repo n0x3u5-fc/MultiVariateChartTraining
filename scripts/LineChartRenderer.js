@@ -11,10 +11,13 @@
     Chart.LineChartRenderer.prototype.displayCharts = function(height, width) {
         var minY = Infinity, maxY = -Infinity;
         var chartsInARow = Math.floor(window.innerWidth / (width + 55));
+        if(chartsInARow > this.charts.length) {
+            chartsInARow = this.charts.length;
+        }
         for (var i = 0; i < this.charts.length; i++) {
             for(var j = i; j < chartsInARow; j++) {
-                var tMaxY = Math.max.apply(Math, this.charts[i].yData.map(Chart.chartUtilities.nullMaxMapper));
-                var tMinY = Math.min.apply(Math, this.charts[i].yData.map(Chart.chartUtilities.nullMinMapper));
+                var tMaxY = Math.max.apply(Math, this.charts[j].yData.map(Chart.chartUtilities.nullMaxMapper));
+                var tMinY = Math.min.apply(Math, this.charts[j].yData.map(Chart.chartUtilities.nullMinMapper));
                 if(tMaxY > maxY) {
                     maxY = tMaxY;
                 }

@@ -11,6 +11,9 @@
     Chart.ColumnChartRenderer.prototype.displayCharts = function(height, width) {
         var minY = Infinity, maxY = -Infinity;
         var chartsInARow = Math.floor(window.innerWidth / (width + 55));
+        if(chartsInARow > this.charts.length) {
+            chartsInARow = this.charts.length;
+        }
         for (var i = 0; i < this.charts.length; i++) {
             for(var j = i; j < chartsInARow; j++) {
                 var tMaxY = Math.max.apply(Math, this.charts[j].yData.map(Chart.chartUtilities.nullMaxMapper));
@@ -80,6 +83,12 @@
         var xAxis = new Chart.XAxis(chartUbWidth, chartUbHeight - 55, chartLbWidth, chartUbHeight - 55,
                               "xAxis", columnsAreComplete);
         xAxis.render(svg);
+        if(svg.getElementsByClassName("zeroPlane").length > 0) {
+            var xLine = svg.getElementsByClassName("xAxis");
+            Array.from(xLine).map(function(currentValue) {
+                currentValue.style.strokeWidth = 0;
+            });
+        }
         xAxis.renderTicks(svg, mappedData.xTicks);
         if (i >= multiCharts.length - chartsInARow) {
             xAxis.renderTickValues(svg, mappedData.xTicks, charts[i].xData);

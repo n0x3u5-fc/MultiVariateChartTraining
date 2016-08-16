@@ -73,35 +73,19 @@ goog.require("Chart");
             var yValuesContent = yData[yTicks.indexOf(yTick)];
             if(yValuesContent == 0) {
                 if(this.columnsAreComplete) {
-                    if(this.type === "category") {
-                        xZeroLine = this.svgHelper.drawLineByClass(this.startX,
-                                                                   yTick - 5,
-                                                                   this.startX,
-                                                                   yTick + (this.endY - this.startY) - 5,
-                                                                   "zeroPlane");
-                    } else {
-                        xZeroLine = this.svgHelper.drawLineByClass(this.startX,
-                                                                   this.endY + this.startY - yTick + 55,
-                                                                   this.startX + chartWidth,
-                                                                   this.endY + this.startY - yTick + 55,
-                                                                   "zeroPlane");
-                    }
+                    xZeroLine = this.svgHelper.drawLineByClass(this.startX,
+                                                               this.endY + this.startY - yTick + 55,
+                                                               this.startX + chartWidth,
+                                                               this.endY + this.startY - yTick + 55,
+                                                               "zeroPlane");
                 } else {
-                    if(this.type === "category") {
-                        xZeroLine = this.svgHelper.drawLineByClass(this.startX,
-                                                                   this.endY + this.startY - yTick + 15,
-                                                                   this.startX + chartWidth,
-                                                                   this.endY + this.startY - yTick + 15,
-                                                                   "zeroPlane");
-                    } else {
-                        xZeroLine = this.svgHelper.drawLineByClass(this.startX,
-                                                                   this.endY + this.startY - yTick + 15,
-                                                                   this.startX + chartWidth,
-                                                                   this.endY + this.startY - yTick + 15,"zeroPlane");
-                    }
+                    xZeroLine = this.svgHelper.drawLineByClass(this.startX,
+                                                               this.endY + this.startY - yTick + 15,
+                                                               this.startX + chartWidth,
+                                                               this.endY + this.startY - yTick + 15,"zeroPlane");
                 }
                 xZeroLine.setAttributeNS(null, "stroke-opacity", 100);
-                // svg.appendChild(xZeroLine);
+                svg.appendChild(xZeroLine);
                 yValuesContent = 0;
             }
         }

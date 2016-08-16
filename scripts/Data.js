@@ -13,7 +13,6 @@
     };
 
     Chart.Data.prototype.ajaxLoader = function(url, callback) {
-        console.log("Hello, Mint!");
         var httpRequest = new XMLHttpRequest();
         if (!httpRequest) {
             console.log("Unable to create XMLHTTP instance.");
@@ -23,13 +22,13 @@
         httpRequest.onreadystatechange = function() {
             if (httpRequest.readyState === XMLHttpRequest.DONE) {
                 if (httpRequest.status === 200) {
-                    try {
-                        callback(JSON.parse(httpRequest.responseText));
-                    } catch(e) {
-                        var chartDiv = document.getElementById("chart-area");
-                        chartDiv.innerHTML = e;
-                        console.log(e);
-                    }
+                    callback(JSON.parse(httpRequest.responseText));
+                    // try {
+                    // } catch(e) {
+                    //     var chartDiv = document.getElementById("chart-area");
+                    //     chartDiv.innerHTML = e;
+                    //     console.log(e);
+                    // }
                 } else {
                     console.log("There was a problem with the request");
                 }
@@ -67,26 +66,35 @@
 
         json.data.map(function(currentValue) {
             objKeys = Object.keys(currentValue);
-            if(categoryNames.indexOf(currentValue[objKeys[0]]) === -1) {
-                categoryNames.push(currentValue[objKeys[0]]);
+            var cat = currentValue.category.split("|");
+            if(categoryNames.indexOf(cat[1]) === -1) {
+                categoryNames.push(cat[1]);
             }
-            dataValues.push(currentValue[objKeys[3]]);
-            xTitle = objKeys[3];
+            var data = currentValue.data.split("|");
+            if(data[1] === undefined) {
+                dataValues.push("");
+            } else {
+                dataValues.push(Number(data[1]));
+            }
+            xTitle = data[0];
         });
-
         dataValues.map(function(currentValue, index) {
-            maxY = currentValue > maxY ? currentValue : maxY;
-            minY = currentValue < minY ? currentValue : minY;
+            if(currentValue !== "") {
+                maxY = currentValue > maxY ? currentValue : maxY;
+                minY = currentValue < minY ? currentValue : minY;
+            }
         });
 
         categoryNames.forEach(function(currentValue, index) {
             var categoryName = currentValue;
             headerNames = [];
             json.data.map(function(currentValue) {
-                objKeys = Object.keys(currentValue);
-                if(currentValue[objKeys[0]] === categoryName) {
-                    if(headerNames.indexOf(currentValue[objKeys[1]]) === -1) {
-                        headerNames.push(currentValue[objKeys[1]]);
+                objKeys  = Object.keys(currentValue);
+                var cat  = currentValue.category.split("|");
+                var head = currentValue.header.split("|");
+                if(cat[1] === categoryName) {
+                    if(headerNames.indexOf(head[1]) === -1) {
+                        headerNames.push(head[1]);
                     }
                 }
             });
@@ -98,25 +106,33 @@
                 colorCriteria  = [];
                 json.data.map(function(currentValue) {
                     objKeys = Object.keys(currentValue);
-                    if(currentValue[objKeys[0]] === categoryName &&
-                        currentValue[objKeys[1]] === headerName) {
-                        if(productNames.indexOf(currentValue[objKeys[2]]) === -1) {
+                    var cat = currentValue.category.split("|");
+                    var head = currentValue.header.split("|");
+                    var type = currentValue.type.split("|");
+                    var dataVal = currentValue.data.split("|");
+                    var light = currentValue.highlight.split("|");
+                    if(cat[1] === categoryName && head[1] === headerName) {
+                        if(productNames.indexOf(type[1]) === -1) {
                             if(data.vis === "trellis") {
-                                prod = Chart.chartUtilities.truncateString(currentValue[objKeys[2]]);
+                                prod = Chart.chartUtilities.truncateString(type[1]);
                             } else {
-                                prod = currentValue[objKeys[2]];
+                                prod = type[1];
                             }
                             productNames.push(prod);
                         }
-                        productData.push(currentValue[objKeys[3]]);
-                        colorCriteria.push(currentValue[objKeys[4]]);
+                        if(dataVal[1] === undefined) {
+                            productData.push("");
+                        } else {
+                            productData.push(dataVal[1]);
+                        }
+                        colorCriteria.push(light[1]);
                     }
                 });
-                var chart = new Chart.MultiVarChart(index + 2, data.vis, data.type, objKeys[3],
+                var chart = new Chart.MultiVarChart(index + 2, data.vis, data.type, xTitle,
                                               headerNames[index], productNames, productData);
                 crosstabHeaders = headerNames.slice();
-                crosstabHeaders.unshift(objKeys[2]);
-                crosstabHeaders.unshift(objKeys[0]);
+                crosstabHeaders.unshift(json.data[0].category.split("|")[0]);
+                crosstabHeaders.unshift(json.data[0].type.split("|")[0]);
 
                 if(data.vis === "crosstab") {
                     chart.keys          = crosstabHeaders;
@@ -166,7 +182,7 @@
                     var footerHeight = 50;
                     var height = Math.floor((window.innerHeight) / categoryNames.length);
                     var safetyOffset = crosstabHeaders.length;
-                    if(height < 110) { height = 110; }
+                    if(height < 110) { height = 110; } else if(height > 300) { height = 300; }
                     if(index === 0) {
                         chartRenderer.displayHeaders(headerHeight, width - safetyOffset, crosstabHeaders);
                     }
