@@ -23,12 +23,6 @@
             if (httpRequest.readyState === XMLHttpRequest.DONE) {
                 if (httpRequest.status === 200) {
                     callback(JSON.parse(httpRequest.responseText));
-                    // try {
-                    // } catch(e) {
-                    //     var chartDiv = document.getElementById("chart-area");
-                    //     chartDiv.innerHTML = e;
-                    //     console.log(e);
-                    // }
                 } else {
                     console.log("There was a problem with the request");
                 }
@@ -38,18 +32,19 @@
     };
 
     Chart.Data.prototype.dataParser = function(json) {
-        var i, idx, objKeys, jsonDataKeys, yObjectKeys, numCharts, chartRenderer, rowCount,
-            headerName, crosstabHeaders, xTitle,
-            criteria = [],
+        var objKeys, chartRenderer, crosstabHeaders, xTitle, chartDiv,
+            yHasString    = false,
+            errorStr      = "",
+            criteria      = [],
             categoryNames = [],
-            headerNames = [],
-            productNames = [],
-            productData = [],
+            headerNames   = [],
+            productNames  = [],
+            productData   = [],
             colorCriteria = [],
-            dataValues = [],
-            maxY = -Infinity,
-            minY = Infinity,
-            data = this;
+            dataValues    = [],
+            maxY          = -Infinity,
+            minY          = Infinity,
+            data          = this;
 
         this.vis                = json.metadata.visualization;
         this.type               = json.metadata.type;
@@ -78,7 +73,7 @@
             }
             xTitle = data[0];
         });
-        dataValues.map(function(currentValue, index) {
+        dataValues.map(function(currentValue) {
             if(currentValue !== "") {
                 maxY = currentValue > maxY ? currentValue : maxY;
                 minY = currentValue < minY ? currentValue : minY;
@@ -120,7 +115,9 @@
                             }
                             productNames.push(prod);
                         }
-                        if(dataVal[1] === undefined) {
+                        if(Number.isNaN(Number(dataVal[1])) && dataVal[1] !== undefined) {
+                            productData.push("0");
+                        } else if(dataVal[1] === undefined) {
                             productData.push("");
                         } else {
                             productData.push(dataVal[1]);
@@ -130,6 +127,7 @@
                 });
                 var chart = new Chart.MultiVarChart(index + 2, data.vis, data.type, xTitle,
                                               headerNames[index], productNames, productData);
+                chart.yHasString = yHasString;
                 crosstabHeaders = headerNames.slice();
                 crosstabHeaders.unshift(json.data[0].category.split("|")[0]);
                 crosstabHeaders.unshift(json.data[0].type.split("|")[0]);
@@ -167,7 +165,14 @@
                         chartRenderer.displayCharts(data.height, data.width);
                     }
                 } else {
-                    throw new Error("Sorry. I can't let you render a trellis without columns or lines.");
+                    errorStr = "Chart type not supported in selected visualization type.";
+                    chartDiv = document.getElementById("chart-area");
+                    chartDiv.innerHTML = errorStr;
+                    throw {
+                        name    : "ChartVisMismatchError",
+                        message : errorStr,
+                        toString: function() { return this.name + ": " + this.message; }
+                    };
                 }
             } else if(data.vis === "crosstab"){
                 if(data.type === "bar") {
@@ -191,15 +196,29 @@
                         chartRenderer.drawX(footerHeight, width - safetyOffset, crosstabHeaders, xTitle);
                     }
                     var allPlots = document.getElementsByClassName("bar-plot");
-                    Array.from(allPlots).map(function(currentValue, index, array) {
+                    Array.from(allPlots).map(function(currentValue) {
                         criteria.push(currentValue.getAttributeNS(null, "data-criteria"));
                     });
                     chartRenderer.colorPlots(criteria);
                 } else {
-                    throw new Error("Sorry. I can't let you render a crosstab without bars.");
+                    errorStr = "Chart type not supported in selected visualization type.";
+                    chartDiv = document.getElementById("chart-area");
+                    chartDiv.innerHTML = errorStr;
+                    throw {
+                        name    : "ChartVisMismatchError",
+                        message : errorStr,
+                        toString: function() { return this.name + ": " + this.message; }
+                    };
                 }
             } else {
-                throw new Error("Sorry. I can't let you render anything other than a trellis or a crosstab.");
+                errorStr = "Visualization type not supported.";
+                chartDiv = document.getElementById("chart-area");
+                chartDiv.innerHTML = errorStr;
+                throw {
+                    name    : "ChartVisError",
+                    message : errorStr,
+                    toString: function() { return this.name + ": " + this.message; }
+                };
             }
             data.chartData = [];
         });
