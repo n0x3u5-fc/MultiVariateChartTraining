@@ -3,13 +3,14 @@
     /**
      * @constructor
      */
-    Chart.Data = function() {
+    Chart.Data = function(renderDiv) {
         this.caption    = "";
         this.subCaption = "";
         this.height     = "";
         this.width      = "";
         this.type       = "";
         this.chartData  = [];
+        this.renderDiv  = renderDiv;
     };
 
     Chart.Data.prototype.ajaxLoader = function(url, callback) {
@@ -18,7 +19,7 @@
             console.log("Unable to create XMLHTTP instance.");
             return false;
         }
-        httpRequest.open('POST', url, true);
+        httpRequest.open('GET', url, true);
         httpRequest.onreadystatechange = function() {
             if (httpRequest.readyState === XMLHttpRequest.DONE) {
                 if (httpRequest.status === 200) {
@@ -155,18 +156,20 @@
                 if(data.type === "line") {
                     if(categoryNames.indexOf(categoryName) === 0) {
                         chartRenderer = new Chart.LineChartRenderer(data.chartData, chartProperties);
-                        chartRenderer.createCaptions("chart-area", data.caption, data.subCaption);
+                        chartRenderer.renderDiv = data.renderDiv;
+                        chartRenderer.createCaptions(data.renderDiv, data.caption, data.subCaption);
                         chartRenderer.displayCharts(data.height, data.width);
                     }
                 } else if(data.type === "column") {
                     if(categoryNames.indexOf(categoryName) === 0) {
                         chartRenderer = new Chart.ColumnChartRenderer(data.chartData, chartProperties);
-                        chartRenderer.createCaptions("chart-area", data.caption, data.subCaption);
+                        chartRenderer.renderDiv = data.renderDiv;
+                        chartRenderer.createCaptions(data.renderDiv, data.caption, data.subCaption);
                         chartRenderer.displayCharts(data.height, data.width);
                     }
                 } else {
                     errorStr = "Chart type not supported in selected visualization type.";
-                    chartDiv = document.getElementById("chart-area");
+                    chartDiv = document.getElementById(data.renderDiv);
                     chartDiv.innerHTML = errorStr;
                     throw {
                         name    : "ChartVisMismatchError",
@@ -177,6 +180,7 @@
             } else if(data.vis === "crosstab"){
                 if(data.type === "bar") {
                     chartRenderer = new Chart.BarChartRenderer(data.chartData, chartProperties);
+                    chartRenderer.renderDiv = data.renderDiv;
                     chartRenderer.plotColor        = data.positiveColorStart;
                     chartRenderer.plotColorEnd     = data.positiveColorEnd;
                     chartRenderer.negativeColor    = data.negativeColorStart;
@@ -202,7 +206,7 @@
                     chartRenderer.colorPlots(criteria);
                 } else {
                     errorStr = "Chart type not supported in selected visualization type.";
-                    chartDiv = document.getElementById("chart-area");
+                    chartDiv = document.getElementById(data.renderDiv);
                     chartDiv.innerHTML = errorStr;
                     throw {
                         name    : "ChartVisMismatchError",
@@ -212,7 +216,7 @@
                 }
             } else {
                 errorStr = "Visualization type not supported.";
-                chartDiv = document.getElementById("chart-area");
+                chartDiv = document.getElementById(data.renderDiv);
                 chartDiv.innerHTML = errorStr;
                 throw {
                     name    : "ChartVisError",
@@ -226,17 +230,17 @@
         // var that = this;
         // window.addEventListener("resize", function() {
         //     console.log("whaaa");
-        //     var chartDiv = document.getElementById("chart-area");
+        //     var chartDiv = document.getElementById(data.renderDiv);
         //     while(chartDiv.firstChild) {
         //         chartDiv.removeChild(chartDiv.firstChild);
         //     }
         //     if(that.type === "line") {
         //         chartRenderer = new LineChartRenderer(that.chartData, chartProperties);
-        //         chartRenderer.createCaptions("chart-area", that.caption, that.subCaption);
+        //         chartRenderer.createCaptions(data.renderDiv, that.caption, that.subCaption);
         //         chartRenderer.displayCharts(that.height, that.width);
         //     } else if(that.type === "column") {
         //         chartRenderer = new ColumnChartRenderer(that.chartData, chartProperties);
-        //         chartRenderer.createCaptions("chart-area", that.caption, that.subCaption);
+        //         chartRenderer.createCaptions(data.renderDiv, that.caption, that.subCaption);
         //         chartRenderer.displayCharts(that.height, that.width);
         //     } else {
         //         console.log("Sorry Dave. I can't let you do that.");

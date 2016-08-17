@@ -11,7 +11,7 @@
         var headerText,
             svgHelper = new Chart.SvgHelper();
         for(var key of keys) {
-            this.createDivs("chart-area");
+            this.createDivs(this.renderDiv);
             var headerSvg = svgHelper.createSvgByClass(height, width, "header-svg");
             var headerDivs = document.getElementsByClassName("multi-chart-header");
             Array.from(headerDivs).map(function(currentValue, index) {
@@ -95,7 +95,7 @@
             var div = document.createElement('span');
             div.setAttribute('class', "multi-chart-footer");
             div.style.display = "inline-block";
-            var renderDiv = document.getElementById("chart-area");
+            var renderDiv = document.getElementById(this.renderDiv);
             renderDiv.appendChild(div);
 
             var footerSvg = svgHelper.createSvgByClass(height, width, "footer-svg");
@@ -131,8 +131,8 @@
     };
     Chart.BarChartRenderer.prototype.displayCharts = function(height, width, rowCount) {
         var maxY = -Infinity, minY = Infinity;
-        this.createDivs("chart-area", rowCount);
-        this.createDivs("chart-area", rowCount);
+        this.createDivs(this.renderDiv, rowCount);
+        this.createDivs(this.renderDiv, rowCount);
         for (var i = 0; i < this.charts.length; i++) {
             var tempMaxY = Math.max.apply(Math, this.charts[i].yData.map(Chart.chartUtilities.nullMaxMapper));
             var tempMinY = Math.min.apply(Math, this.charts[i].yData.map(Chart.chartUtilities.nullMinMapper));
@@ -143,7 +143,7 @@
                 minY = tempMinY;
             }
             if (minY !== Infinity || maxY !== -Infinity) {
-                this.createDivs("chart-area", rowCount);
+                this.createDivs(this.renderDiv, rowCount);
             }
         }
         for(i = 0; i < this.charts.length; i++) {

@@ -29,7 +29,7 @@
                 this.charts[i].yTicks = this.chartProperties.calculateYAxis(minY, maxY);
                 this.charts[i].xTicks = this.chartProperties.calculateYAxis(0,
                                                                        this.charts[i].xData.length);
-                this.createDivs("chart-area");
+                this.createDivs(this.renderDiv);
             }
         }
         this.createCharts(this.charts, height, width);
