@@ -131,37 +131,67 @@
     };
     Chart.BarChartRenderer.prototype.displayCharts = function(height, width, rowCount) {
         var maxY = -Infinity, minY = Infinity;
-        this.createDivs(this.renderDiv, rowCount);
-        this.createDivs(this.renderDiv, rowCount);
-        for (var i = 0; i < this.charts.length; i++) {
-            var tempMaxY = Math.max.apply(Math, this.charts[i].yData.map(Chart.chartUtilities.nullMaxMapper));
-            var tempMinY = Math.min.apply(Math, this.charts[i].yData.map(Chart.chartUtilities.nullMinMapper));
-            if(tempMaxY > maxY) {
-                maxY = tempMaxY;
+        if(this.charts[0].vis === "trellis") {
+            var chartsInARow = Math.floor(window.innerWidth / (width + 55));
+            if(chartsInARow > this.charts.length) {
+                chartsInARow = this.charts.length;
             }
-            if(tempMinY < minY) {
-                minY = tempMinY;
+            for (var i = 0; i < this.charts.length; i++) {
+                for(var j = i; j < chartsInARow; j++) {
+                    var tMaxY = Math.max.apply(Math, this.charts[j].yData.map(Chart.chartUtilities.nullMaxMapper));
+                    var tMinY = Math.min.apply(Math, this.charts[j].yData.map(Chart.chartUtilities.nullMinMapper));
+                    if(tMaxY > maxY) {
+                        maxY = tMaxY;
+                    }
+                    if(tMinY < minY) {
+                        minY = tMinY;
+                    }
+                }
+                if (minY !== Infinity || maxY !== -Infinity) {
+                    this.charts[i].yTicks = this.chartProperties.calculateYAxis(minY, maxY);
+                    this.charts[i].xTicks = this.chartProperties.calculateYAxis(0,
+                                                                           this.charts[i].xData.length);
+                    this.createDivs(this.renderDiv);
+                }
             }
-            if (minY !== Infinity || maxY !== -Infinity) {
-                this.createDivs(this.renderDiv, rowCount);
+            this.createCharts(this.charts, height, width);
+        } else if(this.charts[0].vis === "crosstab") {
+            this.createDivs(this.renderDiv, rowCount);
+            this.createDivs(this.renderDiv, rowCount);
+            for (var i = 0; i < this.charts.length; i++) {
+                var tempMaxY = Math.max.apply(Math, this.charts[i].yData.map(Chart.chartUtilities.nullMaxMapper));
+                var tempMinY = Math.min.apply(Math, this.charts[i].yData.map(Chart.chartUtilities.nullMinMapper));
+                if(tempMaxY > maxY) {
+                    maxY = tempMaxY;
+                }
+                if(tempMinY < minY) {
+                    minY = tempMinY;
+                }
+                if (minY !== Infinity || maxY !== -Infinity) {
+                    this.createDivs(this.renderDiv, rowCount);
+                }
             }
+            for(i = 0; i < this.charts.length; i++) {
+                if (minY !== Infinity || maxY !== -Infinity) {
+                    this.charts[i].yTicks = this.chartProperties.calculateYAxis(this.charts[0].minY,
+                                                                                this.charts[0].maxY);
+                    this.charts[i].xTicks = this.chartProperties.calculateYAxis(this.charts[0].minY,
+                                                                                this.charts[0].maxY);
+                }
+            }
+            this.createCharts(this.charts, height, width, rowCount);
+        } else {
+            console.log("unavailable chart visualization.");
         }
-        for(i = 0; i < this.charts.length; i++) {
-            if (minY !== Infinity || maxY !== -Infinity) {
-                this.charts[i].yTicks = this.chartProperties.calculateYAxis(this.charts[0].minY,
-                                                                            this.charts[0].maxY);
-                this.charts[i].xTicks = this.chartProperties.calculateYAxis(this.charts[0].minY,
-                                                                            this.charts[0].maxY);
-            }
-        }
-        this.createCharts(this.charts, height, width, rowCount);
     };
     Chart.BarChartRenderer.prototype.createDivs = function(targetDiv, rowCount) {
         var div = document.createElement('span');
         if(rowCount !== undefined) {
             div.setAttribute('class', "multi-chart" + rowCount);
-        } else {
+        } else if(rowCount === undefined && this.charts[0].vis === "crosstab") {
             div.setAttribute('class', "multi-chart-header");
+        } else {
+            div.setAttribute('class', "multi-chart");
         }
         div.style.display = "inline-block";
         var renderDiv = document.getElementById(targetDiv);
@@ -194,95 +224,189 @@
             });
         });
     };
+    Chart.BarChartRenderer.prototype.createCaptions = function(targetDiv, caption, subCaption) {
+        var captionHeader = document.createElement('h1');
+        captionHeader.setAttribute('class', 'caption');
+        var renderDiv = document.getElementById(targetDiv);
+        captionHeader.innerHTML = caption;
+        renderDiv.appendChild(captionHeader);
+        var subCaptionHeader = document.createElement('h2');
+        subCaptionHeader.setAttribute('class', 'sub-caption');
+        subCaptionHeader.innerHTML = subCaption;
+        renderDiv.appendChild(subCaptionHeader);
+    };
     Chart.BarChartRenderer.prototype.drawCompleteCharts = function(i, charts, multiCharts,
         chartsInARow, svgHelper, svg, height, width, columnsAreComplete, rowCount) {
         var columnPlot;
         var mappedCharts  = [];
         var formattedTickValues = [];
-        var chartUbHeight = Math.ceil(height);
-        var chartUbWidth  = Math.ceil(width);
-        var chartLbHeight = Math.floor(0);
-        var chartLbWidth  = Math.floor(1);
+        var chartUbHeight = 0,
+            chartUbWidth  = 0,
+            chartLbWidth  = 0,
+            chartLbHeight = 0;
+        if(this.charts[0].vis === "crosstab") {
+            chartUbHeight = Math.ceil(height);
+            chartUbWidth  = Math.ceil(width);
+            chartLbHeight = Math.floor(0);
+            chartLbWidth  = Math.floor(1);
+        } else if(this.charts[0].vis === "trellis") {
+            chartUbHeight = Math.ceil(height - (0.001 * height)) + 55;
+            chartUbWidth  = Math.ceil(width - (0.025 * width)) + 55;
+            chartLbHeight = Math.floor(0 + (0.2 * height)) + 55;
+            chartLbWidth  = Math.floor(0 + (0.025 * height)) + 55;
+        } else {
+            console.log("Unsupported chart visualization.");
+        }
         var chartHeight   = chartUbHeight - chartLbHeight;
         var chartWidth    = chartUbWidth - chartLbWidth;
         var mappedData = this.chartProperties.dataMapper(chartHeight, chartWidth, chartLbHeight,
                                                          chartLbWidth, charts[i]);
         mappedCharts.push(mappedData);
-        var yAxis = new Chart.YAxis(chartLbWidth, chartLbHeight, chartLbWidth, chartUbHeight,
+
+        if(this.charts[0].vis === "crosstab") {
+            var yAxis = new Chart.YAxis(chartLbWidth, chartLbHeight, chartLbWidth, chartUbHeight,
                               "yAxis", columnsAreComplete);
-        yAxis.type = "category";
-        // yAxis.render(svg);
-        // yAxis.renderTicks(svg, mappedData.xTicks);
-        // yAxis.renderTickValues(svg, mappedData.xTicks, charts[i].xData);
-        // yAxis.renderZeroPlane(svg, mappedData.yTicks, charts[i].yTicks, chartWidth);
+            yAxis.type = "category";
 
-        var xAxis = new Chart.XAxis(chartUbWidth, chartUbHeight, chartLbWidth, chartUbHeight,
-                              "xAxis", columnsAreComplete);
-        xAxis.type = "numeric";
-        if(rowCount !== this.totalRows - 1) {
-            xAxis.render(svg);
-        }
-        // xAxis.renderTicks(svg, mappedData.yTicks);
-        if (i >= multiCharts.length - chartsInARow) {
-            for(var yTick of charts[i].yTicks) {
-                formattedTickValues.push(Chart.chartUtilities.shortenLargeNumber(yTick, 2));
+            if(rowCount !== this.totalRows - 1) {
+                var xAxis = new Chart.XAxis(chartUbWidth, chartUbHeight, chartLbWidth, chartUbHeight,
+                                  "xAxis", columnsAreComplete);
+                xAxis.type = "numeric";
+                xAxis.render(svg);
             }
-            // xAxis.renderTickValues(svg, mappedData.yTicks, formattedTickValues);
-        }
-
-        var yTitleRect = svgHelper.drawRectByClass(chartLbWidth, chartLbHeight - 40, 30, chartWidth, "y-title-rect");
-        // svg.appendChild(yTitleRect);
-        var yTitleContent = charts[i].yUnit === "" ?
-            charts[i].yTitle : charts[i].yTitle + " (" + charts[i].yUnit + ")";
-        var yTitle = svgHelper.drawTextByClass((chartUbWidth / 2) - 15, chartLbHeight - 20, yTitleContent,
-                                               "y-title");
-        // svg.appendChild(yTitle);
-
-        for (var k = 0; k < mappedData.yData.length; k++) {
-            if (mappedData.yData[k] !== "") {
-                var anchor = svgHelper.drawCircleByClass(mappedData.yData[k] + chartLbWidth,
-                                        mappedData.xData[k] + chartLbHeight,
-                                        4, "graphCircle");
-                anchor.setAttributeNS(null, "data-value", charts[i].yData[k]);
-                // svg.appendChild(anchor);
-                var plotHeight = (chartHeight / mappedData.xData.length) - 13;
-                if(plotHeight > 27) { plotHeight = 27; }
-                if(svg.getElementsByClassName("zeroPlane").length > 0) {
-                    // var xZeroLine = svg.getElementsByClassName("zeroPlane");
-                    // var zeroPlaneY = xZeroLine[0].getAttributeNS(null, "y1");
-                    // if(charts[i].yData[k] < 0) {
-                    //     var columnHeight = chartHeight - mappedData.yData[k] + chartLbHeight - 55 - zeroPlaneY;
-                    //     columnPlot = svgHelper.drawRectByClass(mappedData.xData[k] + chartLbWidth - (plotWidth / 2),
-                    //     zeroPlaneY - 1, columnHeight, plotWidth, "column-plot");
-                    // } else {
-                    //     columnPlot = svgHelper.drawRectByClass(mappedData.xData[k] + chartLbWidth - (plotWidth / 2),
-                    //     chartUbHeight - mappedData.yData[k] - 55,
-                    //     mappedData.yData[k] - (chartUbHeight - zeroPlaneY) + 55, plotWidth,
-                    //     "column-plot");
-                    // }
-                } else {
-                    var zeroes = charts[i].yData.filter(function(currentValue) {
-                        if(currentValue === 0) { return true; } else { return false; }
-                    });
-                    if(mappedData.yData[k] < 2 && zeroes.length === 0) {
-                        mappedData.yData[k] = 2;
-                    }
-                    columnPlot = svgHelper.drawRectByClass(chartLbWidth - 1,
-                    mappedData.xData[k] + chartLbHeight - (plotHeight / 2),
-                    plotHeight, mappedData.yData[k],
-                    "bar-plot");
+            // xAxis.renderTicks(svg, mappedData.yTicks);
+            if (i >= multiCharts.length - chartsInARow) {
+                for(var yTick of charts[i].yTicks) {
+                    formattedTickValues.push(Chart.chartUtilities.shortenLargeNumber(yTick, 2));
                 }
-                columnPlot.setAttributeNS(null, "data-criteria", charts[i].colorCriteria[k]);
-                columnPlot.setAttributeNS(null, "data-value", charts[i].yData[k]);
-                // columnPlot.setAttributeNS(null, "data-color", );
-                svg.appendChild(columnPlot);
+                // xAxis.renderTickValues(svg, mappedData.yTicks, formattedTickValues);
             }
+
+            var yTitleRect = svgHelper.drawRectByClass(chartLbWidth, chartLbHeight - 40, 30, chartWidth, "y-title-rect");
+            // svg.appendChild(yTitleRect);
+            var yTitleContent = charts[i].yUnit === "" ?
+                charts[i].yTitle : charts[i].yTitle + " (" + charts[i].yUnit + ")";
+            var yTitle = svgHelper.drawTextByClass((chartUbWidth / 2) - 15, chartLbHeight - 20, yTitleContent,
+                                                   "y-title");
+            // svg.appendChild(yTitle);
+            for (var k = 0; k < mappedData.yData.length; k++) {
+                if (mappedData.yData[k] !== "") {
+                    var anchor = svgHelper.drawCircleByClass(mappedData.yData[k] + chartLbWidth,
+                                            mappedData.xData[k] + chartLbHeight,
+                                            4, "graphCircle");
+                    anchor.setAttributeNS(null, "data-value", charts[i].yData[k]);
+                    // svg.appendChild(anchor);
+                    var plotHeight = (chartHeight / mappedData.xData.length) - 13;
+                    if(plotHeight > 27) { plotHeight = 27; }
+                    if(svg.getElementsByClassName("zeroPlane").length > 0) {
+                        // var xZeroLine = svg.getElementsByClassName("zeroPlane");
+                        // var zeroPlaneY = xZeroLine[0].getAttributeNS(null, "y1");
+                        // if(charts[i].yData[k] < 0) {
+                        //     var columnHeight = chartHeight - mappedData.yData[k] + chartLbHeight - 55 - zeroPlaneY;
+                        //     columnPlot = svgHelper.drawRectByClass(mappedData.xData[k] + chartLbWidth - (plotWidth / 2),
+                        //     zeroPlaneY - 1, columnHeight, plotWidth, "column-plot");
+                        // } else {
+                        //     columnPlot = svgHelper.drawRectByClass(mappedData.xData[k] + chartLbWidth - (plotWidth / 2),
+                        //     chartUbHeight - mappedData.yData[k] - 55,
+                        //     mappedData.yData[k] - (chartUbHeight - zeroPlaneY) + 55, plotWidth,
+                        //     "column-plot");
+                        // }
+                    } else {
+                        var zeroes = charts[i].yData.filter(function(currentValue) {
+                            if(currentValue === 0) { return true; } else { return false; }
+                        });
+                        if(mappedData.yData[k] < 2 && zeroes.length === 0) {
+                            mappedData.yData[k] = 2;
+                        }
+                        columnPlot = svgHelper.drawRectByClass(chartLbWidth - 1,
+                        mappedData.xData[k] + chartLbHeight - (plotHeight / 2),
+                        plotHeight, mappedData.yData[k],
+                        "bar-plot");
+                    }
+                    columnPlot.setAttributeNS(null, "data-criteria", charts[i].colorCriteria[k]);
+                    columnPlot.setAttributeNS(null, "data-value", charts[i].yData[k]);
+                    svg.appendChild(columnPlot);
+                }
+            }
+        } else if(this.charts[0].vis === "trellis") {
+            console.log(mappedData);
+            var yAxis = new Chart.YAxis(chartLbWidth, chartLbHeight - 55, chartLbWidth, chartUbHeight - 55,
+                              "yAxis", columnsAreComplete);
+            yAxis.type = "category";
+            yAxis.render(svg);
+            yAxis.renderTicks(svg, mappedData.xTicks);
+            if(i % chartsInARow === 0) {
+                yAxis.renderTickValues(svg, mappedData.xTicks, charts[i].xData);
+            }
+            // yAxis.renderDivs(svg, mappedData.yTicks, chartHeight, chartLbWidth, chartWidth);
+            // yAxis.renderZeroPlane(svg, mappedData.yTicks, charts[i].yTicks, chartWidth);
+
+            var xAxis = new Chart.XAxis(chartUbWidth, chartUbHeight - 55, chartLbWidth, chartUbHeight - 55,
+                                  "xAxis", columnsAreComplete);
+            xAxis.render(svg);
+            if(svg.getElementsByClassName("zeroPlane").length > 0) {
+                var xLine = svg.getElementsByClassName("xAxis");
+                Array.from(xLine).map(function(currentValue) {
+                    currentValue.style.strokeWidth = 0;
+                });
+            }
+            xAxis.renderTicks(svg, mappedData.yTicks);
+            if (i >= multiCharts.length - chartsInARow) {
+                xAxis.renderTickValues(svg, mappedData.yTicks, charts[i].yTicks);
+            }
+
+            var yTitleRect = svgHelper.drawRectByClass(chartLbWidth, chartLbHeight - 55 - 40, 30,
+                                                       chartWidth, "y-title-rect");
+            svg.appendChild(yTitleRect);
+            var yTitleContent = charts[i].yUnit === "" ?
+                charts[i].yTitle : charts[i].yTitle + " (" + charts[i].yUnit + ")";
+            var yTitle = svgHelper.drawTextByClass((chartUbWidth / 2) - yTitleContent.length,
+                                                   chartLbHeight - 55 - 20, yTitleContent,
+                                                   "y-title");
+            svg.appendChild(yTitle);
+
+            for (var k = 0; k < mappedData.yData.length; k++) {
+                if (mappedData.yData[k] !== "") {
+                    var anchor = svgHelper.drawCircleByClass(mappedData.yData[k] + chartLbWidth,
+                                            mappedData.xData[k] + chartLbHeight - 55,
+                                            4, "graphCircle");
+                    anchor.setAttributeNS(null, "data-value", charts[i].yData[k]);
+                    // svg.appendChild(anchor);
+                    var plotHeight = (chartHeight / mappedData.xData.length) - 13;
+                    if(plotHeight > 27) { plotHeight = 27; }
+                    if(svg.getElementsByClassName("zeroPlane").length > 0) {
+                        // var xZeroLine = svg.getElementsByClassName("zeroPlane");
+                        // var zeroPlaneY = xZeroLine[0].getAttributeNS(null, "y1");
+                        // if(charts[i].yData[k] < 0) {
+                        //     var columnHeight = chartHeight - mappedData.yData[k] + chartLbHeight -
+                        //                        55 - zeroPlaneY;
+                        //     columnPlot = svgHelper.drawRectByClass(mappedData.xData[k] + chartLbWidth - (plotWidth / 2),
+                        //     zeroPlaneY - 1, columnHeight, plotWidth, "column-plot");
+                        // } else {
+                        //     columnPlot = svgHelper.drawRectByClass(mappedData.xData[k] + chartLbWidth - (plotWidth / 2),
+                        //     chartUbHeight - mappedData.yData[k] - 55,
+                        //     mappedData.yData[k] - (chartUbHeight - zeroPlaneY) + 55, plotWidth,
+                        //     "column-plot");
+                        // }
+                    } else {
+                        columnPlot = svgHelper.drawRectByClass(chartLbWidth,
+                        mappedData.xData[k] + chartLbHeight - (plotHeight / 2) - 55,
+                        plotHeight, mappedData.yData[k],
+                        "column-plot");
+                    }
+                    columnPlot.setAttributeNS(null, "data-value", charts[i].yData[k]);
+                    svg.appendChild(columnPlot);
+                }
+            }
+        } else {
+            console.log("Unsupported chart visualization.");
         }
+
     };
 
     Chart.BarChartRenderer.prototype.drawIncompleteCharts = function(i, charts, multiCharts,
         chartsInARow, svgHelper, svg, height, width, columnsAreComplete) {
-        var columnPlot;
+        var columnPlot, yTitle;
         var mappedCharts  = [];
         var chartUbHeight = Math.ceil(height - (0.095 * height)) + 55;
         var chartUbWidth  = Math.ceil(width - (0.025 * width)) + 55;
@@ -299,9 +423,11 @@
                               "yAxis", columnsAreComplete);
         yAxis.render(svg);
         yAxis.renderTicks(svg, mappedData.yTicks);
-        yAxis.renderTickValues(svg, mappedData.yTicks, charts[i].yTicks);
+        if(i % chartsInARow === 0) {
+            yAxis.renderTickValues(svg, mappedData.yTicks, charts[i].yTicks);
+        }
         yAxis.renderDivs(svg, mappedData.yTicks, chartHeight, chartLbWidth, chartWidth);
-        // yAxis.renderZeroPlane(svg, mappedData.yTicks, charts[i].yTicks, chartWidth);
+        yAxis.renderZeroPlane(svg, mappedData.yTicks, charts[i].yTicks, chartWidth);
 
         var xAxis = new Chart.XAxis(chartLbWidth, chartLbHeight - 15, chartLbWidth, chartLbHeight - 15,
                               "xAxis", columnsAreComplete);
@@ -311,12 +437,20 @@
             xAxis.renderTickValues(svg, mappedData.xTicks, charts[i].xData);
         }
 
-        var yTitleRect = svgHelper.drawRectByClass(chartLbWidth, chartUbHeight - 7, 30, chartWidth, "y-title-rect");
+        var yTitleRect = svgHelper.drawRectByClass(chartLbWidth, chartUbHeight - 7, 30, chartWidth,
+                                                   "y-title-rect");
         svg.appendChild(yTitleRect);
         var yTitleContent = charts[i].yUnit === "" ?
             charts[i].yTitle : charts[i].yTitle + " (" + charts[i].yUnit + ")";
-        var yTitle = svgHelper.drawTextByClass((chartUbWidth / 2) - 15, chartUbHeight + 15, yTitleContent,
-                                               "y-title");
+        if(this.charts[0].vis === "crosstab") {
+            yTitle = svgHelper.drawTextByClass((chartUbWidth / 2) - 15,
+                                               chartUbHeight + 15, yTitleContent, "y-title");
+        } else if(this.charts[0].vis === "trellis"){
+            yTitle = svgHelper.drawTextByClass((chartUbWidth / 2) - yTitleContent.length,
+                                               chartUbHeight + 15, yTitleContent, "y-title");
+        } else {
+            console.log("Unsupported chart visualization.");
+        }
         svg.appendChild(yTitle);
 
         for (var k = 0; k < mappedData.yData.length; k++) {
@@ -327,11 +461,13 @@
                 anchor.setAttributeNS(null, "data-value", charts[i].yData[k]);
                 // svg.appendChild(anchor);
                 var plotWidth = (chartWidth / mappedData.xData.length) - 10;
+
                 if(svg.getElementsByClassName("zeroPlane").length > 0) {
                     var xZeroLine = svg.getElementsByClassName("zeroPlane");
                     var zeroPlaneY = xZeroLine[0].getAttributeNS(null, "y1");
                     if(charts[i].yData[k] < 0) {
-                        var columnHeight = chartHeight - mappedData.yData[k] + chartLbHeight - 15 - zeroPlaneY;
+                        var columnHeight = chartHeight - mappedData.yData[k] + chartLbHeight -
+                                           15 - zeroPlaneY;
                         columnPlot = svgHelper.drawRectByClass(mappedData.xData[k] + chartLbWidth - (plotWidth / 2),
                         zeroPlaneY - 1, columnHeight, plotWidth, "column-plot");
                     } else {
@@ -353,30 +489,60 @@
     };
 
     Chart.BarChartRenderer.prototype.createCharts = function(charts, height, width, rowCount) {
-        var columnsAreComplete;
+        var columnsAreComplete, multiCharts, svg;
         var svgHelper    = new Chart.SvgHelper();
         var chartsInARow = Math.floor(window.innerWidth / (width));
 
-        var multiCharts = document.getElementsByClassName("multi-chart" + rowCount);
-        columnsAreComplete = true;              // since crosstabs always have their columns complete
-        for (var i = 0; i < multiCharts.length; i++) {
-            var svg = svgHelper.createSvgByClass(height, width, "chart-svg");
-            if(i === 0) {
-                this.drawRowName(charts, multiCharts, svgHelper, svg, height, width, i, rowCount);
-            } else if(i === 1) {
-                this.drawYLabels(charts, multiCharts, svgHelper, svg, height, width, i, rowCount);
+        if(this.charts[0].vis === "crosstab") {
+            multiCharts = document.getElementsByClassName("multi-chart" + rowCount);
+            columnsAreComplete = true;              // since crosstabs always have their columns complete
+        } else if(this.charts[0].vis === "trellis") {
+            multiCharts = document.getElementsByClassName("multi-chart");
+            if(chartsInARow > multiCharts.length) {
+                chartsInARow = multiCharts.length;
+            }
+            if(multiCharts.length % chartsInARow === 0) {
+                columnsAreComplete = true;
             } else {
-                if(columnsAreComplete) {
-                    this.drawCompleteCharts(i - 2, charts, multiCharts, chartsInARow, svgHelper,
-                        svg, height, width, columnsAreComplete, rowCount);
+                columnsAreComplete = false;
+            }
+        } else {
+            console.log("Visualization unsupported.");
+        }
+        for (var i = 0; i < multiCharts.length; i++) {
+            if(this.charts[0].vis === "crosstab") {
+                svg = svgHelper.createSvgByClass(height, width, "chart-svg");
+                if(i === 0) {
+                    this.drawRowName(charts, multiCharts, svgHelper, svg, height, width, i, rowCount);
+                } else if(i === 1) {
+                    this.drawYLabels(charts, multiCharts, svgHelper, svg, height, width, i, rowCount);
                 } else {
-                    this.drawIncompleteCharts(i - 2, charts, multiCharts, chartsInARow, svgHelper,
+                    if(columnsAreComplete) {
+                        this.drawCompleteCharts(i - 2, charts, multiCharts, chartsInARow, svgHelper,
+                            svg, height, width, columnsAreComplete, rowCount);
+                    } else {
+                        this.drawIncompleteCharts(i - 2, charts, multiCharts, chartsInARow, svgHelper,
+                            svg, height, width, columnsAreComplete);
+                    }
+                }
+                multiCharts[i].appendChild(svg);
+                if(i > 0) {
+                    multiCharts[i].style.borderRight = "1px solid black";
+                }
+            } else if(this.charts[0].vis === "trellis") {
+                svg = svgHelper.createSvgByClass(height + 55, width + 55, "chart-svg");
+
+                if(columnsAreComplete) {
+                    this.drawCompleteCharts(i, charts, multiCharts, chartsInARow, svgHelper,
+                        svg, height, width, columnsAreComplete);
+                } else {
+                    this.drawIncompleteCharts(i, charts, multiCharts, chartsInARow, svgHelper,
                         svg, height, width, columnsAreComplete);
                 }
-            }
-            multiCharts[i].appendChild(svg);
-            if(i > 0) {
-                multiCharts[i].style.borderRight = "1px solid black";
+
+                multiCharts[i].appendChild(svg);
+            } else {
+                console.log("Visualization unsupported.");
             }
             var xValueElements = svg.getElementsByClassName("x-value");
             for(var e = 0; e < xValueElements.length; e++) {

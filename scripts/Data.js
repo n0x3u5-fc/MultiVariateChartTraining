@@ -144,6 +144,20 @@
                 data.chartData.push(chart);
             });
 
+            // var chartRenderer = new Chart.ChartRenderer();
+            // switch(data.vis) {
+            //     case "crosstab":
+            //         var crosstabVis = new Chart.CrosstabVis(data);
+            //         crosstabVis.setupSpaces();
+            //         break;
+            //     case "trellis":
+            //         var trellisVis = new Chart.TrellisVis(data);
+            //         trellisVis.setupSpaces();
+            //         break;
+            //     default:
+            //         console.log("Chart visualization not supported.");
+            // }
+
             if(typeof data.customSort == "function") {
                 data.customSort();
             } else {
@@ -163,6 +177,13 @@
                 } else if(data.type === "column") {
                     if(categoryNames.indexOf(categoryName) === 0) {
                         chartRenderer = new Chart.ColumnChartRenderer(data.chartData, chartProperties);
+                        chartRenderer.renderDiv = data.renderDiv;
+                        chartRenderer.createCaptions(data.renderDiv, data.caption, data.subCaption);
+                        chartRenderer.displayCharts(data.height, data.width);
+                    }
+                } else if(data.type === "bar") {
+                    if(categoryNames.indexOf(categoryName) === 0) {
+                        chartRenderer = new Chart.BarChartRenderer(data.chartData, chartProperties);
                         chartRenderer.renderDiv = data.renderDiv;
                         chartRenderer.createCaptions(data.renderDiv, data.caption, data.subCaption);
                         chartRenderer.displayCharts(data.height, data.width);
@@ -249,7 +270,7 @@
         //     eventAgent.crosshairHandler(document.getElementsByClassName("chart-svg"));
         // });
 
-        var eventAgent = new Chart.EventAgents(this.type);
+        var eventAgent = new Chart.EventAgents(this.type, this.vis);
         eventAgent.crosshairHandler(document.getElementsByClassName("chart-svg"));
     };
 

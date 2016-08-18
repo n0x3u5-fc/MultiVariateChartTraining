@@ -28,8 +28,13 @@
         var xDataMax  = chart.xData.length - 1;
         if (chartVis === "trellis") {
             for (var yTick of chart.yTicks) {
-                var yTickVal = lbHeight;
-                var yTickInterval = height / (yTicksMax - yTicksMin);
+                if(chart.type === "bar") {
+                    var yTickVal = lbWidth;
+                    var yTickInterval = width / (yTicksMax - yTicksMin);
+                } else {
+                    var yTickVal = lbHeight;
+                    var yTickInterval = width / (yTicksMax - yTicksMin);
+                }
                 yTickVal += yTickInterval * (yTick - yTicksMin);
                 yTicks.push(Math.floor(yTickVal));
             }
@@ -38,7 +43,11 @@
                     yData.push("");
                 } else {
                     var yDataVal  = 0;
-                    var yInterval = height / (yTicksMax - yTicksMin);
+                    if(chart.type === "bar") {
+                        var yInterval = width / (yTicksMax - yTicksMin);
+                    } else {
+                        var yInterval = height / (yTicksMax - yTicksMin);
+                    }
                     yDataVal += yInterval * (yDatum - yTicksMin);
                     yData.push(Math.floor(yDataVal));
                 }
@@ -73,6 +82,23 @@
                     var xInterval = width / (xDataMax - xDataMin);
                     if (i === 0) {
                         xDataVal += xInterval * (i - xTicksMin);
+                    } else {
+                        xDataVal += xInterval * (i - xDataMin);
+                    }
+                    xData.push(Math.floor(xDataVal));
+                }
+            } else if(chartType === "bar") {
+                var divDiff = Math.floor((height - 35) / (chart.xData.length - 1));
+                var tickVal = lbHeight + 20;
+                for (var xTick of chart.xData) {
+                    xTicks.push(tickVal);
+                    tickVal += divDiff;
+                }
+                for (var i = 0; i <= xDataMax; i++) {
+                    var xDataVal = 20;
+                    var xInterval = (height - 35) / (xDataMax - xDataMin);
+                    if (i === 0) {
+                        xDataVal += xInterval * (i - xDataMin);
                     } else {
                         xDataVal += xInterval * (i - xDataMin);
                     }

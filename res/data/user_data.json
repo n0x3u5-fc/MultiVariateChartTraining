@@ -3,7 +3,7 @@
 		"caption"              : "Multi-Variate Chart",
 		"subCaption"           : "Correlation of Age with Nutrition",
 		"visualization"        : "trellis",
-		"type"                 : "line",
+		"type"                 : "bar",
 		"height"               : "250",
 		"width"                : "280",
 		"positiveGradientStart": "#17202a",
@@ -15,7 +15,7 @@
 		"category" : "Product Type|Coffee",
 		"header"   : "Zone|Central",
 		"type"     : "Product|Amaretto",
-		"data"     : "Sum of Sales|wat",
+		"data"     : "Sum of Sales|14011",
 		"highlight": "Sum of Profits|5105"
 	}, {
 		"category" : "Product Type|Coffee",
