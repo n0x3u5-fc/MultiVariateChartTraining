@@ -329,7 +329,6 @@
                 }
             }
         } else if(this.charts[0].vis === "trellis") {
-            console.log(mappedData);
             var yAxis = new Chart.YAxis(chartLbWidth, chartLbHeight - 55, chartLbWidth, chartUbHeight - 55,
                               "yAxis", columnsAreComplete);
             yAxis.type = "category";

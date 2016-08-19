@@ -33,7 +33,7 @@
                     var yTickInterval = width / (yTicksMax - yTicksMin);
                 } else {
                     var yTickVal = lbHeight;
-                    var yTickInterval = width / (yTicksMax - yTicksMin);
+                    var yTickInterval = height / (yTicksMax - yTicksMin);
                 }
                 yTickVal += yTickInterval * (yTick - yTicksMin);
                 yTicks.push(Math.floor(yTickVal));

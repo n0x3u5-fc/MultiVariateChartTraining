@@ -28,7 +28,6 @@
 
     Chart.EventAgents.prototype.createOtherCrosshairs = function(event) {
         var targetSvgHeight = Number(event.target.getAttributeNS(null, "height"));
-        var targetSvgX      = Number(event.target.getAttributeNS(null, "x"));
         var targetSvgY      = Number(event.target.getAttributeNS(null, "y"));
         var crosshair, tooltip, tooltipBg;
         if (targetSvgHeight) {
@@ -205,9 +204,6 @@
     };
     Chart.EventAgents.prototype.prepAllPlots = function(event) {
         var tooltip, tooltipBg;
-        var targetSvgHeight = Number(event.target.getAttributeNS(null, "height"));
-        var targetSvgX      = Number(event.target.getAttributeNS(null, "x"));
-        var targetSvgY      = Number(event.target.getAttributeNS(null, "y"));
         var hoveredPlotX = Math.floor(Number(event.detail.hoveredPlotX) * 1000) / 1000;
         var hoveredPlotY = Math.floor(Number(event.detail.hoveredPlotY) * 1000) / 1000;
         var targetBBoxX = Math.floor(event.target.getBBox().x * 1000) / 1000;
@@ -245,10 +241,8 @@
         }
     };
     Chart.EventAgents.prototype.moveTooltips = function(event) {
-        var rectRect   = event.target.getBoundingClientRect();
         var tooltips   = event.target.parentNode.getElementsByClassName("otherTooltip");
         var tooltipBgs = event.target.parentNode.getElementsByClassName("otherTooltipBg");
-        var hoverColumnLeft;
         var hoveredPlotX = Math.floor(Number(event.detail.hoveredPlotX) * 1000) / 1000;
         var hoveredPlotY = Math.floor(Number(event.detail.hoveredPlotY) * 1000) / 1000;
         var targetBBoxX = Math.floor(event.target.getBBox().x * 1000) / 1000;
@@ -391,7 +385,6 @@
                     rect.addEventListener("crosshairRemoveEvent", this.removeOtherCrosshairs.bind(this));
                 }
             }
-            var svgClass = svg.getAttributeNS(null, "class");
             if(this.chartVis !== "crosstab") {
                 svg.addEventListener("mousedown", this.dragSelect);
                 svg.addEventListener("customDragSelect", this.customDragSelect.bind(this));
