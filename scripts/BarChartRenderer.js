@@ -43,7 +43,6 @@
         var mappedData = this.chartProperties.dataMapper(chartHeight, chartWidth, chartLbHeight,
                                                          chartLbWidth, charts[0]);
         mappedCharts.push(mappedData);
-
         var categoryText = svgHelper.drawTextByClass(16, mappedData.xTicks[0] + 8,
                                                      charts[i].category, "category-text");
         svg.appendChild(categoryText);
@@ -198,7 +197,7 @@
         renderDiv.appendChild(div);
     };
     Chart.BarChartRenderer.prototype.colorPlots = function(criteria) {
-        var color, lumRatio;
+        var color, lumRatio, plots;
         var charts = document.getElementsByClassName("chart-svg");
         var that = this;
         var losses = criteria.filter(function(currentValue) {
@@ -210,18 +209,78 @@
         });
         var profitDiff = Math.max.apply(Math, profits) - Math.min.apply(Math, profits);
         Array.from(charts).map(function(currentValue, index) {
-            var plots = currentValue.getElementsByClassName("bar-plot");
-            Array.from(plots).map(function(currentValue, index, array) {
-                var colorCriteria = Number(currentValue.getAttributeNS(null, "data-criteria"));
-                if(colorCriteria < 0) {
-                    lumRatio = colorCriteria / lossDiff;
-                    color = Chart.chartUtilities.generateColor(that.negativeColor, that.negativeColorEnd, lumRatio);
-                } else {
-                    lumRatio = colorCriteria / profitDiff;
-                    color = Chart.chartUtilities.generateColor(that.plotColor, that.plotColorEnd, lumRatio);
-                }
-                currentValue.setAttributeNS(null, "fill", color);
-            });
+            var chartIdx = index;
+            if(that.charts[0].type === "line") {
+                plots = currentValue.getElementsByClassName("graphCircle");
+                Array.from(plots).map(function(currentValue, index, array) {
+                    var colorCriteria = Number(currentValue.getAttributeNS(null, "data-criteria"));
+                    if(colorCriteria < 0) {
+                        lumRatio = colorCriteria / lossDiff;
+                        color = Chart.chartUtilities.generateColor(that.negativeColor, that.negativeColorEnd, lumRatio);
+                    } else {
+                        lumRatio = colorCriteria / profitDiff;
+                        color = Chart.chartUtilities.generateColor(that.plotColor, that.plotColorEnd, lumRatio);
+                    }
+                    currentValue.style.fill = color;
+                    currentValue.style.stroke = color;
+                });
+                var lines = Array.from(currentValue.getElementsByClassName("graphLine"));
+                var anchors = Array.from(currentValue.getElementsByClassName("graphCircle"));
+                lines.map(function(currentValue, index, array) {
+                    var startAnchor, endAnchor;
+                    if(currentValue.parentNode.getElementsByTagName("defs").length === 0) {
+                        var defSvg = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+                        currentValue.parentNode.appendChild(defSvg);
+                    }
+                });
+                lines.map(function(currentValue, index, array) {
+                    var startAnchor, endAnchor;
+                    var svgDefs = currentValue.parentNode.getElementsByTagName("defs");
+                    var grad = document.createElementNS("http://www.w3.org/2000/svg", "linearGradient");
+                    grad.setAttributeNS(null, "id", "lineGradient" + chartIdx + index);
+                    grad.setAttributeNS(null, "x1", "0");
+                    grad.setAttributeNS(null, "x2", "0");
+                    grad.setAttributeNS(null, "y1", "0");
+                    grad.setAttributeNS(null, "y2", "1");
+                    var beginStop = document.createElementNS("http://www.w3.org/2000/svg", "stop");
+                    beginStop.setAttributeNS(null, "offset", "5%");
+                    var lineStartX = currentValue.getAttributeNS(null, "x1");
+                    var lineStartY = currentValue.getAttributeNS(null, "y1");
+                    var lineEndX = currentValue.getAttributeNS(null, "x2");
+                    var lineEndY = currentValue.getAttributeNS(null, "y2");
+                    anchors.map(function(currentValue) {
+                        if(currentValue.getAttributeNS(null, "cx") == lineStartX && currentValue.getAttributeNS(null, "cy") == lineStartY) {
+                            startAnchor = currentValue;
+                        }
+                    });
+                    var endStop = document.createElementNS("http://www.w3.org/2000/svg", "stop");
+                    endStop.setAttributeNS(null, "offset", "95%");
+                    anchors.map(function(currentValue) {
+                        if(currentValue.getAttributeNS(null, "cx") == lineEndX && currentValue.getAttributeNS(null, "cy") == lineEndY) {
+                            endAnchor = currentValue;
+                        }
+                    });
+                    beginStop.setAttributeNS(null, "stop-color", startAnchor.style.fill);
+                    endStop.setAttributeNS(null, "stop-color", endAnchor.style.fill);
+                    grad.appendChild(beginStop);
+                    grad.appendChild(endStop);
+                    svgDefs[0].appendChild(grad);
+                    currentValue.style.stroke = "url(#lineGradient" + chartIdx + index + ")";
+                });
+            } else if(that.charts[0].type === "bar") {
+                plots = currentValue.getElementsByClassName("bar-plot");
+                Array.from(plots).map(function(currentValue, index, array) {
+                    var colorCriteria = Number(currentValue.getAttributeNS(null, "data-criteria"));
+                    if(colorCriteria < 0) {
+                        lumRatio = colorCriteria / lossDiff;
+                        color = Chart.chartUtilities.generateColor(that.negativeColor, that.negativeColorEnd, lumRatio);
+                    } else {
+                        lumRatio = colorCriteria / profitDiff;
+                        color = Chart.chartUtilities.generateColor(that.plotColor, that.plotColorEnd, lumRatio);
+                    }
+                    currentValue.style.fill = color;
+                });
+            }
         });
     };
     Chart.BarChartRenderer.prototype.createCaptions = function(targetDiv, caption, subCaption) {
@@ -289,43 +348,76 @@
             var yTitle = svgHelper.drawTextByClass((chartUbWidth / 2) - 15, chartLbHeight - 20, yTitleContent,
                                                    "y-title");
             // svg.appendChild(yTitle);
+            if(this.charts[0].type === "line") {
+                for (var l = 0; l < mappedData.yData.length - 1; l++) {
+                    var graphLine;
+                    var c = 0;
+                    if (mappedData.yData[l + 1] !== "" && mappedData.yData[l] !== "") {
+                        graphLine = svgHelper.drawLineByClass(mappedData.yData[l] + chartLbWidth,
+                                            mappedData.xData[l] + chartLbHeight,
+                                            mappedData.yData[l + 1] + chartLbWidth,
+                                            mappedData.xData[l + 1] + chartLbHeight,
+                                            "graphLine");
+                        svg.appendChild(graphLine);
+                    } else if (mappedData.yData[l] !== "") {
+                        for (var j = l + 2; j < mappedData.yData.length; j++) {
+                            l++;
+                            c++;
+                            if (mappedData.yData[j] !== "") {
+                                graphLine = svgHelper
+                                    .drawLineByClass(mappedData.yData[l - c] + chartLbWidth,
+                                            mappedData.xData[l - c] + chartLbHeight,
+                                            mappedData.yData[j] + chartLbWidth,
+                                            mappedData.xData[j] + chartLbHeight,
+                                            "graphLine inferredLine");
+                                svg.appendChild(graphLine);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
             for (var k = 0; k < mappedData.yData.length; k++) {
                 if (mappedData.yData[k] !== "") {
                     var anchor = svgHelper.drawCircleByClass(mappedData.yData[k] + chartLbWidth,
                                             mappedData.xData[k] + chartLbHeight,
                                             4, "graphCircle");
                     anchor.setAttributeNS(null, "data-value", charts[i].yData[k]);
-                    // svg.appendChild(anchor);
-                    var plotHeight = (chartHeight / mappedData.xData.length) - 13;
-                    if(plotHeight > 27) { plotHeight = 27; }
-                    if(svg.getElementsByClassName("zeroPlane").length > 0) {
-                        // var xZeroLine = svg.getElementsByClassName("zeroPlane");
-                        // var zeroPlaneY = xZeroLine[0].getAttributeNS(null, "y1");
-                        // if(charts[i].yData[k] < 0) {
-                        //     var columnHeight = chartHeight - mappedData.yData[k] + chartLbHeight - 55 - zeroPlaneY;
-                        //     columnPlot = svgHelper.drawRectByClass(mappedData.xData[k] + chartLbWidth - (plotWidth / 2),
-                        //     zeroPlaneY - 1, columnHeight, plotWidth, "column-plot");
-                        // } else {
-                        //     columnPlot = svgHelper.drawRectByClass(mappedData.xData[k] + chartLbWidth - (plotWidth / 2),
-                        //     chartUbHeight - mappedData.yData[k] - 55,
-                        //     mappedData.yData[k] - (chartUbHeight - zeroPlaneY) + 55, plotWidth,
-                        //     "column-plot");
-                        // }
+                    if (this.charts[0].type === "line") {
+                        anchor.setAttributeNS(null, "data-criteria", charts[i].colorCriteria[k]);
+                        svg.appendChild(anchor);
                     } else {
-                        var zeroes = charts[i].yData.filter(function(currentValue) {
-                            if(currentValue === 0) { return true; } else { return false; }
-                        });
-                        if(mappedData.yData[k] < 2 && zeroes.length === 0) {
-                            mappedData.yData[k] = 2;
+                        var plotHeight = (chartHeight / mappedData.xData.length) - 13;
+                        if(plotHeight > 27) { plotHeight = 27; }
+                        if(svg.getElementsByClassName("zeroPlane").length > 0) {
+                            // var xZeroLine = svg.getElementsByClassName("zeroPlane");
+                            // var zeroPlaneY = xZeroLine[0].getAttributeNS(null, "y1");
+                            // if(charts[i].yData[k] < 0) {
+                            //     var columnHeight = chartHeight - mappedData.yData[k] + chartLbHeight - 55 - zeroPlaneY;
+                            //     columnPlot = svgHelper.drawRectByClass(mappedData.xData[k] + chartLbWidth - (plotWidth / 2),
+                            //     zeroPlaneY - 1, columnHeight, plotWidth, "column-plot");
+                            // } else {
+                            //     columnPlot = svgHelper.drawRectByClass(mappedData.xData[k] + chartLbWidth - (plotWidth / 2),
+                            //     chartUbHeight - mappedData.yData[k] - 55,
+                            //     mappedData.yData[k] - (chartUbHeight - zeroPlaneY) + 55, plotWidth,
+                            //     "column-plot");
+                            // }
+                        } else {
+                            var zeroes = charts[i].yData.filter(function(currentValue) {
+                                if(currentValue === 0) { return true; } else { return false; }
+                            });
+                            if(mappedData.yData[k] < 2 && zeroes.length === 0) {
+                                mappedData.yData[k] = 2;
+                            }
+                            columnPlot = svgHelper.drawRectByClass(chartLbWidth - 1,
+                            mappedData.xData[k] + chartLbHeight - (plotHeight / 2),
+                            plotHeight, mappedData.yData[k],
+                            "bar-plot");
                         }
-                        columnPlot = svgHelper.drawRectByClass(chartLbWidth - 1,
-                        mappedData.xData[k] + chartLbHeight - (plotHeight / 2),
-                        plotHeight, mappedData.yData[k],
-                        "bar-plot");
+                        columnPlot.setAttributeNS(null, "data-criteria", charts[i].colorCriteria[k]);
+                        columnPlot.setAttributeNS(null, "data-value", charts[i].yData[k]);
+                        svg.appendChild(columnPlot);
                     }
-                    columnPlot.setAttributeNS(null, "data-criteria", charts[i].colorCriteria[k]);
-                    columnPlot.setAttributeNS(null, "data-value", charts[i].yData[k]);
-                    svg.appendChild(columnPlot);
                 }
             }
         } else if(this.charts[0].vis === "trellis") {

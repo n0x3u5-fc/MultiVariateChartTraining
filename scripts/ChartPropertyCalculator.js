@@ -107,7 +107,7 @@
             }
         } else if(chartVis === "crosstab"){
             for (var yTick of chart.yTicks) {
-                if(chart.type === "bar") {
+                if(chart.type === "bar" || chart.type === "line") {
                     var yTickVal = lbWidth;
                     var yTickInterval = width / (yTicksMax - yTicksMin);
                 } else {
@@ -122,7 +122,7 @@
                     yData.push("");
                 } else {
                     var yDataVal  = 0;
-                    if(chart.type === "bar") {
+                    if(chart.type === "bar" || chart.type === "line") {
                         var yInterval = width / (yTicksMax - yTicksMin);
                     } else {
                         var yInterval = height / (yTicksMax - yTicksMin);
@@ -131,7 +131,7 @@
                     yData.push(Math.floor(yDataVal));
                 }
             }
-            if (chartType === "bar") {
+            if (chartType === "bar" || chartType === "line") {
                 var divDiff = Math.floor((height - 35) / (chart.xData.length - 1));
                 var tickVal = lbHeight + 20;
                 for (var xTick of chart.xData) {

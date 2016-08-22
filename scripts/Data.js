@@ -205,7 +205,7 @@
                 var height = Math.floor((window.innerHeight) / categoryNames.length);
                 var safetyOffset = crosstabHeaders.length;
                 if(height < 110) { height = 110; } else if(height > 300) { height = 300; }
-                if(data.type === "bar") {
+                if(data.type === "bar" || data.type === "line") {
                     chartRenderer = new Chart.BarChartRenderer(data.chartData, chartProperties);
                     chartRenderer.renderDiv        = data.renderDiv;
                     chartRenderer.plotColor        = data.positiveColorStart;
@@ -220,11 +220,18 @@
                     if(index === categoryNames.length - 1) {
                         chartRenderer.drawX(footerHeight, width - safetyOffset, crosstabHeaders, xTitle);
                     }
-                    var allBarPlots = document.getElementsByClassName("bar-plot");
-                    Array.from(allBarPlots).map(function(currentValue) {
-                        criteria.push(currentValue.getAttributeNS(null, "data-criteria"));
-                    });
-                    chartRenderer.colorPlots(criteria);
+                    if(data.type === "bar") {
+                        var allBarPlots = document.getElementsByClassName("bar-plot");
+                        Array.from(allBarPlots).map(function(currentValue) {
+                            criteria.push(currentValue.getAttributeNS(null, "data-criteria"));
+                        });
+                    } else if(data.type === "line") {
+                        var allAnchorPlots = document.getElementsByClassName("graphCircle");
+                        Array.from(allAnchorPlots).map(function(currentValue) {
+                            criteria.push(currentValue.getAttributeNS(null, "data-criteria"));
+                        });
+                    }
+                    // chartRenderer.colorPlots(criteria);
                 } else if(data.type === "column") {
                     chartRenderer = new Chart.ColumnChartRenderer(data.chartData, chartProperties);
                     chartRenderer.renderDiv        = data.renderDiv;
@@ -244,7 +251,7 @@
                     Array.from(allColumnPlots).map(function(currentValue) {
                         criteria.push(currentValue.getAttributeNS(null, "data-criteria"));
                     });
-                    chartRenderer.colorPlots(criteria);
+                    // chartRenderer.colorPlots(criteria);
                 } else {
                     errorStr = "Chart type not supported in selected visualization type.";
                     chartDiv = document.getElementById(data.renderDiv);
@@ -267,6 +274,7 @@
             }
             data.chartData = [];
         });
+        chartRenderer.colorPlots(criteria);
 
         // var that = this;
         // window.addEventListener("resize", function() {
