@@ -62,7 +62,7 @@
         var chartHeight   = chartUbHeight - chartLbHeight;
         var chartWidth    = chartUbWidth - chartLbWidth;
 
-        var mappedData = this.chartProperties.dataMapper(chartHeight - 15, chartWidth, chartLbHeight + 2,
+        var mappedData = this.chartProperties.dataMapper(chartHeight - 16, chartWidth, chartLbHeight + 1,
                                                          chartLbWidth, charts[0]);
         mappedCharts.push(mappedData);
 
@@ -76,59 +76,61 @@
             svg.style.borderBottom = "1px solid black";
         }
     };
-    // Chart.ColumnChartRenderer.prototype.drawX = function(height, width, keys, title) {
-    //     var mappedCharts  = [];
-    //     var formattedTickValues = [];
-    //     var chartUbHeight = Math.ceil(height);
-    //     var chartUbWidth  = Math.ceil(width);
-    //     var chartLbHeight = Math.floor(0);
-    //     var chartLbWidth  = Math.floor(1);
-    //     var chartHeight   = chartUbHeight - chartLbHeight;
-    //     var chartWidth    = chartUbWidth - chartLbWidth;
-    //     var svgHelper     = new Chart.SvgHelper();
-    //
-    //     var mappedData = this.chartProperties.dataMapper(chartHeight, chartWidth, chartLbHeight,
-    //                                                      chartLbWidth, this.charts[0]);
-    //     mappedCharts.push(mappedData);
-    //
-    //     for(var key of keys) {
-    //         var div = document.createElement('span');
-    //         div.setAttribute('class', "multi-chart-footer");
-    //         div.style.display = "inline-block";
-    //         var renderDiv = document.getElementById(this.renderDiv);
-    //         renderDiv.appendChild(div);
-    //
-    //         var footerSvg = svgHelper.createSvgByClass(height, width, "footer-svg");
-    //         var footerDivs = document.getElementsByClassName("multi-chart-footer");
-    //         var xAxis = new Chart.XAxis(chartLbWidth, 0, chartUbWidth, 0, "xAxis", true);
-    //         xAxis.type = "numeric";
-    //         Array.from(footerDivs).map(function(currentValue, index) {
-    //             currentValue.style.borderTop = "1px solid black";
-    //             if(index > 0) {
-    //                 currentValue.style.borderRight = "1px solid black";
-    //             }
-    //             currentValue.appendChild(footerSvg);
-    //         });
-    //         var footerSvgs = document.getElementsByClassName("footer-svg");
-    //         var that = this;
-    //         Array.from(footerSvgs).map(function(currentValue, index) {
-    //             if(index > 1) {
-    //                 // xAxis.render(footerSvg);
-    //                 xAxis.renderTicks(footerSvg, mappedData.yTicks);
-    //                 for(var yTick of that.charts[0].yTicks) {
-    //                     formattedTickValues.push(Chart.chartUtilities.shortenLargeNumber(yTick, 2));
-    //                 }
-    //             }
-    //         });
-    //         xAxis.chartVis = "crosstabs";
-    //         xAxis.renderTickValues(footerSvg, mappedData.yTicks, formattedTickValues);
-    //         if(keys.indexOf(key) > 1) {
-    //             var xTitle = svgHelper.drawTextByClass((chartWidth / 2) - (title.length * 3),
-    //                                                    chartHeight / 1.2, title, "x-title");
-    //             footerSvg.appendChild(xTitle);
-    //         }
-    //     }
-    // };
+    Chart.ColumnChartRenderer.prototype.drawX = function(height, width, keys, title) {
+        var mappedCharts  = [];
+        var formattedTickValues = [];
+        var chartUbHeight = Math.ceil(height);
+        var chartUbWidth  = Math.ceil(width);
+        var chartLbHeight = Math.floor(0);
+        var chartLbWidth  = Math.floor(1);
+        var chartHeight   = chartUbHeight - chartLbHeight;
+        var chartWidth    = chartUbWidth - chartLbWidth;
+        var svgHelper     = new Chart.SvgHelper();
+
+        var mappedData = this.chartProperties.dataMapper(chartHeight, chartWidth, chartLbHeight,
+                                                         chartLbWidth, this.charts[0]);
+        mappedCharts.push(mappedData);
+
+        for(var key of keys) {
+            var div = document.createElement('span');
+            div.setAttribute('class', "multi-chart-footer");
+            div.style.display = "inline-block";
+            var renderDiv = document.getElementById(this.renderDiv);
+            renderDiv.appendChild(div);
+
+            var footerSvg = svgHelper.createSvgByClass(height, width, "footer-svg");
+            var footerDivs = document.getElementsByClassName("multi-chart-footer");
+            var xAxis = new Chart.XAxis(chartLbWidth, 0, chartUbWidth, 0, "xAxis", true);
+            xAxis.type = "numeric";
+            Array.from(footerDivs).map(function(currentValue, index) {
+                currentValue.style.borderTop = "1px solid black";
+                if(index > 0) {
+                    currentValue.style.borderRight = "1px solid black";
+                }
+                currentValue.appendChild(footerSvg);
+            });
+            var footerSvgs = document.getElementsByClassName("footer-svg");
+            var that = this;
+            Array.from(footerSvgs).map(function(currentValue, index) {
+                if(index > 1) {
+                    // xAxis.render(footerSvg);
+                    xAxis.renderTicks(footerSvg, mappedData.xTicks);
+                    for(var xData of that.charts[0].xData) {
+                        formattedTickValues.push(Chart.chartUtilities.truncateString(xData, 5));
+                    }
+                }
+            });
+            xAxis.chartVis = "crosstabs";
+            xAxis.chartType = "column";
+            console.log(this.charts[0]);
+            xAxis.renderTickValues(footerSvg, mappedData.xTicks, formattedTickValues);
+            if(keys.indexOf(key) > 1) {
+                var xTitle = svgHelper.drawTextByClass((chartWidth / 2) - (title.length * 3),
+                                                       chartHeight / 1.2, title, "x-title");
+                footerSvg.appendChild(xTitle);
+            }
+        }
+    };
     Chart.ColumnChartRenderer.prototype.displayCharts = function(height, width, rowCount) {
         var minY = Infinity, maxY = -Infinity;
         if(this.charts[0].vis === "trellis") {
@@ -198,7 +200,33 @@
         var renderDiv = document.getElementById(targetDiv);
         renderDiv.appendChild(div);
     };
-
+    Chart.ColumnChartRenderer.prototype.colorPlots = function(criteria) {
+        var color, lumRatio;
+        var charts = document.getElementsByClassName("chart-svg");
+        var that = this;
+        var losses = criteria.filter(function(currentValue) {
+            if(currentValue < 0) { return true; } else { return false; }
+        });
+        var lossDiff = Math.max.apply(Math, losses) - Math.min.apply(Math, losses);
+        var profits = criteria.filter(function(currentValue) {
+            if(currentValue >= 0) { return true; } else { return false; }
+        });
+        var profitDiff = Math.max.apply(Math, profits) - Math.min.apply(Math, profits);
+        Array.from(charts).map(function(currentValue, index) {
+            var plots = currentValue.getElementsByClassName("column-plot");
+            Array.from(plots).map(function(currentValue, index, array) {
+                var colorCriteria = Number(currentValue.getAttributeNS(null, "data-criteria"));
+                if(colorCriteria < 0) {
+                    lumRatio = colorCriteria / lossDiff;
+                    color = Chart.chartUtilities.generateColor(that.negativeColor, that.negativeColorEnd, lumRatio);
+                } else {
+                    lumRatio = colorCriteria / profitDiff;
+                    color = Chart.chartUtilities.generateColor(that.plotColor, that.plotColorEnd, lumRatio);
+                }
+                currentValue.style.fill = color;
+            });
+        });
+    };
     Chart.ColumnChartRenderer.prototype.createCaptions = function(targetDiv, caption, subCaption) {
         var captionHeader = document.createElement('h1');
         captionHeader.setAttribute('class', 'caption');
@@ -268,7 +296,6 @@
             // }
 
             for (var k = 0; k < mappedData.yData.length; k++) {
-                console.log(mappedData);
                 if (mappedData.yData[k] !== "") {
                     var anchor = svgHelper.drawCircleByClass(mappedData.xData[k] + chartLbWidth,
                                             chartHeight - mappedData.yData[k] + chartLbHeight,
@@ -294,9 +321,10 @@
                     } else {
                         columnPlot = svgHelper.drawRectByClass(mappedData.xData[k] + chartLbWidth - (plotWidth / 2),
                         chartUbHeight - mappedData.yData[k],
-                        mappedData.yData[k], plotWidth,
+                        mappedData.yData[k] + 4, plotWidth,
                         "column-plot");
                     }
+                    columnPlot.setAttributeNS(null, "data-criteria", charts[i].colorCriteria[k]);
                     columnPlot.setAttributeNS(null, "data-value", charts[i].yData[k]);
                     svg.appendChild(columnPlot);
                 }

@@ -240,7 +240,7 @@
                     if(index === categoryNames.length - 1) {
                         chartRenderer.drawX(footerHeight, width - safetyOffset, crosstabHeaders, xTitle);
                     }
-                    var allColumnPlots = document.getElementsByClassName("bar-plot");
+                    var allColumnPlots = document.getElementsByClassName("column-plot");
                     Array.from(allColumnPlots).map(function(currentValue) {
                         criteria.push(currentValue.getAttributeNS(null, "data-criteria"));
                     });

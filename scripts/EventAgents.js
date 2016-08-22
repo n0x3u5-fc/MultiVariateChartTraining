@@ -365,27 +365,27 @@
     };
 
     Chart.EventAgents.prototype.crosshairHandler = function(svgs) {
-        for(var svg of svgs) {
-            if(this.chartType === "column" || this.chartType === "bar") {
-                for(var plot of svg.getElementsByClassName("column-plot")) {
-                    plot.addEventListener("mouseenter", this.prepPlot);
-                    plot.addEventListener("plotLightEvent", this.prepAllPlots.bind(this));
-                    plot.addEventListener("mousemove", this.prepTooltips);
-                    plot.addEventListener("tooltipMoveEvent", this.moveTooltips.bind(this));
-                    plot.addEventListener("mouseleave", this.unprepPlot);
-                    plot.addEventListener("unprepPlotEvent", this.unprepAllPlots.bind(this));
+        if(this.chartVis !== "crosstab") {
+            for(var svg of svgs) {
+                if(this.chartType === "column" || this.chartType === "bar") {
+                    for(var plot of svg.getElementsByClassName("column-plot")) {
+                        plot.addEventListener("mouseenter", this.prepPlot);
+                        plot.addEventListener("plotLightEvent", this.prepAllPlots.bind(this));
+                        plot.addEventListener("mousemove", this.prepTooltips);
+                        plot.addEventListener("tooltipMoveEvent", this.moveTooltips.bind(this));
+                        plot.addEventListener("mouseleave", this.unprepPlot);
+                        plot.addEventListener("unprepPlotEvent", this.unprepAllPlots.bind(this));
+                    }
+                } else if(this.chartType === "line") {
+                    for (var rect of svg.getElementsByClassName("chart-rect")) {
+                        rect.addEventListener("mouseenter", this.createCrosshair);
+                        rect.addEventListener("crosshairCreateEvent", this.createOtherCrosshairs.bind(this));
+                        rect.addEventListener("mousemove", this.moveCrosshair);
+                        rect.addEventListener("crosshairMoveEvent", this.moveOtherCrosshairs.bind(this));
+                        rect.addEventListener("mouseleave", this.removeCrosshair);
+                        rect.addEventListener("crosshairRemoveEvent", this.removeOtherCrosshairs.bind(this));
+                    }
                 }
-            } else if(this.chartType === "line") {
-                for (var rect of svg.getElementsByClassName("chart-rect")) {
-                    rect.addEventListener("mouseenter", this.createCrosshair);
-                    rect.addEventListener("crosshairCreateEvent", this.createOtherCrosshairs.bind(this));
-                    rect.addEventListener("mousemove", this.moveCrosshair);
-                    rect.addEventListener("crosshairMoveEvent", this.moveOtherCrosshairs.bind(this));
-                    rect.addEventListener("mouseleave", this.removeCrosshair);
-                    rect.addEventListener("crosshairRemoveEvent", this.removeOtherCrosshairs.bind(this));
-                }
-            }
-            if(this.chartVis !== "crosstab") {
                 svg.addEventListener("mousedown", this.dragSelect);
                 svg.addEventListener("customDragSelect", this.customDragSelect.bind(this));
                 svg.addEventListener("customExpandSelect", this.customExpandSelect.bind(this));
