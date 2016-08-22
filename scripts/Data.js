@@ -199,20 +199,20 @@
                     };
                 }
             } else if(data.vis === "crosstab"){
+                var width = Math.floor((document.body.clientWidth - 20) / crosstabHeaders.length);
+                var headerHeight = 20;
+                var footerHeight = 50;
+                var height = Math.floor((window.innerHeight) / categoryNames.length);
+                var safetyOffset = crosstabHeaders.length;
+                if(height < 110) { height = 110; } else if(height > 300) { height = 300; }
                 if(data.type === "bar") {
                     chartRenderer = new Chart.BarChartRenderer(data.chartData, chartProperties);
-                    chartRenderer.renderDiv = data.renderDiv;
+                    chartRenderer.renderDiv        = data.renderDiv;
                     chartRenderer.plotColor        = data.positiveColorStart;
                     chartRenderer.plotColorEnd     = data.positiveColorEnd;
                     chartRenderer.negativeColor    = data.negativeColorStart;
                     chartRenderer.negativeColorEnd = data.negativeColorEnd;
                     chartRenderer.totalRows        = categoryNames.length;
-                    var width = Math.floor((document.body.clientWidth - 20) / crosstabHeaders.length);
-                    var headerHeight = 20;
-                    var footerHeight = 50;
-                    var height = Math.floor((window.innerHeight) / categoryNames.length);
-                    var safetyOffset = crosstabHeaders.length;
-                    if(height < 110) { height = 110; } else if(height > 300) { height = 300; }
                     if(index === 0) {
                         chartRenderer.displayHeaders(headerHeight, width - safetyOffset, crosstabHeaders);
                     }
@@ -220,8 +220,28 @@
                     if(index === categoryNames.length - 1) {
                         chartRenderer.drawX(footerHeight, width - safetyOffset, crosstabHeaders, xTitle);
                     }
-                    var allPlots = document.getElementsByClassName("bar-plot");
-                    Array.from(allPlots).map(function(currentValue) {
+                    var allBarPlots = document.getElementsByClassName("bar-plot");
+                    Array.from(allBarPlots).map(function(currentValue) {
+                        criteria.push(currentValue.getAttributeNS(null, "data-criteria"));
+                    });
+                    chartRenderer.colorPlots(criteria);
+                } else if(data.type === "column") {
+                    chartRenderer = new Chart.ColumnChartRenderer(data.chartData, chartProperties);
+                    chartRenderer.renderDiv        = data.renderDiv;
+                    chartRenderer.plotColor        = data.positiveColorStart;
+                    chartRenderer.plotColorEnd     = data.positiveColorEnd;
+                    chartRenderer.negativeColor    = data.negativeColorStart;
+                    chartRenderer.negativeColorEnd = data.negativeColorEnd;
+                    chartRenderer.totalRows        = categoryNames.length;
+                    if(index === 0) {
+                        chartRenderer.displayHeaders(headerHeight, width - safetyOffset, crosstabHeaders);
+                    }
+                    chartRenderer.displayCharts(height - 25, width - safetyOffset, categoryNames.indexOf(categoryName));
+                    if(index === categoryNames.length - 1) {
+                        chartRenderer.drawX(footerHeight, width - safetyOffset, crosstabHeaders, xTitle);
+                    }
+                    var allColumnPlots = document.getElementsByClassName("bar-plot");
+                    Array.from(allColumnPlots).map(function(currentValue) {
                         criteria.push(currentValue.getAttributeNS(null, "data-criteria"));
                     });
                     chartRenderer.colorPlots(criteria);

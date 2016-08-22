@@ -2,8 +2,8 @@
 	"metadata": {
 		"caption"              : "Multi-Variate Chart",
 		"subCaption"           : "Correlation of Age with Nutrition",
-		"visualization"        : "trellis",
-		"type"                 : "bar",
+		"visualization"        : "crosstab",
+		"type"                 : "column",
 		"height"               : "250",
 		"width"                : "280",
 		"positiveGradientStart": "#17202a",

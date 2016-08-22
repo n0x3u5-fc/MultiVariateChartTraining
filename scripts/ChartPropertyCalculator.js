@@ -107,8 +107,13 @@
             }
         } else if(chartVis === "crosstab"){
             for (var yTick of chart.yTicks) {
-                var yTickVal = lbWidth;
-                var yTickInterval = width / (yTicksMax - yTicksMin);
+                if(chart.type === "bar") {
+                    var yTickVal = lbWidth;
+                    var yTickInterval = width / (yTicksMax - yTicksMin);
+                } else {
+                    var yTickVal = lbHeight;
+                    var yTickInterval = height / (yTicksMax - yTicksMin);
+                }
                 yTickVal += yTickInterval * (yTick - yTicksMin);
                 yTicks.push(Math.floor(yTickVal));
             }
@@ -117,7 +122,11 @@
                     yData.push("");
                 } else {
                     var yDataVal  = 0;
-                    var yInterval = width / (yTicksMax - yTicksMin);
+                    if(chart.type === "bar") {
+                        var yInterval = width / (yTicksMax - yTicksMin);
+                    } else {
+                        var yInterval = height / (yTicksMax - yTicksMin);
+                    }
                     yDataVal += yInterval * (yDatum - yTicksMin);
                     yData.push(Math.floor(yDataVal));
                 }
@@ -134,6 +143,23 @@
                     var xInterval = (height - 35) / (xDataMax - xDataMin);
                     if (i === 0) {
                         xDataVal += xInterval * (i - xDataMin);
+                    } else {
+                        xDataVal += xInterval * (i - xDataMin);
+                    }
+                    xData.push(Math.floor(xDataVal));
+                }
+            } else if (chartType === "column") {
+                var divDiff = Math.floor((width - 80) / (chart.xData.length - 1));
+                var tickVal = lbWidth + 40;
+                for (var xTick of chart.xData) {
+                    xTicks.push(tickVal);
+                    tickVal += divDiff;
+                }
+                for (var i = 0; i <= xDataMax; i++) {
+                    var xDataVal = 40;
+                    var xInterval = (width - 80) / (xDataMax - xDataMin);
+                    if (i === 0) {
+                        xDataVal += xInterval * (i - xTicksMin);
                     } else {
                         xDataVal += xInterval * (i - xDataMin);
                     }

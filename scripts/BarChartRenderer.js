@@ -155,7 +155,7 @@
                 }
             }
             this.createCharts(this.charts, height, width);
-        } else if(this.charts[0].vis === "crosstab") {
+        } else if (this.charts[0].vis === "crosstab") {
             this.createDivs(this.renderDiv, rowCount);
             this.createDivs(this.renderDiv, rowCount);
             for (var i = 0; i < this.charts.length; i++) {
