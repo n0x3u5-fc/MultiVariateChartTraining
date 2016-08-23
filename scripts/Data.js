@@ -274,7 +274,9 @@
             }
             data.chartData = [];
         });
-        chartRenderer.colorPlots(criteria);
+        if(this.chartType === "crosstab") {
+            chartRenderer.colorPlots(criteria);
+        }
 
         // var that = this;
         // window.addEventListener("resize", function() {
