@@ -17,4 +17,4 @@ var chart = new Chart('res/data/user_data.json');
 //     this.chartData = this.multiSort(averages, this.chartData, sortOrder);
 // };
 
-chart.render();
+chart.render("chart");

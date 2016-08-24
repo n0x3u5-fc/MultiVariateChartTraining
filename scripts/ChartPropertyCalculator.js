@@ -28,8 +28,13 @@
         var xDataMax  = chart.xData.length - 1;
         if (chartVis === "trellis") {
             for (var yTick of chart.yTicks) {
-                var yTickVal = lbHeight;
-                var yTickInterval = height / (yTicksMax - yTicksMin);
+                if(chart.type === "bar") {
+                    var yTickVal = lbWidth;
+                    var yTickInterval = width / (yTicksMax - yTicksMin);
+                } else {
+                    var yTickVal = lbHeight;
+                    var yTickInterval = height / (yTicksMax - yTicksMin);
+                }
                 yTickVal += yTickInterval * (yTick - yTicksMin);
                 yTicks.push(Math.floor(yTickVal));
             }
@@ -38,7 +43,11 @@
                     yData.push("");
                 } else {
                     var yDataVal  = 0;
-                    var yInterval = height / (yTicksMax - yTicksMin);
+                    if(chart.type === "bar") {
+                        var yInterval = width / (yTicksMax - yTicksMin);
+                    } else {
+                        var yInterval = height / (yTicksMax - yTicksMin);
+                    }
                     yDataVal += yInterval * (yDatum - yTicksMin);
                     yData.push(Math.floor(yDataVal));
                 }
@@ -78,25 +87,7 @@
                     }
                     xData.push(Math.floor(xDataVal));
                 }
-            }
-        } else if(chartVis === "crosstab"){
-            for (var yTick of chart.yTicks) {
-                var yTickVal = lbWidth;
-                var yTickInterval = width / (yTicksMax - yTicksMin);
-                yTickVal += yTickInterval * (yTick - yTicksMin);
-                yTicks.push(Math.floor(yTickVal));
-            }
-            for (var yDatum of chart.yData) {
-                if (yDatum === "") {
-                    yData.push("");
-                } else {
-                    var yDataVal  = 0;
-                    var yInterval = width / (yTicksMax - yTicksMin);
-                    yDataVal += yInterval * (yDatum - yTicksMin);
-                    yData.push(Math.floor(yDataVal));
-                }
-            }
-            if (chartType === "bar") {
+            } else if(chartType === "bar") {
                 var divDiff = Math.floor((height - 35) / (chart.xData.length - 1));
                 var tickVal = lbHeight + 20;
                 for (var xTick of chart.xData) {
@@ -108,6 +99,67 @@
                     var xInterval = (height - 35) / (xDataMax - xDataMin);
                     if (i === 0) {
                         xDataVal += xInterval * (i - xDataMin);
+                    } else {
+                        xDataVal += xInterval * (i - xDataMin);
+                    }
+                    xData.push(Math.floor(xDataVal));
+                }
+            }
+        } else if(chartVis === "crosstab"){
+            for (var yTick of chart.yTicks) {
+                if(chart.type === "bar" || chart.type === "line") {
+                    var yTickVal = lbWidth;
+                    var yTickInterval = width / (yTicksMax - yTicksMin);
+                } else {
+                    var yTickVal = lbHeight;
+                    var yTickInterval = height / (yTicksMax - yTicksMin);
+                }
+                yTickVal += yTickInterval * (yTick - yTicksMin);
+                yTicks.push(Math.floor(yTickVal));
+            }
+            for (var yDatum of chart.yData) {
+                if (yDatum === "") {
+                    yData.push("");
+                } else {
+                    var yDataVal  = 0;
+                    if(chart.type === "bar" || chart.type === "line") {
+                        var yInterval = width / (yTicksMax - yTicksMin);
+                    } else {
+                        var yInterval = height / (yTicksMax - yTicksMin);
+                    }
+                    yDataVal += yInterval * (yDatum - yTicksMin);
+                    yData.push(Math.floor(yDataVal));
+                }
+            }
+            if (chartType === "bar" || chartType === "line") {
+                var divDiff = Math.floor((height - 35) / (chart.xData.length - 1));
+                var tickVal = lbHeight + 20;
+                for (var xTick of chart.xData) {
+                    xTicks.push(tickVal);
+                    tickVal += divDiff;
+                }
+                for (var i = 0; i <= xDataMax; i++) {
+                    var xDataVal = 20;
+                    var xInterval = (height - 35) / (xDataMax - xDataMin);
+                    if (i === 0) {
+                        xDataVal += xInterval * (i - xDataMin);
+                    } else {
+                        xDataVal += xInterval * (i - xDataMin);
+                    }
+                    xData.push(Math.floor(xDataVal));
+                }
+            } else if (chartType === "column") {
+                var divDiff = Math.floor((width - 80) / (chart.xData.length - 1));
+                var tickVal = lbWidth + 40;
+                for (var xTick of chart.xData) {
+                    xTicks.push(tickVal);
+                    tickVal += divDiff;
+                }
+                for (var i = 0; i <= xDataMax; i++) {
+                    var xDataVal = 40;
+                    var xInterval = (width - 80) / (xDataMax - xDataMin);
+                    if (i === 0) {
+                        xDataVal += xInterval * (i - xTicksMin);
                     } else {
                         xDataVal += xInterval * (i - xDataMin);
                     }

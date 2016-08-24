@@ -3,8 +3,9 @@
     /**
      * @constructor
      */
-    Chart.EventAgents = function(chartType) {
+    Chart.EventAgents = function(chartType, chartVis) {
         this.chartType = chartType;
+        this.chartVis  = chartVis;
         this.svgHelper = new Chart.SvgHelper();
         if(document.getElementsByClassName("graphCircle")[0]) {
             this.defaultAnchorStroke = getComputedStyle(document.getElementsByClassName("graphCircle")[0]).stroke;
@@ -27,7 +28,6 @@
 
     Chart.EventAgents.prototype.createOtherCrosshairs = function(event) {
         var targetSvgHeight = Number(event.target.getAttributeNS(null, "height"));
-        var targetSvgX      = Number(event.target.getAttributeNS(null, "x"));
         var targetSvgY      = Number(event.target.getAttributeNS(null, "y"));
         var crosshair, tooltip, tooltipBg;
         if (targetSvgHeight) {
@@ -189,11 +189,13 @@
         var mouseLeftOffset = event.target.getBoundingClientRect().left;
         var mouseTopOffset  = event.target.getBoundingClientRect().top;
         var plotx           = event.target.getAttributeNS(null, "x");
+        var ploty           = event.target.getAttributeNS(null, "y");
         var plotHighlight   = new CustomEvent("plotLightEvent", {
             "detail": {
                 "mousex"      : event.clientX - mouseLeftOffset + 62,
                 "mousey"      : event.clientY - mouseTopOffset + 3,
-                "hoveredPlotX": plotx
+                "hoveredPlotX": plotx,
+                "hoveredPlotY": ploty
             }
         });
         for(var plot of document.getElementsByClassName("column-plot")) {
@@ -202,12 +204,13 @@
     };
     Chart.EventAgents.prototype.prepAllPlots = function(event) {
         var tooltip, tooltipBg;
-        var targetSvgHeight = Number(event.target.getAttributeNS(null, "height"));
-        var targetSvgX      = Number(event.target.getAttributeNS(null, "x"));
-        var targetSvgY      = Number(event.target.getAttributeNS(null, "y"));
         var hoveredPlotX = Math.floor(Number(event.detail.hoveredPlotX) * 1000) / 1000;
+        var hoveredPlotY = Math.floor(Number(event.detail.hoveredPlotY) * 1000) / 1000;
         var targetBBoxX = Math.floor(event.target.getBBox().x * 1000) / 1000;
-        if(targetBBoxX == hoveredPlotX) {
+        var targetBBoxY = Math.floor(event.target.getBBox().y * 1000) / 1000;
+        if(this.chartType !== "bar" && targetBBoxX == hoveredPlotX) {
+            event.target.style.fill = "#b94748";
+        } else if(this.chartType === "bar" && targetBBoxY == hoveredPlotY) {
             event.target.style.fill = "#b94748";
         }
         tooltipBg = this.svgHelper.drawRectByClass(event.detail.mousex, event.detail.mousey, 20, 60,
@@ -224,11 +227,13 @@
         var mouseLeftOffset = event.target.parentNode.getBoundingClientRect().left;
         var mouseTopOffset  = event.target.parentNode.getBoundingClientRect().top;
         var plotx           = event.target.getAttributeNS(null, "x");
+        var ploty           = event.target.getAttributeNS(null, "y");
         var tooltipMovement = new CustomEvent("tooltipMoveEvent", {
             "detail": {
                 "mousex": event.clientX - mouseLeftOffset - 15,
                 "mousey": event.clientY - mouseTopOffset + 15,
-                "hoveredPlotX": plotx
+                "hoveredPlotX": plotx,
+                "hoveredPlotY": ploty
             }
         });
         for (var plot of document.getElementsByClassName("column-plot")) {
@@ -236,13 +241,21 @@
         }
     };
     Chart.EventAgents.prototype.moveTooltips = function(event) {
-        var rectRect   = event.target.getBoundingClientRect();
         var tooltips   = event.target.parentNode.getElementsByClassName("otherTooltip");
         var tooltipBgs = event.target.parentNode.getElementsByClassName("otherTooltipBg");
-        var hoverColumnLeft;
         var hoveredPlotX = Math.floor(Number(event.detail.hoveredPlotX) * 1000) / 1000;
+        var hoveredPlotY = Math.floor(Number(event.detail.hoveredPlotY) * 1000) / 1000;
         var targetBBoxX = Math.floor(event.target.getBBox().x * 1000) / 1000;
-        if(targetBBoxX == hoveredPlotX) {
+        var targetBBoxY = Math.floor(event.target.getBBox().y * 1000) / 1000;
+        if(this.chartType !== "bar" && targetBBoxX == hoveredPlotX) {
+            tooltipBgs[0].style.visibility = "initial";
+            tooltipBgs[0].setAttributeNS(null, "x", event.detail.mousex);
+            tooltipBgs[0].setAttributeNS(null, "y", event.detail.mousey);
+            tooltips[0].textContent = event.target.getAttributeNS(null, "data-value");
+            tooltips[0].setAttributeNS(null, "x", event.detail.mousex + 5);
+            tooltips[0].setAttributeNS(null, "y", event.detail.mousey + 15);
+            tooltipBgs[0].setAttributeNS(null, "width", tooltips[0].getComputedTextLength() + 10);
+        } else if(this.chartType === "bar" && targetBBoxY == hoveredPlotY) {
             tooltipBgs[0].style.visibility = "initial";
             tooltipBgs[0].setAttributeNS(null, "x", event.detail.mousex);
             tooltipBgs[0].setAttributeNS(null, "y", event.detail.mousey);
@@ -352,28 +365,27 @@
     };
 
     Chart.EventAgents.prototype.crosshairHandler = function(svgs) {
-        for(var svg of svgs) {
-            if(this.chartType === "column") {
-                for(var plot of svg.getElementsByClassName("column-plot")) {
-                    plot.addEventListener("mouseenter", this.prepPlot);
-                    plot.addEventListener("plotLightEvent", this.prepAllPlots.bind(this));
-                    plot.addEventListener("mousemove", this.prepTooltips);
-                    plot.addEventListener("tooltipMoveEvent", this.moveTooltips.bind(this));
-                    plot.addEventListener("mouseleave", this.unprepPlot);
-                    plot.addEventListener("unprepPlotEvent", this.unprepAllPlots.bind(this));
+        if(this.chartVis !== "crosstab") {
+            for(var svg of svgs) {
+                if(this.chartType === "column" || this.chartType === "bar") {
+                    for(var plot of svg.getElementsByClassName("column-plot")) {
+                        plot.addEventListener("mouseenter", this.prepPlot);
+                        plot.addEventListener("plotLightEvent", this.prepAllPlots.bind(this));
+                        plot.addEventListener("mousemove", this.prepTooltips);
+                        plot.addEventListener("tooltipMoveEvent", this.moveTooltips.bind(this));
+                        plot.addEventListener("mouseleave", this.unprepPlot);
+                        plot.addEventListener("unprepPlotEvent", this.unprepAllPlots.bind(this));
+                    }
+                } else if(this.chartType === "line") {
+                    for (var rect of svg.getElementsByClassName("chart-rect")) {
+                        rect.addEventListener("mouseenter", this.createCrosshair);
+                        rect.addEventListener("crosshairCreateEvent", this.createOtherCrosshairs.bind(this));
+                        rect.addEventListener("mousemove", this.moveCrosshair);
+                        rect.addEventListener("crosshairMoveEvent", this.moveOtherCrosshairs.bind(this));
+                        rect.addEventListener("mouseleave", this.removeCrosshair);
+                        rect.addEventListener("crosshairRemoveEvent", this.removeOtherCrosshairs.bind(this));
+                    }
                 }
-            } else if(this.chartType === "line") {
-                for (var rect of svg.getElementsByClassName("chart-rect")) {
-                    rect.addEventListener("mouseenter", this.createCrosshair);
-                    rect.addEventListener("crosshairCreateEvent", this.createOtherCrosshairs.bind(this));
-                    rect.addEventListener("mousemove", this.moveCrosshair);
-                    rect.addEventListener("crosshairMoveEvent", this.moveOtherCrosshairs.bind(this));
-                    rect.addEventListener("mouseleave", this.removeCrosshair);
-                    rect.addEventListener("crosshairRemoveEvent", this.removeOtherCrosshairs.bind(this));
-                }
-            }
-            var svgClass = svg.getAttributeNS(null, "class");
-            if(this.chartType !== "bar") {
                 svg.addEventListener("mousedown", this.dragSelect);
                 svg.addEventListener("customDragSelect", this.customDragSelect.bind(this));
                 svg.addEventListener("customExpandSelect", this.customExpandSelect.bind(this));
