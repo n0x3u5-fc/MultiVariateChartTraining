@@ -1,4 +1,4 @@
-var chart = new Chart('res/data/crosstab_data.json');
+var chart = new Chart('res/data/user_data.json');
 //custom average function
 // chart.customSort = function() {
 //     'use strict';
